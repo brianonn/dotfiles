@@ -1,0 +1,170 @@
+
+! my customisations
+!XTerm*faceName: DejaVu Sans Mono
+
+XTerm*allowSendEvents: True
+XTerm*alwaysHighlight: yes
+XTerm*background: lemonchiffon
+XTerm*color0: black
+XTerm*color10: green
+XTerm*color11: yellow
+XTerm*color12: blue
+XTerm*color13: magenta
+XTerm*color14: cyan
+XTerm*color15: white
+XTerm*color1: red3
+XTerm*color2: green3
+XTerm*color3: yellow3
+XTerm*color4: DodgerBlue1
+XTerm*color5: magenta3
+XTerm*color6: cyan3
+XTerm*color7: gray90
+XTerm*color8: gray50
+XTerm*color9: red
+XTerm*colorBD: white
+XTerm*colorUL: yellow
+XTerm*eightBitInput: false
+XTerm*faceName: monofur
+XTerm*faceSize: 12
+XTerm*fontMenu*backgroundPixmap: gradient:vertical?dimension=300&start=gray10&end=gray40
+XTerm*fontMenu*foreground: white
+XTerm*foreground: lightslategray
+XTerm*highlightSelection: true
+xterm*iconMask: /home/brian/Pictures/terminal-16x16-mask.xpm
+XTerm*iconName: terminal
+xterm*iconPixmap: /home/brian/Pictures/terminal-16x16.xpm
+!XTerm*internalBorder: 10
+XTerm*loginShell: true
+XTerm*mainMenu*backgroundPixmap: gradient:vertical?dimension=400&start=gray10&end=gray40
+XTerm*mainMenu*foreground: white
+XTerm*marginBell: yes
+XTerm*metaSendsEscape: true
+XTerm*rightScrollBar: true
+xterm*savelines: 4000
+XTerm*scrollColor: black
+XTerm*sessionMgt: false
+XTerm*tekMenu*backgroundPixmap: gradient:vertical?dimension=300&start=gray10&end=gray40
+XTerm*tekMenu*foreground: white
+XTerm*VT100*colorBD: blue
+XTerm*VT100*colorBDMode: on
+XTerm*VT100*colorULMode: on
+XTerm*VT100*colorUL: red
+XTerm.VT100*dynamicColors: On
+XTerm.VT100.eightBitOutput: true
+XTerm.VT100.titeInhibit: false
+XTerm*VT100*titeInhibit: true
+XTerm*VT100*underLine: on
+XTerm*VT100*geometry: 100x25
+XTerm*vtMenu*backgroundPixmap: gradient:vertical?dimension=550&start=gray10&end=gray40
+XTerm*vtMenu*foreground: white
+xterm*termName: xterm-color
+
+
+
+URxvt*geometry: 128x30
+!urxvt color scheme:
+!
+URxvt*background: #1B1B1B
+URxvt*foreground: #DEDEDE
+!
+URxvt*colorUL: #86a2b0
+!
+!! black
+URxvt*color0  : #2E3436
+URxvt*color8  : #555753
+!! red
+URxvt*color1  : #CC0000
+URxvt*color9  : #EF2929
+!! green
+URxvt*color2  : #4E9A06
+URxvt*color10 : #8AE234
+!! yellow
+URxvt*color3  : #C4A000
+URxvt*color11 : #FCE94F
+!! blue
+URxvt*color4  : #3465A4
+URxvt*color12 : #729FCF
+!! magenta
+URxvt*color5  : #75507B
+URxvt*color13 : #AD7FA8
+!! cyan
+URxvt*color6  : #06989A
+URxvt*color14 : #34E2E2
+!! white
+URxvt*color7  : #D3D7CF
+URxvt*color15 : #EEEEEC
+!
+!!urxvt fonts: 
+!
+!URxvt*font: xft:Inconsolata:pixelsize=12
+!URxvt*boldFont: xft:Inconsolata:bold:pixelsize=12
+!URxvt*italicFont: xft:Inconsolata:italic:pixelsize=12
+!URxvt*boldItalicFont: xft:Inconsolata:bold italic:pixelsize=12
+!
+! FONTS
+! $ fc-list lists available fonts
+URxvt*font: xft:DejaVu Sans Mono-12:style=Book:pixelsize=12
+URxvt*boldFont: xft:DejaVu Sans Mono-12:style=Bold:pixelsize=12
+URxvt*italicFont: xft:DejaVu Sans Mono-12:style=Oblique:pixelsize=12
+URxvt*boldItalicFont: xft:DejaVu Sans Mono-12:style=Bold Oblique:pixelsize=12
+URxvt*letterSpace: -2
+!
+!!urxvt extensions:
+!
+URxvt.perl-lib: /home/brian/.urxvt/plugins
+!URxvt.perl-ext-common:  default,matcher,tabbedex
+URxvt.perl-ext-common:  clipboard
+
+URxvt.keysym.M-c:   perl:clipboard:copy
+URxvt.keysym.M-v:   perl:clipboard:paste
+URxvt.keysym.M-C-v: perl:clipboard:paste_escaped
+URxvt.clipboard.autocopy: true
+
+!
+!!enabling clickable links:
+!
+URxvt.urlLauncher:      /usr/bin/chromium
+URxvt.url-Launcher:      /usr/bin/chromium
+URxvt.matcher.button:   1 
+!
+!!urxvt scrolling options and cursor style:
+!
+URxvt*saveLines: 12000
+URxvt*scrollstyle:plain
+URxvt*scrollBar: true
+URxvt*scrollBar_right: true
+URxvt*cursorBlink: true
+URxvt*cursorUnderline: true
+URxvt.depth: 32
+URxvt*borderLess: false
+URxvt.visualBell: true
+URxvt*scrollTtyOutput: false
+URxvt*scrollTtyKeypress: true
+URxvt*secondaryScroll: true
+!
+!! urxvt tabs settings:
+!
+URxvt.tabbed.tabbar-fg: 2
+URxvt.tabbed.tabbar-bg: 0
+URxvt.tabbed.tab-fg: 2
+URxvt.tabbed.tab-bg: 8
+URxvt.tabbed.autohide:  yes
+URxvt.tabbed.new-button:  no
+URxvt.tabbed.title: no
+
+
+
+
+
+
+
+
+
+
+
+
+
+! URxvt*font: xft:Liberation Mono:style=Regular:pixelsize=12
+! URxvt*boldFont: xft:Liberation Mono:style=Bold:pixelsize=12
+! URxvt*italicFont: xft:Liberation Mono:style=Italic:pixelsize=12
+! URxvt*boldItalicFont: xft:Liberation Mono:style=Bold Italic:pixelsize=12
