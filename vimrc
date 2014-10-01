@@ -37,7 +37,8 @@ endif
 
 filetype on
 filetype plugin indent on 
-execute pathogen#infect()
+call pathogen#infect()
+call pathogen#helptags()
 
 if has('autocmd')
 
