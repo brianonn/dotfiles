@@ -21,6 +21,7 @@ set number
 set title
 set nobackup
 set enc=utf-8
+set modeline
 
 "set directory=~/.vim/swapfiles,.
 set shell=/bin/bash

@@ -1,6 +1,6 @@
 # c-basic-offset: 4; tab-width: 4; indent-tabs-mode: nil
 # vi: set shiftwidth=4 tabstop=4 expandtab:
-# vi: set filetype=sh
+# vim: set filetype=sh
 # :indentSize=4:tabSize=4:noTabs=true:
 
 # functions as aliases
@@ -146,14 +146,16 @@ alias egrep="egrep $color_opt"
 
 ls_pager="perl -lpe 's/(\S+)\//[\1]/g' | /bin/less -S -R -X -F"
 ls_pager="/bin/less -S -R -X -F"
-ls="/bin/ls -F --group-directories-first $color_opt"
-alias ls="$ls | $ls_pager" 
-alias l="$ls -C | $ls_pager"
-alias ll="$ls -l | $ls_pager"
-alias lll="$ls -l | tail -20"
-alias llr="$ls -lrt | tail -20"
+ls_bin="/bin/ls -F --group-directories-first $color_opt"
+
+unalias ls
+ls  () { $ls_bin "$@" | $ls_pager ; }
+l   () { $ls_bin -C "$@" | $ls_pager ; }
+ll  () { $ls_bin -l "$@" | $ls_pager ; }
+lll () { $ls_bin -lt "$@" | tail -20 ; }
+llr () { $ls_bin -lrt "$@" | tail -20 ; }
 alias lr=llr
-alias llx="$ls -X -C --si | $ls_pager"
+llx () { $ls_bin -X -C --si "$@" | $ls_pager ; }
 
 alias findgrep='find . -type f \( -name \*.git -o -name .snaphot -o -name .bak -prune \) -print0 | xargs -0 grep -in'
 
@@ -163,3 +165,7 @@ alias dip="sudo docker inspect --format='{{.NetworkSettings.IPAddress}}' \`d1\`"
 
 #tmux pane titles
 #alias np=printf "'\033]2;%s\033'" "'title goes here'"
+
+
+source ~/.sensitive_aliases
+
