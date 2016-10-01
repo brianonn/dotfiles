@@ -1,6 +1,7 @@
 
 ! my customisations
-!XTerm*faceName: DejaVu Sans Mono
+XTerm*faceName: Droid Sans Mono
+XTerm*faceSize: 12
 
 XTerm*allowSendEvents: True
 XTerm*alwaysHighlight: yes
@@ -24,8 +25,6 @@ XTerm*color9: red
 XTerm*colorBD: white
 XTerm*colorUL: yellow
 XTerm*eightBitInput: false
-XTerm*faceName: monofur
-XTerm*faceSize: 12
 XTerm*fontMenu*backgroundPixmap: gradient:vertical?dimension=300&start=gray10&end=gray40
 XTerm*fontMenu*foreground: white
 XTerm*foreground: lightslategray
@@ -64,6 +63,7 @@ xterm*termName: xterm-color
 URxvt*geometry: 128x30
 !urxvt color scheme:
 !
+! blue URxvt*background: #160E47
 URxvt*background: #1B1B1B
 URxvt*foreground: #DEDEDE
 !
@@ -76,7 +76,9 @@ URxvt*color8  : #555753
 URxvt*color1  : #CC0000
 URxvt*color9  : #EF2929
 !! green
-URxvt*color2  : #4E9A06
+!!URxvt*color2  : #4E9A06
+!!URxvt*color10 : #8AE234
+URxvt*color2  : #68E868
 URxvt*color10 : #8AE234
 !! yellow
 URxvt*color3  : #C4A000
@@ -96,18 +98,26 @@ URxvt*color15 : #EEEEEC
 !
 !!urxvt fonts: 
 !
+! FONTS
+! $ fc-list lists available fonts
+!
+!
+!URxvt*font: xft:ProFontWindows:style=Regular:pixelsize=12
+!URxvt*boldFont: xft:ProFontWindows:style=Bold:pixelsize=12
+!URxvt*italicFont: xft:ProFontWindows:style=Italic:pixelsize=12
+!URxvt*boldItalicFont: xft:ProFontWindows:style=Bold Italic:pixelsize=1
+!
+URxvt*font: xft:Droid Sans Mono-12:style=Book:pixelsize=12
+URxvt*boldFont: xft:Droid Sans Mono-12:style=Bold:pixelsize=12
+URxvt*italicFont: xft:Droid Sans Mono-12:style=Oblique:pixelsize=12
+URxvt*boldItalicFont: xft:Droid Sans Mono-12:style=Bold Oblique:pixelsize=1
+URxvt*letterSpace: -2
+!
 !URxvt*font: xft:Inconsolata:pixelsize=12
 !URxvt*boldFont: xft:Inconsolata:bold:pixelsize=12
 !URxvt*italicFont: xft:Inconsolata:italic:pixelsize=12
 !URxvt*boldItalicFont: xft:Inconsolata:bold italic:pixelsize=12
 !
-! FONTS
-! $ fc-list lists available fonts
-URxvt*font: xft:DejaVu Sans Mono-12:style=Book:pixelsize=12
-URxvt*boldFont: xft:DejaVu Sans Mono-12:style=Bold:pixelsize=12
-URxvt*italicFont: xft:DejaVu Sans Mono-12:style=Oblique:pixelsize=12
-URxvt*boldItalicFont: xft:DejaVu Sans Mono-12:style=Bold Oblique:pixelsize=12
-URxvt*letterSpace: -2
 !
 !!urxvt extensions:
 !
@@ -151,18 +161,6 @@ URxvt.tabbed.tab-bg: 8
 URxvt.tabbed.autohide:  yes
 URxvt.tabbed.new-button:  no
 URxvt.tabbed.title: no
-
-
-
-
-
-
-
-
-
-
-
-
 
 ! URxvt*font: xft:Liberation Mono:style=Regular:pixelsize=12
 ! URxvt*boldFont: xft:Liberation Mono:style=Bold:pixelsize=12
