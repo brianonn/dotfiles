@@ -1,4 +1,35 @@
--bl -bli0 -bs -cs -cli0.5 -i4 -di4 -psl -bap -bad -nce -bbo -bfda -l80 -lp -bc -hnl
+--dont-format-comments
+--procnames-start-lines
+--parameter-indentation4
+--indent-level4
+--line-comments-indentation4
+--cuddle-else
+--brace-indent0
+--start-left-side-of-comments
+--no-blank-lines-after-commas
+--blank-lines-after-declarations
+--blank-lines-after-procedures
+--comment-indentation33
+--declaration-comment-column33
+--no-comment-delimiters-on-blank-lines
+--continuation-indentation4
+--case-indentation0
+--else-endif-column33
+--no-space-after-casts
+--no-blank-before-sizeof
+--declaration-indentation16
+--continue-at-parentheses
+--no-space-after-function-call-names
+--swallow-optional-blank-lines
+--space-special-semicolon
+--no-tabs
+--line-length79
+--braces-on-if-line
+--braces-on-struct-decl-line
+--leave-preprocessor-space
+--no-space-after-parentheses
+--honour-newlines
+--break-before-boolean-operator
 
 
 

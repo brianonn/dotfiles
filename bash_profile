@@ -1,4 +1,7 @@
-# File: ~/.bash_profile
+# -*- mode: sh; c-basic-offset: 4; tab-width: 4; indent-tabs-mode: nil -*-
+# vi: set ft=sh shiftwidth=4 tabstop=4 expandtab :
+
+# File: ~/.bash_profile 
 
 # source ~/.profile, if available
 #if [[ -r ~/.profile ]]; then
@@ -33,3 +36,6 @@ fi
 # are we interactive, source .bashrc
 case $- in *i*) source $HOME/.bashrc;; esac 
 
+
+export QSYS_ROOTDIR="$HOME/altera_lite/15.1/quartus/sopc_builder/bin"
+export ALTERAOCLSDKROOT="$HOME/altera_lite/15.1/hld"

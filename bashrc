@@ -1,14 +1,18 @@
+# -*- mode: sh; -*-
+# vi: set ft=sh :
+
 # ~/.bashrc: executed by bash(1) for non-login shells.
+
 # see /usr/share/doc/bash/examples/startup-files (in the package bash-doc)
 # for examples
 
 # If not running interactively, don't do anything
-[[ $- != *i* ]] && return 
+[[ $- != *i* ]] && return
 
 ##
-## Everything else is useful stuff when sitting at an 
-## interactive terminal shell.  Don't push stuff here that you need in 
-## a remote rsh(1) or ssh shell 
+## Everything else is useful stuff when sitting at an
+## interactive terminal shell.  Don't push stuff here that you need in
+## a remote rsh(1) or ssh shell
 ##
 
 set -o noclobber
@@ -22,6 +26,9 @@ export HISTIGNORE="??"
 
 # append to the history file, don't overwrite it
 shopt -s histappend
+
+# always verify history expansion by putting the new command line in the terminal input buffer before execution
+shopt -s histverify
 
 # for setting history length see HISTSIZE and HISTFILESIZE in bash(1)
 
@@ -72,12 +79,12 @@ if [ "$color_prompt" = yes ]; then
         CYAN="\[\033[36m\]"
         WHT="\[\033[39m\]"
     fi
-     
+
     if [ $UID = 0 ]; then
       UID_COLOR="$RED"
       P="#"
     else
-      UID_COLOR="$CYAN"
+      UID_COLOR="$BOLD$CYAN$RESET"
       P="$"
     fi
 
@@ -88,7 +95,7 @@ if [ "$color_prompt" = yes ]; then
     # A two-line colored Bash prompt (PS1) with Git branch 
 
 
-     
+
     export PROMPT_DIRTRIM=6
 
     PS_LINE=$(printf -- '- %.0s' {1..200})
@@ -107,13 +114,13 @@ if [ "$color_prompt" = yes ]; then
 #    export PS1="\${PS_FILL}\[\033[0G\]${PS_INFO} ${PS_GIT}${PS_TIME}\n${RESET}\$ "
 #
 
-  #L="«" R="»"
+  #L="ÃÂ«" R="ÃÂ»"
   L="[" R="]"
   #R= L= 
 
   #export PS1="\n${UID_COLOR}\342\226\210\342\226\210 \u${WHT} (\h) ${ORANGE}${L}${PS_GIT}${ORANGE} \w ${R}\n${CYAN}\342\226\210\342\226\210 [\!] ${P}${RESET}${WHT} "
   export PS1="\n${UID_COLOR}\342\226\210\342\226\210 ${GREEN}[\@] ${ORANGE}${L}${PS_GIT}${ORANGE}\w${R}\n${CYAN}\342\226\210\342\226\210 [\!] ${P}${RESET}${WHT} "
-   
+
   unset P L R UID_COLOR B_UID_COLOR RESET BOLD RED GREEN ORANGE BLUE MAG CYAN WHT
   unset PS_GIT_BRANCH PS_FILL ref PS_INFO PS_GIT PS_TIME
 else
@@ -160,3 +167,19 @@ export PATH="$PATH":/opt/WebStorm-135.547/bin
 export KIGITHUB=https://github.com/KiCad
 
 export PHP_IDE_CONFIG='servername=localhost'
+export NODE_PATH=/usr/local/lib/node_modules
+export NVM_DIR="/home/brian/.nvm"
+[ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"  # This loads nvm
+
+export DART_SDK="/usr/lib/dart"
+[ -d $DART_SDK ] && export PATH="${DART_SDK}/bin:$PATH"
+
+export QSYS_ROOTDIR="/home/brian/altera_lite/15.1/quartus/sopc_builder/bin"
+export ALTERAOCLSDKROOT="/home/brian/altera_lite/15.1/hld"
+
+export LESS="-f -S -X -R -F" LESSOPEN="||~/.lessfilter %s"
+ 
+export DOCKER_HOST="0.0.0.0:4243"  # this depends on DOCKER_OPTS set in /etc/default/docker
+
+export GOPATH="$HOME/lib/go"
+[[ -s "/home/brian/.gvm/scripts/gvm" ]] && source "/home/brian/.gvm/scripts/gvm"

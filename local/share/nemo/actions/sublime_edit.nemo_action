@@ -4,5 +4,5 @@ Comment=Edit the selected file(s) with the Sublime Text Editor
 Quote=double
 Exec=subl %F
 Selection = any
-Extensions=htm;html;js;ts;css;coffee;txt;c;c++;cpp;h;h++;hpp;rb;py;md;me;go;rc;ini;sh;bash;log;pl;lua;opa;dart;sql;yaml;
+Extensions=htm;html;js;jade;ts;css;coffee;txt;c;c++;cpp;h;h++;hpp;rb;py;md;me;go;rc;ini;sh;bash;log;pl;lua;opa;dart;sql;yaml;
 

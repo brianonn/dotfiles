@@ -23,6 +23,11 @@ set nobackup
 set enc=utf-8
 set modeline
 
+"TODO: install vundle plugin manager
+"ctrlp - fuzzt file finder like sublime
+"fugitive git tool
+"syntastic ??
+
 "set directory=~/.vim/swapfiles,.
 set shell=/bin/bash
 
@@ -129,6 +134,12 @@ map <C-h> <C-w>h
 map <C-j> <C-w>j
 map <C-k> <C-w>k
 map <C-l> <C-w>l
+
+"emacs like begin/end of line and enter insert mode
+map <C-a> <ESC>I
+imap <C-a> <ESC>I
+map <C-e> <ESC>A
+imap <C-e> <ESC>A
 
 nmap <silent> ,/ :nohlsearch<CR>
 
@@ -238,8 +249,21 @@ imap <f2> <ESC>:MyMake<CR>
 imap <f3> <ESC>:cp<CR>
 imap <f4> <ESC>:cn<CR>
 
+"add a W command to write when you have no permission. :W will do it
+command! W w !sudo tee % > /dev/null
+
 if has('gui_running')
   set lines=50
   set columns=175
 endif
+
+if exists('&relativenumber')
+  set relativenumber
+  autocmd InsertLeave,BufWinEnter,WinEnter,FocusGained * :setlocal relativenumber
+  autocmd InsertEnter,BufWinLeave,WinLeave,FocusLost   * :setlocal number
+endif
+
+"paste code use :IX or :SP or :start,end SP. URL is in clipbpard register +
+command! -range=% SP  silent execute <line1> . "," . <line2> . "w !curl -F 'sprunge=<-' http://sprunge.us | tr -d '\\n' | xclip -selection clipboard"
+command! -range=% IX  silent execute <line1> . "," . <line2> . "w !curl -F 'f:1=<-' ix.io | tr -d '\\n' | xclip -selection clipboard"
 
