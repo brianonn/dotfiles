@@ -12,6 +12,12 @@ case "$ans" in [yY]*) ;; *) exit 1 ;; esac
 dir="readlink -f `dirname $0`"
 dir=`eval $dir`
 
+# templates
+for path in $dir/*.template; do
+    cp -pf "$path" `basename "$path" ".template"` 
+done
+
+#make symlinks
 for path in $dir/*; do
     filename=`basename "$path"`
     if [ "$filename" = "bootstrap.sh" ]; then

@@ -1,0 +1,78 @@
+[core]
+	excludefiles = ~/.gitignore
+	whitespace = cr-at-eol
+	autocrlf = input
+
+[branch]
+	autosetuprebase = always
+	autosetupmerge = always
+
+[alias]
+    st = status -sb
+    ci = commit
+    br = branch -v
+    b = branch -v
+    co = checkout
+    re  = remote -v
+    r  = remote -v
+    df = diff
+    d  = diff
+    dw = diff -w
+    dc = diff --cached
+    ls = ls-files
+    lp = log -p
+    lol  = log --graph --decorate --pretty=format:'%C(bold blue)%h%C(reset) %C(yellow)(%ar)%C(reset) %C(green)%an%C(auto)%d%C(reset) %C(white)%s%C(reset)' --abbrev-commit 
+    lola = !"git lol --all"
+    ll   = "log --pretty=oneline --abbrev-commit"
+    lg   = log --pretty=oneline --abbrev-commit --graph --decorate --date=relative
+    lgt  = log --graph --pretty=format:'%Cred%h%Creset %s %Cgreen(%cr)%Creset' --abbrev-commit --date=relative
+    lgtt = log --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr)%Creset' --abbrev-commit --date=relative
+
+    # Show files ignored by git:
+    ign = ls-files -o -i --exclude-standard
+    unstage = reset HEAD --
+
+    fo = fetch origin --all
+    pod = push origin dev
+    changeset = log --name-status -n 1 HEAD
+    cs = !"git changeset"
+	dt = difftool -d
+
+[color]
+    ui = auto
+
+[color "branch"]
+    current = yellow reverse
+    local = yellow
+    remote = green
+
+[color "diff"]
+    meta = yellow bold
+    frag = magenta bold
+    old = red bold
+    new = green bold
+
+[color "status"]
+    added = yellow
+    changed = green
+    untracked = cyan
+
+[apply]
+	whitespace = nowarn
+
+[credential]
+	helper = cache --timeout=14440
+
+[push]
+	default = current
+
+# git for-each-ref --format='%(*committerdate:iso) %(refname) %(*objectname) %(objectname) (%(subject))' refs/tags | sort -n | awk '{ print $1, $2, $5, $4, $7,$8,$9,$10,$11; }' 
+[diff]
+    tool = meld
+
+[instaweb]
+    local = true
+    httpd = python -m SimpleHTTPServer
+    port = 4321
+    browser = /usr/local/bin/chrome
+
