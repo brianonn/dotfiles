@@ -146,6 +146,11 @@ nmap <silent> ,/ :nohlsearch<CR>
 " map ; to : so you can press ;w not <shift>:<unshift>w 
 nnoremap ; :
 
+" swap tick and backtick.  backtick command is more useful but tick is easier
+" to reach
+nnoremap ' `
+nnoremap ` '
+
 vmap Q gq
 nmap Q gqap
 
