@@ -1,4 +1,6 @@
-;; .emacs -- my initializations
+;;; .emacs --- my initializations ---  -*- mode: emacs-lisp; -*-
+
+;;; Author: Brian A. Onn
 ;;; Commentary:
 ;;; Change Log: 
 
@@ -35,6 +37,8 @@
       smartparens
       smex
       sass-mode scss-mode
+      sublimity
+      nlinum
       yasnippet)
     "A list of packages that I want to always have installed.
 
@@ -86,6 +90,39 @@
 (ido-mode t)
 
 ;; =====================================================
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; sublimity
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(require 'sublimity)
+(sublimity-mode 1)
+
+(require 'sublimity-scroll)
+(setq sublimity-scroll-weight 10
+      sublimity-scroll-drift-length 5)
+
+(require 'sublimity-map)
+(setq sublimity-map-size 20)
+(setq sublimity-map-text-scale -7)
+(setq sublimity-map-max-fraction 0.5)
+(add-hook 'sublimity-map-setup-hook
+          (lambda ()
+            (setq buffer-face-mode-face '(:family "Monospace"))
+            (buffer-face-mode)))
+
+;; (require 'sublimity-attractive)
+
+
+;; =====================================================
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; new linum mode - faster than linum-mode
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(require 'linum) ;  for it's face
+(require 'nlinum)
+(defvar nlinum-highlight-current-line t)
+(add-hook 'prog-mode-hook 'nlinum-mode)
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -277,16 +314,23 @@ Use \\[jump-to-register] c for coding, and \\[jump-to-register] d for debug."
 current buffer's file.  The eshell is renamed to match that
 directory to make multiple eshell windows easier."
   (interactive)
+  (defvar eshell-p)
   (let* ((parent (if (buffer-file-name)
                      (file-name-directory (buffer-file-name))
                    default-directory))
          (height (/ (window-total-height) 3))
-         (name   (car (last (split-string parent "/" t)))))
+         (name   (car (last (split-string parent "/" t))))
+	 (eshell-p t))
     (split-window-vertically (- height))
     (other-window 1)
     (eshell "new")
     (rename-buffer (concat "*eshell: " name "*"))
-
+    (setq-local eshell-p t)
+    ;; (add-hook 'kill-buffer-hook
+    ;; 	      (lamda () (if (or (string-prefix-p "*eshell: " (buffer-name))
+    ;; 				(bound-and-true-p eshell-p))
+    ;; 			    (eshell/x))))
+		     
     ;(insert (concat "ls"))
     ;(eshell-send-input)
     ))
@@ -296,6 +340,9 @@ directory to make multiple eshell windows easier."
 ;; Exit the shell and close the window just opened for it
 (defun eshell/x ()
 "Exit the eshell and close the window."
+  (goto-char (point-max))
+  (eshell-bol)
+  (kill-line)
   (insert "exit")
   (eshell-send-input)
   (delete-window))
@@ -314,13 +361,11 @@ directory to make multiple eshell windows easier."
  '(column-number-mode t)
  '(custom-enabled-themes (quote (wombat)))
  '(inhibit-startup-screen t)
- '(org-agenda-files (quote ("~/test.org")))
  '(scroll-bar-mode (quote right))
  '(show-paren-mode t)
  '(transient-mark-mode nil)
  '(blink-cursor-mode t)
  '(blink-cursor-delay 0.5)
- '(cursor-color "#52676f")
  '(org-agenda-files (quote ("~/Dropbox/tmp/time.org")))
  '(org-insert-mode-line-in-empty-file t))
 (custom-set-faces
@@ -368,19 +413,19 @@ directory to make multiple eshell windows easier."
 (setq resize-mini-windows t)
 (setq column-number-mode t)
 (setq next-line-add-newlines nil)
-(setq blink-matching-paren nil)
-(blink-cursor-mode -1)
+(setq blink-matching-paren t)
+(blink-cursor-mode 1)
+(set-cursor-color "#a2676f")
 (tool-bar-mode -1)
 (tooltip-mode -1)
 (scroll-bar-mode 0)
-
+(line-number-mode 1)
 (setq default-frame-alist
       '((top . 43) 
 ;;	(left . (/ (- (display-pixel-width) (* 150 (frame-char-width))) 2))
 	(left . 370)
-        (width . 100) (height . 45)
+        (width . 141) (height . 45)
         ))
-
 
 ;; the fringe is fun to play in 
 
@@ -407,5 +452,4 @@ directory to make multiple eshell windows easier."
 ;(load "server")
 ;(unless (server-running-p) (server-start))
 
-(provide '.emacs)
-;;; .emacs ends here
+;; end
