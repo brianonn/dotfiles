@@ -11,107 +11,289 @@
   (setq-default buffer-file-coding-system 'utf-8)
   (setq default-buffer-file-coding-system 'utf-8))
 
+(add-to-list 'load-path "~/.emacs.d/site-lisp")
+
 ;; packages. Access with M-X package-list-packages
 (when (>= emacs-major-version 24)
   (require 'package)
   (setq package-archives
-	(append package-archives
-		(list
-     '("marmalade" . "http://marmalade-repo.org/packages/")
-     '("melpa" . "http://melpa.org/packages/"))))
+         (append package-archives
+           (list
+             '("marmalade" . "http://marmalade-repo.org/packages/")
+             '("melpa" . "http://melpa.org/packages/"))))
     (package-initialize)
 
   (defvar my-package-list
     '( auto-complete auto-complete-c-headers 
-      auto-complete-etags auto-complete-exuberant-ctags
+       auto-complete-etags auto-complete-exuberant-ctags
+      auto-dim-other-buffers
+      editorconfig
+      emmet-mode
       expand-region
+      exec-path-from-shell
       flycheck
-      helm
+      ibuffer
       iedit
+      ivy counsel
       dart-mode
+      jade-mode
+      js2-mode js2-refactor
+      js3-mode
       json-mode json-reformat json-rpc
       go-mode golint go-scratch
       magit magithub
       markdown-mode
       multiple-cursors mc-extras
+      neotree
+      nlinum
+      nodejs-repl
       smartparens
+      smart-mode-line
       smex
       sass-mode scss-mode
       sublimity
-      nlinum
+      tern tern-auto-complete
+      php-mode
+      php+-mode
+      web-mode 
       yasnippet)
     "A list of packages that I want to always have installed.
 
      This is used by `my-install-packages' whenever I want to
      setup a new emacs deployment on a new host")
+    
+    (defvar my-packages-timestamp-file "~/.emacs.d/my-packages-timestamp")
+    (defvar my-packages-days-between-checks 7)
 
-  (defun my-install-packages ()
-    "Install the packages in the list `my-package-list'.
+    (defun my-install-packages ()
+        "Install the packages in the list `my-package-list'.
      This function can be called in .emacs just after `package-initialize'
      or it can be manually called only once when needed for a new deployment"
+        (interactive)
+        ;; TODO: create a timestamp file and only run through this code
+        ;; on the first call (i.e. timestamp does not exist) or if the timestamp
+        ;; is more than 1 week old
+        (defvar my-packages-last-update (nth 5 (file-attributes my-packages-timestamp-file)))
+        (defvar my-packages-elapsed-days (- (time-to-number-of-days (current-time))
+                                             (time-to-number-of-days my-packages-last-update)))
+        (if (or (not my-packages-last-update)
+                (> my-packages-elapsed-days my-packages-days-between-checks))
+            (progn
+                (package-refresh-contents)
+                (mapc (lambda (my-package)
+                          (if (not (package-installed-p my-package))
+                              (condition-case nil
+                                  (package-install my-package)
+                                  (error nil))))
+                    my-package-list)
+                (with-temp-buffer (write-file my-packages-timestamp-file)))))
+
+    ;; run it
+    (my-install-packages))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; lisp-mode settings
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(add-hook 'emacs-lisp-mode-hook
+    (lambda ()
+        ;; Use spaces, not tabs.
+        (setq indent-tabs-mode nil)
+        (setq tab-width 2)
+        ;; Keep M-TAB for `completion-at-point'
+        ;;(define-key flyspell-mode-map "\M-\t" nil)
+
+        ;; Pretty-print eval'd expressions.
+        (define-key emacs-lisp-mode-map (kbd "C-x C-e") nil)
+        (define-key emacs-lisp-mode-map (kbd "C-x C-e e") 'pp-eval-last-sexp)
+        (define-key emacs-lisp-mode-map (kbd "C-x C-e C-e") 'pp-eval-last-sexp)
+        (define-key emacs-lisp-mode-map (kbd "C-x C-e r") 'eval-region)
+        (define-key emacs-lisp-mode-map (kbd "C-x C-e C-r") 'eval-region)
+        (define-key emacs-lisp-mode-map (kbd "C-x C-e b") 'eval-buffer)
+        (define-key emacs-lisp-mode-map (kbd "C-x C-e C-b") 'eval-buffer)
+
+        ;; Recompile if .elc exists.
+        (add-hook 'after-save-hook
+            (lambda ()
+                (byte-force-recompile default-directory)) t t)
+        (define-key emacs-lisp-mode-map
+            "\r" 'reindent-then-newline-and-indent)))
+(add-hook 'emacs-lisp-mode-hook 'eldoc-mode)
+;;(add-hook 'emacs-lisp-mode-hook 'flyspell-prog-mode) ;; Requires Ispell
+
+
+;; ========== AUTO-DIM BUFFERS WITHOUT FOCUS ===========
+(require 'smart-mode-line)
+(setq sml/theme 'respectful)
+(sml/setup)
+
+
+;; ========== AUTO-DIM BUFFERS WITHOUT FOCUS ===========
+
+(require 'auto-dim-other-buffers)
+(add-hook 'after-init-hook (lambda ()
+  (when (fboundp 'auto-dim-other-buffers-mode)
+    (auto-dim-other-buffers-mode t))))
+
+;; ========== INTERACTIVE DO COMPLETION=================
+
+(require 'ido)
+(ido-mode 1)
+(setq ido-enable-flex-matching t)
+(setq ido-everywhere t)
+(setq ido-use-filename-at-point 'guess)
+(setq ido-use-url-at-point t)
+(setq ido-file-extensions-order '(".c" ".cpp" ".h" ".js" ".css" ".htm" ".html" ".txt")
+
+;; ========== IVY COMPLETION ===========================
+(require 'ivy)
+(ivy-mode t)
+(setq ivy-use-virtual-buffers t)
+(global-set-key "\C-s" 'swiper)
+(global-set-key (kbd "C-c C-r") 'ivy-resume)
+(global-set-key (kbd "<f6>") 'ivy-resume)
+(global-set-key (kbd "M-x") 'counsel-M-x)
+(global-set-key (kbd "C-x C-f") 'counsel-find-file)
+(global-set-key (kbd "<f1> f") 'counsel-describe-function)
+(global-set-key (kbd "<f1> v") 'counsel-describe-variable)
+(global-set-key (kbd "<f1> l") 'counsel-find-library)
+(global-set-key (kbd "<f2> i") 'counsel-info-lookup-symbol)
+(global-set-key (kbd "<f2> u") 'counsel-unicode-char)
+(global-set-key (kbd "C-c g") 'counsel-git)
+(global-set-key (kbd "C-c j") 'counsel-git-grep)
+(global-set-key (kbd "C-c k") 'counsel-ag)
+(global-set-key (kbd "C-x l") 'counsel-locate)
+(global-set-key (kbd "C-S-o") 'counsel-rhythmbox)
+(define-key read-expression-map (kbd "C-r") 'counsel-expression-history)
+
+
+
+;; ========== DIRED MODE ===========================
+
+(require 'dired)
+(define-key dired-mode-map "j" 'dired-next-line)
+(define-key dired-mode-map "k" 'dired-previous-line)
+(define-key dired-mode-map "S" 'dired-do-relsymlink)
+(define-key dired-mode-map "i" 'ido-find-file)
+(defun my-dired-neotree-set-root ()
     (interactive)
-    (package-refresh-contents)
-    (mapc (lambda (my-package)
-       (if (not (package-installed-p my-package))
-         (condition-case nil
-            (package-install my-package)
-          (error nil))))
-       my-package-list))
- 
- (my-install-packages)		; TODO: create a timestamp file and only call this weekly
-)				        ; (when ...
+    (save-selected-window
+        (neo-global--open-dir (dired-current-directory))))
+
+(define-key dired-mode-map [f8] 'my-dired-neotree-set-root)
 
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-; org-mode settings
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; ========== ORG MODE ===========================
 
 (org-babel-do-load-languages
- 'org-babel-load-languages
- '(
-   (sh . t)
-   (python . t)
-   (ruby . t)
-   (perl . t)
-;;   (dart . t)
-;;   (nim . t)
-   (octave . t)
-   ))
+  'org-babel-load-languages
+  '(
+     (sh . t)
+     (python . t)
+     (ruby . t)
+     (perl . t)
+     ;;   (dart . t)
+     ;;   (nim . t)
+     (octave . t)
+     ))
 
-; Add short cut keys for the org-agenda
+;; Add short cut keys for the org-agenda
 (global-set-key "\C-cl" 'org-store-link)
 (global-set-key "\C-cc" 'org-capture)
 (global-set-key "\C-ca" 'org-agenda)
 
-;; =====================================================
+;; ========== NEOTREE (Sidebar Tree) ===================
 
-;; Interactive Do
-(require 'ido)
-(ido-mode t)
+(require 'neotree)
+(global-set-key [f8] 'neotree-toggle)
 
-;; =====================================================
+;; ========== EDITOR CONFIG ============================
+
+(require 'editorconfig)
+(editorconfig-mode 1)
+
+;; ========== IBUFFER ==================================
+
+(autoload 'ibuffer "ibuffer" "List Buffers Interactively" t)
+(global-set-key (kbd "C-x C-b") 'ibuffer)
+(add-hook 'ibuffer-mode-hook 
+    '(lambda ()
+         ;; Use human readable Size column instead of original one
+         (define-ibuffer-column prettysize
+             (:name "Size" :inline t)
+             (cond
+                 ((> (buffer-size) 1000000) (format "%7.1fM" (/ (buffer-size) 1000000.0)))
+                 ((> (buffer-size) 100000) (format "%7.0fk" (/ (buffer-size) 1000.0)))
+                 ((> (buffer-size) 1000) (format "%7.1fk" (/ (buffer-size) 1000.0)))
+                 (t (format "%8d" (buffer-size)))))
+
+         ;; Modify the default ibuffer-formats
+       (setq ibuffer-formats
+        '((mark modified read-only " "
+              (name 18 18 :left :elide)
+              " "
+              (prettysize 9 -1 :right)
+              " "
+              (mode 16 16 :left :elide)
+              " "
+              filename-and-process)))
+
+       (setq ibuffer-saved-filter-groups
+        '(("home"
+              ("Web Dev" (or (mode . html-mode)
+                             (mode . web-mode)
+                             (mode . jade-mode)
+                             (mode . json-mode)
+                             (mode . js-mode)
+                             (mode . js2-mode)))
+                             (mode . js3-mode)))
+              ("emacs-config" (or (filename . "\.emacs\.d")
+                                  (filename . "emacs")
+                                  (filename . "\.emacs")
+                                  (filename . ".*\.el$")))
+              ("Bitcoin" (filename . ".*bitcoin.*"))
+              ("Magit" (name . "\*magit"))
+              ("Org" (or (mode . org-mode)
+                         (filename . "OrgMode")))
+              ("Help" (or (name . "\*Help\*")
+                          (name . "\*Apropos\*")
+                          (name . "\*info\*"))))))
+
+       (ibuffer-switch-to-saved-filter-groups "home")))
+
+;; TODO - Ibuffer filters
+
+;; ========== BLANK MODE ===============================
+
+;;  (visualize blanks, tabs and newlines)
+(if (require 'blank-mode "blank-mode" t)
+    (progn
+        (custom-set-variables
+            '(blank-chars (quote (tabs spaces trailing lines space-before-tab newline empty space-after-tab)))
+            '(blank-line-column 120))
+        (global-blank-mode 0)
+        (blank-mode 0)
+        (global-set-key [f12] 'blank-mode)))
 
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-; sublimity
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-(require 'sublimity)
-(sublimity-mode 1)
+;; ========== SUBLIMITY ================================
 
-(require 'sublimity-scroll)
-(setq sublimity-scroll-weight 10
-      sublimity-scroll-drift-length 5)
+;; (require 'sublimity)
+;; (sublimity-mode 1)
 
-(require 'sublimity-map)
-(setq sublimity-map-size 20)
-(setq sublimity-map-text-scale -7)
-(setq sublimity-map-max-fraction 0.5)
-(add-hook 'sublimity-map-setup-hook
-          (lambda ()
-            (setq buffer-face-mode-face '(:family "Monospace"))
-            (buffer-face-mode)))
+;; (require 'sublimity-scroll)
+;; (setq sublimity-scroll-weight 10
+;;       sublimity-scroll-drift-length 5)
 
-;; (require 'sublimity-attractive)
+;; (require 'sublimity-map)
+;; (setq sublimity-map-size 20)
+;; (setq sublimity-map-text-scale -7)
+;; (setq sublimity-map-max-fraction 0.5)
+;; (add-hook 'sublimity-map-setup-hook
+;;           (lambda ()
+;;             (setq buffer-face-mode-face '(:family "Monospace"))
+;;             (buffer-face-mode)))
+
+;; ;; (require 'sublimity-attractive)
 
 
 ;; =====================================================
@@ -119,11 +301,14 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; new linum mode - faster than linum-mode
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-(require 'linum) ;  for it's face
-(require 'nlinum)
 (defvar nlinum-highlight-current-line t)
-(add-hook 'prog-mode-hook 'nlinum-mode)
-
+(defun initialize-nlinum (&optional frame)
+  (require 'linum) ; for faces
+  (require 'nlinum)
+  (add-hook 'prog-mode-hook 'nlinum-mode))
+(if (daemonp)
+  (add-hook 'after-make-frame-functions 'initialize-nlinum)
+  (add-hook 'after-init-hook 'initialize-nlinum))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; smart M-X - 
@@ -151,6 +336,7 @@
 ; start yasnippet when emacs starts
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (require 'yasnippet)
+(add-to-list 'yas-snippet-dirs "~/.emacs.d/snippets")
 (yas-global-mode 1)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -171,7 +357,7 @@
   (when (not buffer-backed-up)
     ;; Override the default parameters for per-session backups.
     (let ((backup-directory-alist '(("" . "~/.emacs.d/backups/per-session")))
-          (kept-new-versions 3))
+           (kept-new-versions 3))
       (backup-buffer)))
   ;; Make a "per save" backup on each save.  The first save results in
   ;; both a per-session and a per-save backup, to keep the numbering
@@ -192,19 +378,18 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
 (require 'iedit)
-
 (defun iedit-dwim (arg)
   "Start iedit but use \\[narrow-to-defun] to limit its scope. 
 With a prefix ARG, it will widen the scope to the whole buffer."
   (interactive "P")
   (if arg
-      (iedit-mode)
+    (iedit-mode)
     (save-excursion
       (save-restriction
         (widen)
         ;; this function determines the scope of `iedit-start'.
         (if iedit-mode
-            (iedit-done)
+          (iedit-done)
           ;; `current-word' can of course be replaced by other
           ;; functions.
           (narrow-to-defun)
@@ -212,15 +397,36 @@ With a prefix ARG, it will widen the scope to the whole buffer."
 
 (global-set-key (kbd "C-;") 'iedit-dwim)
 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; flycheck settings
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(require 'flycheck)
+(add-hook 'after-init-hook #'global-flycheck-mode)
+
+;; disable jshint since we prefer eslint checking
+(setq-default flycheck-disabled-checkers
+  (append flycheck-disabled-checkers
+    '(javascript-eslint)))
+
+;; eslint was annoying to make it work well
+;; I'll stick with gjslint until I need support
+;; for React, jsx, or AirBnB mode 
+(flycheck-add-mode 'javascript-gjslint 'web-mode)
+(flycheck-add-mode 'javascript-gjslint 'js2-mode)
+(flycheck-add-mode 'javascript-gjslint 'js3-mode)
+
+;; customize flycheck temp file prefix
+(setq-default flycheck-temp-prefix ".flycheck")
+
 
 ;;;;;;;;;;;;;
 ;;;;;;;;;;;;;
 
 (defun my-one-true-style ()
-"Set my style." 
+  "Set my style." 
   (c-set-style "bsd")
-  (setq-default tab-width 8
-		c-basic-offset 4
+  (setq-default tab-width 2
+		c-basic-offset 2
 		indent-tabs-mode nil) ; use only spaces for indentation
   (require 'auto-complete-c-headers)
   (add-to-list 'ac-sources 'ac-source-c-headers))
@@ -230,12 +436,10 @@ With a prefix ARG, it will widen the scope to the whole buffer."
 (add-hook 'objc-mode-hook 'my-one-true-style)
 (add-hook 'php-mode-hook 'my-one-true-style)
 
-(add-hook 'after-init-hook #'global-flycheck-mode)
-
 ;; yellow is good on a dark background
 (set-face-foreground 'minibuffer-prompt "OrangeRed") ;
 
-;; TODO -- it's 2015.. are we still using cc-mode? or is there something better now
+;; C/C++ programming
 (require 'cc-mode)
 (global-font-lock-mode 1)
 (c-toggle-hungry-state 1)
@@ -244,17 +448,17 @@ With a prefix ARG, it will widen the scope to the whole buffer."
 ;; shorten the compilation window, and remove it 
 ;; at the end of compilation ONLY if there were no errors.
 (setq compilation-window-height 8)
-(setq compilation-finish-function
-      (lambda (buf str)
+(setq compilation-finish-functions
+  (lambda (buf str)
 
-        (if (string-match "exited abnormally" str)
+    (if (string-match "exited abnormally" str)
 
-            ;;there were errors
-            (message "compilation errors, press C-x ` to visit")
+      ;;there were errors
+      (message "compilation errors, press C-x ` to visit")
 
-          ;;no errors, make the compilation window go away in 0.5 seconds
-          (run-at-time 0.5 nil 'delete-windows-on buf)
-          (message "** NO ERRORS **"))))
+      ;;no errors, make the compilation window go away in 0.5 seconds
+      (run-at-time 0.5 nil 'delete-windows-on buf)
+      (message "** NO ERRORS **"))))
 
 (defun my-build-tab-stop-list (width)
   (let ((num-tab-stops (/ 80 width))
@@ -265,13 +469,13 @@ With a prefix ARG, it will widen the scope to the whole buffer."
       (setq counter (1+ counter)))
     (set (make-local-variable 'tab-stop-list) (nreverse ls))))
 
-(defun my-c-mode-common-hook ()
-  (setq tab-width 4) ;; change this to taste, 
+(defun my-mode-common-hook ()
+  (setq tab-width 2) ;; change this to taste, 
   (my-build-tab-stop-list tab-width)
   (setq c-basic-offset tab-width)
-  (setq indent-tabs-mode nil) ;; force only spaces for indentation
+  (setq indent-tabs-mode nil) ;; use only SPACES for indentation
   (auto-complete-mode))
-(add-hook 'c-mode-common-hook 'my-c-mode-common-hook)
+(add-hook 'c-mode-common-hook 'my-mode-common-hook)
 
 
 ;; personal preferences
@@ -281,11 +485,13 @@ With a prefix ARG, it will widen the scope to the whole buffer."
 (c-set-offset 'arglist-intro '+)
 (c-set-offset 'topmost-intro-cont '+)
 
-(global-set-key [f2] 'compile)
-(global-set-key [f3] 'previous-error)
-(global-set-key [f4] 'next-error)
-(global-set-key [f5] 'find-tag)
-(global-set-key [f6] 'pop-tag-mark)
+;; f1 is help
+;; f2 is party of ivy-mode
+(global-set-key [f3] 'compile)
+(global-set-key [f4] 'previous-error)
+(global-set-key [f5] 'next-error)
+(global-set-key [f6] 'find-tag)
+(global-set-key [f7] 'pop-tag-mark)
 (auto-compression-mode t)
 
 (setq gdb-many-windows t)
@@ -302,11 +508,112 @@ Use \\[jump-to-register] c for coding, and \\[jump-to-register] d for debug."
   (select-frame (make-frame))
   (call-interactively 'gdb))
 
+;; from http://stackoverflow.com/a/24923325/475482
+;; prevent GDB from stealing windows 
+(defadvice gdb-inferior-filter
+    (around gdb-inferior-filter-without-stealing)
+  (with-current-buffer (gdb-get-buffer-create 'gdb-inferior-io)
+    (comint-output-filter proc string)))
+(ad-activate 'gdb-inferior-filter)
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Sticky windows
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+;; http://emacs.stackexchange.com/a/2198
+(defun toggle-window-dedicated ()
+  "Control whether or not Emacs is allowed to display another
+buffer in current window."
+  (interactive)
+  (message
+   (if (let (window (get-buffer-window (current-buffer)))
+         (set-window-dedicated-p window (not (window-dedicated-p window))))
+       "%s: This window is now dedicated."
+     "%s: This window is not dedicated anymore.")
+   (current-buffer)))
+
+(global-set-key [pause] 'toggle-window-dedicated)
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Javascript/CSS/SASS/HTML, livereload and in-browser debugging
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(require 'js2-mode)
+(require 'js2-refactor)
+(require 'js3-mode)               ;js3-mode supports node, AMD and CommonJS best
+(require 'web-mode)
+(require 'css-mode)
+(require 'sass-mode)
+(require 'jade-mode)
+
+(add-hook 'js2-mode-hook #'js2-refactor-mode)
+(js2r-add-keybindings-with-prefix "C-c C-m")
+;; eg. extract function with `C-c C-m ef`.
+
+(add-hook 'js2-mode-hook
+    (lambda ()
+        (tern-mode t)
+        (linum-mode t)
+        ))
+
+(add-hook 'js3-mode-hook
+    (lambda ()
+        (tern-mode t)
+        (linum-mode t)
+        (js3-auto-indent-p t)         ; it's nice for commas to right themselves.
+        (js3-enter-indents-newline t) ; don't need to push tab before typing
+        (js3-indent-on-enter-key t)   ; fix indenting before moving on
+        ))
+
+(eval-after-load 'tern
+    '(progn
+         (require 'tern-auto-complete)
+         (term-ac-setup)))
+
+;; Force restart of tern in new projects
+;; $ M-x delete-tern-process
+(defun delete-tern-process () 
+    "Force restart of tern in new project."
+    (interactive)
+    (delete-process "Tern"))
+
+(add-to-list 'auto-mode-alist `(,(rx ".js" string-end) . js3-mode))
+(add-to-list 'auto-mode-alist `(,(rx ".jsx" string-end) . web-mode))
+(add-to-list 'auto-mode-alist `(,(rx ".htm" string-end) . web-mode))
+(add-to-list 'auto-mode-alist `(,(rx ".html" string-end) . web-mode))
+(add-to-list 'auto-mode-alist `(,(rx ".phtml" string-end) . web-mode))
+(add-to-list 'auto-mode-alist `(,(rx ".php" string-end) . web-mode))
+(add-to-list 'auto-mode-alist `(,(rx ".phtml" string-end) . web-mode))
+(add-to-list 'auto-mode-alist '("\\.[agj]sp\\'" . web-mode))
+(add-to-list 'auto-mode-alist '("\\.as[cp]x\\'" . web-mode))
+(add-to-list 'auto-mode-alist '("\\.erb\\'" . web-mode))
+(add-to-list 'auto-mode-alist '("\\.mustache\\'" . web-mode))
+(add-to-list 'auto-mode-alist '("\\.djhtml\\'" . web-mode))
+
+(add-hook 'js2-mode-hook 'my-mode-common-hook)
+(add-hook 'web-mode-hook 'my-mode-common-hook)
+(add-hook 'css-mode-hook 'my-mode-common-hook)
+(add-hook 'sass-mode-hook 'my-mode-common-hook)
+(add-hook 'json-mode-hook 'my-mode-common-hook)
+(add-hook 'jade-mode-hook
+    '(lambda ()
+         (progn
+             (setq indent-tabs-mode nil)
+             (setq tab-width 2))))
+
+(defun my-web-mode-hook ()
+  "Hooks for Web mode."
+    (setq web-mode-markup-indent-offset 2)
+    (setq web-mode-css-indent-offset 2)
+    (setq web-mode-code-indent-offset 2)
+    (setq web-mode-enable-current-column-highlight t)
+)
+(add-hook 'web-mode-hook  'my-web-mode-hook)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; from: http://www.howardism.org/Technical/Emacs/eshell-fun.html
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;
+
 (defun eshell-here ()
   "Opens up a new shell in the current directory.
 
@@ -330,7 +637,7 @@ directory to make multiple eshell windows easier."
     ;; 	      (lamda () (if (or (string-prefix-p "*eshell: " (buffer-name))
     ;; 				(bound-and-true-p eshell-p))
     ;; 			    (eshell/x))))
-		     
+
     ;(insert (concat "ls"))
     ;(eshell-send-input)
     ))
@@ -353,29 +660,6 @@ directory to make multiple eshell windows easier."
 
 ;;(require 'tramp)
 
-(custom-set-variables
- ;; custom-set-variables was added by Custom.
- ;; If you edit it by hand, you could mess it up, so be careful.
- ;; Your init file should contain only one such instance.
- ;; If there is more than one, they won't work right.
- '(column-number-mode t)
- '(custom-enabled-themes (quote (wombat)))
- '(inhibit-startup-screen t)
- '(scroll-bar-mode (quote right))
- '(show-paren-mode t)
- '(transient-mark-mode nil)
- '(blink-cursor-mode t)
- '(blink-cursor-delay 0.5)
- '(org-agenda-files (quote ("~/Dropbox/tmp/time.org")))
- '(org-insert-mode-line-in-empty-file t))
-(custom-set-faces
- ;; custom-set-faces was added by Custom.
- ;; If you edit it by hand, you could mess it up, so be careful.
- ;; Your init file should contain only one such instance.
- ;; If there is more than one, they won't work right.
- '(default ((t (:height 130 :family "NanumGothicCoding" :embolden t)))))
-
-
 ;;; XEmacs backwards compatibility file
 (defmacro GNUEmacs (&rest x)
   (list 'if (string-match "GNU Emacs" (version)) (cons 'progn x)))
@@ -396,6 +680,10 @@ directory to make multiple eshell windows easier."
  
  (load-file user-init-file)
  (load-file custom-file))
+
+(GNUEmacs
+  (setq custom-file "~/.emacs.d/site-lisp/custom.el")
+  (load custom-file))
 
 
 ;;;;;;;;;;;;;;;;;
@@ -434,6 +722,7 @@ directory to make multiple eshell windows easier."
 ;;        (* 80 (frame-char-width)))
 ;;     2))
 
+
 ;; (defun my-resize-margins ()
 ;;   (let ((margin-size (/ (- (frame-width) 80) 2)))
 ;;     (set-window-margins nil margin-size margin-size)))
@@ -443,11 +732,38 @@ directory to make multiple eshell windows easier."
 
 ;; confirm exit with C-X C-C. Doesn't work in daemon mode
 (setq confirm-kill-emacs 'yes-or-no-p)
+; (add-hook 'kill-emacs-query-functions
+;  'custom-prompt-customize-unsaved-options)
 
 ;; allow narrow and widen
 (put 'narrow-to-region 'disabled nil)
 (global-set-key (kbd "C-x n r") 'narrow-to-region)
 (global-set-key (kbd "C-x n f") 'narrow-to-defun)
+
+(defun my-insert-date ()
+  (interactive)
+  (insert (format-time-string "%x")))
+
+(defun my-insert-time ()
+  (interactive)
+  (insert (format-time-string "%X")))
+
+(defun my-insert-name ()
+  (interactive)
+  (insert "Brian A. Onn <brian.a.onn@gmail.com>"))
+
+(global-set-key (kbd "C-c i d") 'my-insert-date)
+(global-set-key (kbd "C-c i t") 'my-insert-time)
+(global-set-key (kbd "C-c i n") 'my-insert-name)
+
+
+;; window navigation with control arrows
+(global-set-key (kbd "C-<left>") 'windmove-left)
+(global-set-key (kbd "C-<right>") 'windmove-right)
+(global-set-key (kbd "C-<up>") 'windmove-up)
+(global-set-key (kbd "C-<down>") 'windmove-down)
+
+
 
 ;(load "server")
 ;(unless (server-running-p) (server-start))

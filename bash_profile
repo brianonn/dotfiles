@@ -33,9 +33,9 @@ else
     start_agent;
 fi
 
+export QSYS_ROOTDIR="$HOME/altera_lite/15.1/quartus/sopc_builder/bin"
+export ALTERAOCLSDKROOT="$HOME/altera_lite/15.1/hld"
+
 # are we interactive, source .bashrc
 case $- in *i*) source $HOME/.bashrc;; esac 
 
-
-export QSYS_ROOTDIR="$HOME/altera_lite/15.1/quartus/sopc_builder/bin"
-export ALTERAOCLSDKROOT="$HOME/altera_lite/15.1/hld"

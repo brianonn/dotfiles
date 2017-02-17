@@ -10,9 +10,9 @@
 [[ $- != *i* ]] && return
 
 ##
-## Everything else is useful stuff when sitting at an
+## Below here is useful stuff only when sitting at an
 ## interactive terminal shell.  Don't push stuff here that you need in
-## a remote rsh(1) or ssh shell
+## a remote rsh(1) or ssh shell. That should be in .bash_profile
 ##
 
 set -o noclobber
@@ -57,13 +57,13 @@ if [ "$color_prompt" = yes ]; then
             MAGENTA=$(tput setaf 9)
             ORANGE=$(tput setaf 172)
             GREEN=$(tput setaf 190)
-            PURPLE=$(tput setaf 141)
+            RED=$(tput setaf 196)
             WHITE=$(tput setaf 256)
         else
             MAGENTA=$(tput setaf 5)
-            ORANGE=$(tput setaf 4)
+            ORANGE=$(tput setaf 3)
             GREEN=$(tput setaf 2)
-            PURPLE=$(tput setaf 1)
+            RED=$(tput setaf 1)
             WHITE=$(tput setaf 7)
         fi
         BOLD=$(tput bold)
@@ -114,12 +114,15 @@ if [ "$color_prompt" = yes ]; then
 #    export PS1="\${PS_FILL}\[\033[0G\]${PS_INFO} ${PS_GIT}${PS_TIME}\n${RESET}\$ "
 #
 
+## Left and Right sides of the path string
   #L="ÃÂ«" R="ÃÂ»"
-  L="[" R="]"
+  #L="<<" R=">>"
   #R= L= 
+  L="[" R="]"
 
   #export PS1="\n${UID_COLOR}\342\226\210\342\226\210 \u${WHT} (\h) ${ORANGE}${L}${PS_GIT}${ORANGE} \w ${R}\n${CYAN}\342\226\210\342\226\210 [\!] ${P}${RESET}${WHT} "
-  export PS1="\n${UID_COLOR}\342\226\210\342\226\210 ${GREEN}[\@] ${ORANGE}${L}${PS_GIT}${ORANGE}\w${R}\n${CYAN}\342\226\210\342\226\210 [\!] ${P}${RESET}${WHT} "
+#  export PS1="\n${UID_COLOR}\342\226\210\342\226\210 ${GREEN}[\@] ${ORANGE}${L}${PS_GIT}${ORANGE}\w${R}\n${CYAN}\342\226\210\342\226\210 [\!] ${P}${RESET}${WHT} "
+  export PS1="\n${GREEN}[\@] ${ORANGE}${L}${PS_GIT}${ORANGE}\w${R}\n${CYAN}[\!] ${P}${RESET}${WHT} "
 
   unset P L R UID_COLOR B_UID_COLOR RESET BOLD RED GREEN ORANGE BLUE MAG CYAN WHT
   unset PS_GIT_BRANCH PS_FILL ref PS_INFO PS_GIT PS_TIME
@@ -181,5 +184,8 @@ export LESS="-f -S -X -R -F" LESSOPEN="||~/.lessfilter %s"
  
 export DOCKER_HOST="0.0.0.0:4243"  # this depends on DOCKER_OPTS set in /etc/default/docker
 
-export GOPATH="$HOME/lib/go"
+# Golang Version Manager 
+# gvm list
+# gvm use <version>
 [[ -s "/home/brian/.gvm/scripts/gvm" ]] && source "/home/brian/.gvm/scripts/gvm"
+

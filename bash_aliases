@@ -133,7 +133,7 @@ alias quartus='/opt/altera/13.0sp1/quartus/bin/quartus'
 alias ff='firefox'
 
 # Editors
-alias e='emacs'
+alias e='$HOME/bin/edit'
 alias v='vi'
 alias gv='gvim'
 alias ge='gedit'
