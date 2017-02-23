@@ -42,7 +42,7 @@
       json-mode json-reformat json-rpc
       go-mode golint go-scratch
       magit magithub
-      markdown-mode
+      markdown-mode pandoc-mode
       multiple-cursors mc-extras
       neotree
       nlinum
@@ -119,6 +119,12 @@
             "\r" 'reindent-then-newline-and-indent)))
 (add-hook 'emacs-lisp-mode-hook 'eldoc-mode)
 ;;(add-hook 'emacs-lisp-mode-hook 'flyspell-prog-mode) ;; Requires Ispell
+
+
+;; ========== AUTO-DIM BUFFERS WITHOUT FOCUS ===========
+(require 'markdown-mode)
+(require 'pandoc-mode)
+(add-hook 'markdown-mode-hook 'pandoc-mode)
 
 
 ;; ========== AUTO-DIM BUFFERS WITHOUT FOCUS ===========
@@ -772,9 +778,8 @@ directory to make multiple eshell windows easier."
 (global-set-key (kbd "C-<up>") 'windmove-up)
 (global-set-key (kbd "C-<down>") 'windmove-down)
 
-
-
 ;(load "server")
 ;(unless (server-running-p) (server-start))
 
 ;; end
+
