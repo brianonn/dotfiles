@@ -516,6 +516,12 @@ Use \\[jump-to-register] c for coding, and \\[jump-to-register] d for debug."
     (comint-output-filter proc string)))
 (ad-activate 'gdb-inferior-filter)
 
+(defadvice pop-to-buffer (before cancel-other-window first)
+  (ad-set-arg 1 nil))
+
+(ad-activate 'pop-to-buffer)
+
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Sticky windows
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
