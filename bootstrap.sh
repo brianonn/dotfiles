@@ -39,9 +39,9 @@ for path in $dir/*; do
         dotfile="$HOME/.$filename"
         if [ -e "$dotfile" ]; then
             [ -e "$SAVEDIR" ] || mkdir -p "$SAVEDIR"
-            echo mv "$dotfile" "$SAVEDIR"
-            echo ln -s "$path" "$dotfile"
+            mv "$dotfile" "$SAVEDIR"
         fi
+        ln -s "$path" "$dotfile"
     fi
 done
 
