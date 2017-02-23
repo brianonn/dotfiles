@@ -439,6 +439,7 @@ With a prefix ARG, it will widen the scope to the whole buffer."
 ;; yellow is good on a dark background
 (set-face-foreground 'minibuffer-prompt "OrangeRed") ;
 
+
 ;; C/C++ programming
 (require 'cc-mode)
 (global-font-lock-mode 1)
@@ -720,6 +721,8 @@ directory to make multiple eshell windows easier."
 	(left . 370)
         (width . 141) (height . 45)
         ))
+
+;;(set-frame-font "Inconsolata-g-12")
 
 ;; the fringe is fun to play in 
 
