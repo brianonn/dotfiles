@@ -148,7 +148,7 @@
 (setq ido-everywhere t)
 (setq ido-use-filename-at-point 'guess)
 (setq ido-use-url-at-point t)
-(setq ido-file-extensions-order '(".c" ".cpp" ".h" ".js" ".css" ".htm" ".html" ".txt")
+(setq ido-file-extensions-order '(".c" ".cpp" ".h" ".js" ".css" ".htm" ".html" ".txt"))
 
 ;; ========== IVY COMPLETION ===========================
 (require 'ivy)
