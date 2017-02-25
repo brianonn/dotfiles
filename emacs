@@ -233,38 +233,39 @@
                  (t (format "%8d" (buffer-size)))))
 
          ;; Modify the default ibuffer-formats
-       (setq ibuffer-formats
-        '((mark modified read-only " "
-              (name 18 18 :left :elide)
-              " "
-              (prettysize 9 -1 :right)
-              " "
-              (mode 16 16 :left :elide)
-              " "
-              filename-and-process)))
+         (setq ibuffer-formats
+             '((mark modified read-only " "
+                   (name 18 18 :left :elide)
+                   " "
+                   (prettysize 9 -1 :right)
+                   " "
+                   (mode 16 16 :left :elide)
+                   " "
+                   filename-and-process)))
 
-       (setq ibuffer-saved-filter-groups
-        '(("home"
-              ("Web Dev" (or (mode . html-mode)
-                             (mode . web-mode)
-                             (mode . jade-mode)
-                             (mode . json-mode)
-                             (mode . js-mode)
-                             (mode . js2-mode)))
-                             (mode . js3-mode)))
-              ("emacs-config" (or (filename . "\.emacs\.d")
-                                  (filename . "emacs")
-                                  (filename . "\.emacs")
-                                  (filename . ".*\.el$")))
-              ("Bitcoin" (filename . ".*bitcoin.*"))
-              ("Magit" (name . "\*magit"))
-              ("Org" (or (mode . org-mode)
-                         (filename . "OrgMode")))
-              ("Help" (or (name . "\*Help\*")
-                          (name . "\*Apropos\*")
-                          (name . "\*info\*"))))))
+         (setq ibuffer-saved-filter-groups
+             '(("home"
+                   ("Web Dev" (or (mode . html-mode)
+                                  (mode . web-mode)
+                                  (mode . jade-mode)
+                                  (mode . json-mode)
+                                  (mode . js-mode)
+                                  (mode . js2-mode)))
+                   (mode . js3-mode)))
+             ("emacs-config" (or (filename . "\.emacs\.d")
+                                 (filename . "emacs")
+                                 (filename . "\.emacs")
+                                 (filename . ".*\.el$")))
+             ("Bitcoin" (filename . ".*bitcoin.*"))
+             ("Magit" (name . "\*magit"))
+             ("Org" (or (mode . org-mode)
+                        (filename . "OrgMode")))
+             ("Help" (or (name . "\*Help\*")
+                         (name . "\*Apropos\*")
+                         (name . "\*info\*"))))
 
-       (ibuffer-switch-to-saved-filter-groups "home")))
+         (ibuffer-switch-to-saved-filter-groups "home")
+         ))
 
 ;; TODO - Ibuffer filters
 
