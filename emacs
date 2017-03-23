@@ -23,7 +23,7 @@
                 '("melpa" . "http://melpa.org/packages/"))))
     (package-initialize)
 
-    (defvar my-package-list
+    (defvar my/package-list
         '( auto-complete auto-complete-c-headers
              auto-complete-etags auto-complete-exuberant-ctags
              auto-dim-other-buffers
@@ -64,37 +64,37 @@
              yasnippet)
         "A list of packages that I want to always have installed.
 
-     This is used by `my-install-packages' whenever I want to
+     This is used by `my/install-packages' whenever I want to
      setup a new emacs deployment on a new host")
 
-    (defvar my-packages-timestamp-file (concat user-emacs-directory "my-packages-timestamp"))
-    (defvar my-packages-days-between-checks 7)
+    (defvar my/packages-timestamp-file (concat user-emacs-directory "my-packages-timestamp"))
+    (defvar my/packages-days-between-checks 7)
 
-    (defun my-install-packages ()
-        "Install the packages in the list `my-package-list'.
+    (defun my/install-packages ()
+        "Install the packages in the list `my/package-list'.
      This function can be called in .emacs just after `package-initialize'
      or it can be manually called only once when needed for a new deployment"
         (interactive)
         ;; TODO: create a timestamp file and only run through this code
         ;; on the first call (i.e. timestamp does not exist) or if the timestamp
         ;; is more than 1 week old
-        (defvar my-packages-last-update (nth 5 (file-attributes my-packages-timestamp-file)))
-        (defvar my-packages-elapsed-days (- (time-to-number-of-days (current-time))
-                                             (time-to-number-of-days my-packages-last-update)))
-        (if (or (not my-packages-last-update)
-                (> my-packages-elapsed-days my-packages-days-between-checks))
+        (defvar my/packages-last-update (nth 5 (file-attributes my/packages-timestamp-file)))
+        (defvar my/packages-elapsed-days (- (time-to-number-of-days (current-time))
+                                             (time-to-number-of-days my/packages-last-update)))
+        (if (or (not my/packages-last-update)
+                (> my/packages-elapsed-days my/packages-days-between-checks))
             (progn
                 (package-refresh-contents)
-                (mapc (lambda (my-package)
-                          (if (not (package-installed-p my-package))
+                (mapc (lambda (my/package)
+                          (if (not (package-installed-p my/package))
                               (condition-case nil
-                                  (package-install my-package)
+                                  (package-install my/package)
                                   (error nil))))
-                    my-package-list)
-                (with-temp-buffer (write-file my-packages-timestamp-file)))))
+                    my/package-list)
+                (with-temp-buffer (write-file my/packages-timestamp-file)))))
 
     ;; run it
-    (my-install-packages))
+    (my/install-packages))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; lisp-mode settings
@@ -180,12 +180,12 @@
 (define-key dired-mode-map "k" 'dired-previous-line)
 (define-key dired-mode-map "S" 'dired-do-relsymlink)
 (define-key dired-mode-map "i" 'ido-find-file)
-(defun my-dired-neotree-set-root ()
+(defun my/dired-neotree-set-root ()
     (interactive)
     (save-selected-window
         (neo-global--open-dir (dired-current-directory))))
 
-(define-key dired-mode-map [f8] 'my-dired-neotree-set-root)
+(define-key dired-mode-map [f8] 'my/dired-neotree-set-root)
 
 
 ;; ========== ORG MODE ===========================
@@ -221,7 +221,7 @@
 
 (autoload 'ibuffer "ibuffer" "List Buffers Interactively" t)
 (global-set-key (kbd "C-x C-b") 'ibuffer)
-(defun my-ibuffer-set-columns ()
+(defun my/ibuffer-set-columns ()
     ;; Use human readable Size column instead of original one
     (define-ibuffer-column prettysize
         (:name "Size" :inline t)
@@ -242,7 +242,7 @@
               " "
               filename-and-process))))
 
-(defun my-ibuffer-mode-hook ()
+(defun my/ibuffer-mode-hook ()
     (setq ibuffer-saved-filter-groups
         '(("home"
               ("Web Dev" (or (mode . html-mode)
@@ -271,7 +271,7 @@
 
     (ibuffer-switch-to-saved-filter-groups "home"))
 
-(add-hook 'ibuffer-mode-hook 'my-ibuffer-mode-hook)
+(add-hook 'ibuffer-mode-hook 'my/ibuffer-mode-hook)
 
 ;; TODO - Ibuffer filters
 
@@ -567,7 +567,7 @@ With a prefix ARG, it will widen the scope to the whole buffer."
 ;;;;;;;;;;;;;
 ;;;;;;;;;;;;;
 
-(defun my-one-true-style ()
+(defun my/one-true-style ()
     "Set my style."
   (c-set-style "bsd")
     (setq-default
@@ -577,10 +577,10 @@ With a prefix ARG, it will widen the scope to the whole buffer."
   (require 'auto-complete-c-headers)
   (add-to-list 'ac-sources 'ac-source-c-headers))
 
-(add-hook 'c-mode-hook 'my-one-true-style)
-(add-hook 'c++-mode-hook 'my-one-true-style)
-(add-hook 'objc-mode-hook 'my-one-true-style)
-(add-hook 'php-mode-hook 'my-one-true-style)
+(add-hook 'c-mode-hook 'my/one-true-style)
+(add-hook 'c++-mode-hook 'my/one-true-style)
+(add-hook 'objc-mode-hook 'my/one-true-style)
+(add-hook 'php-mode-hook 'my/one-true-style)
 
 ;; yellow is good on a dark background
 (set-face-foreground 'minibuffer-prompt "OrangeRed") ;
@@ -608,7 +608,7 @@ With a prefix ARG, it will widen the scope to the whole buffer."
             (message "** NO ERRORS **"))))
 (setq compilation-finish-functions #'my/compilation-finish-function)
 
-(defun my-build-tab-stop-list (width)
+(defun my/build-tab-stop-list (width)
   (let ((num-tab-stops (/ 80 width))
     (counter 1)
     (ls nil))
@@ -619,7 +619,7 @@ With a prefix ARG, it will widen the scope to the whole buffer."
 
 (defun my/mode-common-hook ()
     (setq tab-width 2)                 ; change this to taste,
-    (my-build-tab-stop-list tab-width)
+    (my/build-tab-stop-list tab-width)
     (setq c-basic-offset tab-width)
     (setq indent-tabs-mode nil)        ; use only SPACES for indentation
     (auto-complete-mode)
@@ -650,7 +650,7 @@ With a prefix ARG, it will widen the scope to the whole buffer."
 
 
 (setq gdb-many-windows t)
-(defun my-gdb-other-frame ()
+(defun my/gdb-other-frame ()
 "Initialize a gdb session in a new frame.
 Save window configuration to register 'c' with \\[window-configuration-to-register] c.
 Start GDB GUD with \\[execute-extended-command] gdb, then set many window mode with
@@ -764,14 +764,14 @@ buffer in current window."
              (setq indent-tabs-mode nil)
              (setq tab-width 2))))
 
-(defun my-web-mode-hook ()
+(defun my/web-mode-hook ()
   "Hooks for Web mode."
     (setq web-mode-markup-indent-offset 2)
     (setq web-mode-css-indent-offset 2)
     (setq web-mode-code-indent-offset 2)
     (setq web-mode-enable-current-column-highlight t)
 )
-(add-hook 'web-mode-hook  'my-web-mode-hook)
+(add-hook 'web-mode-hook  'my/web-mode-hook)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; from: http://www.howardism.org/Technical/Emacs/eshell-fun.html
@@ -891,12 +891,12 @@ directory to make multiple eshell windows easier."
 ;;     2))
 
 
-;; (defun my-resize-margins ()
+;; (defun my/resize-margins ()
 ;;   (let ((margin-size (/ (- (frame-width) 80) 2)))
 ;;     (set-window-margins nil margin-size margin-size)))
 
-;; (add-hook 'window-configuration-change-hook #'my-resize-margins)
-;; ((my-resize-margins)
+;; (add-hook 'window-configuration-change-hook #'my/resize-margins)
+;; ((my/resize-margins)
 
 ;; confirm exit with C-X C-C. Doesn't work in daemon mode
 (setq confirm-kill-emacs 'yes-or-no-p)
@@ -908,36 +908,36 @@ directory to make multiple eshell windows easier."
 (global-set-key (kbd "C-x n r") 'narrow-to-region)
 (global-set-key (kbd "C-x n f") 'narrow-to-defun)
 
-(defun my-insert-date ()
+(defun my/insert-date ()
     "inserts the date into the current document"
     (interactive)
     (insert (format-time-string "%x")))
 
-(defun my-insert-time ()
+(defun my/insert-time ()
     "inserts the time into the current document"
     (interactive)
     (insert (format-time-string "%X")))
 
-(defun my-insert-iso8601 ()
+(defun my/insert-iso8601 ()
     "inserts the date and time into the current document in iso8601 format."
     (interactive)
     (insert (format-time-string "%C%y-%m-%dT%H:%M:%SZ")))
 
-(defun my-insert-utc ()
+(defun my/insert-utc ()
     "inserts the date and time into the current document in utc format."
     (interactive)
     (insert (format-time-string "%C%y-%m-%dT%H:%M:%SZ")))
 
-(defun my-insert-name ()
+(defun my/insert-name ()
     "inserts my name and email into the current document."
     (interactive)
     (insert "Brian A. Onn <brian.a.onn@gmail.com>"))
 
-(global-set-key (kbd "C-c i d") 'my-insert-date)
-(global-set-key (kbd "C-c i t") 'my-insert-time)
-(global-set-key (kbd "C-c i n") 'my-insert-name)
-(global-set-key (kbd "C-c i i") 'my-insert-iso8601)
-(global-set-key (kbd "C-c i u") 'my-insert-utc)
+(global-set-key (kbd "C-c i d") 'my/insert-date)
+(global-set-key (kbd "C-c i t") 'my/insert-time)
+(global-set-key (kbd "C-c i n") 'my/insert-name)
+(global-set-key (kbd "C-c i i") 'my/insert-iso8601)
+(global-set-key (kbd "C-c i u") 'my/insert-utc)
 
 ;; window navigation with control arrows
 (global-set-key (kbd "C-<left>") 'windmove-left)
