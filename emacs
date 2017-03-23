@@ -2,67 +2,72 @@
 
 ;;; Author: Brian A. Onn
 ;;; Commentary:
-;;; Change Log: 
+;;; Change Log:
 
 ;;; Code:
 
 (prefer-coding-system 'utf-8)
 (when (>= emacs-major-version 24)
-  (setq-default buffer-file-coding-system 'utf-8)
-  (setq default-buffer-file-coding-system 'utf-8))
+    (setq-default buffer-file-coding-system 'utf-8)
+    (setq default-buffer-file-coding-system 'utf-8))
 
-(add-to-list 'load-path "~/.emacs.d/site-lisp")
+(add-to-list 'load-path (concat user-emacs-directory "site-lisp"))
 
 ;; packages. Access with M-X package-list-packages
 (when (>= emacs-major-version 24)
-  (require 'package)
-  (setq package-archives
-         (append package-archives
-           (list
-             '("marmalade" . "http://marmalade-repo.org/packages/")
-             '("melpa" . "http://melpa.org/packages/"))))
+    (require 'package)
+    (setq package-archives
+        (append package-archives
+            (list
+                '("marmalade" . "http://marmalade-repo.org/packages/")
+                '("melpa" . "http://melpa.org/packages/"))))
     (package-initialize)
 
-  (defvar my-package-list
-    '( auto-complete auto-complete-c-headers 
-       auto-complete-etags auto-complete-exuberant-ctags
-      auto-dim-other-buffers
-      editorconfig
-      emmet-mode
-      expand-region
-      exec-path-from-shell
-      flycheck
-      ibuffer
-      iedit
-      ivy counsel
-      dart-mode
-      jade-mode
-      js2-mode js2-refactor
-      js3-mode
-      json-mode json-reformat json-rpc
-      go-mode golint go-scratch
-      magit magithub
-      markdown-mode pandoc-mode
-      multiple-cursors mc-extras
-      neotree
-      nlinum
-      nodejs-repl
-      smartparens
-      smart-mode-line
-      smex
-      sass-mode scss-mode
-      sublimity
-      tern tern-auto-complete
-      php-mode
-      php+-mode
-      web-mode 
-      yasnippet)
-    "A list of packages that I want to always have installed.
+    (defvar my-package-list
+        '( auto-complete auto-complete-c-headers
+             auto-complete-etags auto-complete-exuberant-ctags
+             auto-dim-other-buffers
+             dart-mode
+             dockerfile-mode
+             editorconfig
+             emmet-mode
+             expand-region
+             exec-path-from-shell
+             fill-column-indicator
+             flycheck
+             go-mode golint go-scratch
+             ibuffer
+             iedit
+             ivy counsel
+             jade-mode
+             js2-mode js2-refactor
+             js3-mode
+             json-mode json-reformat json-rpc
+             lua-mode
+             magit magithub
+             markdown-mode pandoc-mode
+             multiple-cursors mc-extras
+             neotree
+             nlinum
+             nodejs-repl
+             php-mode php+-mode
+             rust rust-mode
+             smartparens
+             smart-mode-line
+             smex
+             sass-mode scss-mode
+             sublimity
+             tern tern-auto-complete
+             use-package
+             web-mode
+             xcscope
+             yasnippet)
+        "A list of packages that I want to always have installed.
 
      This is used by `my-install-packages' whenever I want to
      setup a new emacs deployment on a new host")
-    
-    (defvar my-packages-timestamp-file "~/.emacs.d/my-packages-timestamp")
+
+    (defvar my-packages-timestamp-file (concat user-emacs-directory "my-packages-timestamp"))
     (defvar my-packages-days-between-checks 7)
 
     (defun my-install-packages ()
@@ -112,49 +117,43 @@
         (define-key emacs-lisp-mode-map (kbd "C-x C-e C-b") 'eval-buffer)
 
         ;; Recompile if .elc exists.
-        (add-hook 'after-save-hook
-            (lambda ()
-                (byte-force-recompile default-directory)) t t)
+        ;; (add-hook 'after-save-hook
+        ;;     (lambda ()
+        ;;         (byte-force-recompile default-directory)) t t)
         (define-key emacs-lisp-mode-map
             "\r" 'reindent-then-newline-and-indent)))
 (add-hook 'emacs-lisp-mode-hook 'eldoc-mode)
 ;;(add-hook 'emacs-lisp-mode-hook 'flyspell-prog-mode) ;; Requires Ispell
 
 
-;; ========== AUTO-DIM BUFFERS WITHOUT FOCUS ===========
+;; ========== MARKDOWN SUPPORT ===========
 (require 'markdown-mode)
 (require 'pandoc-mode)
 (add-hook 'markdown-mode-hook 'pandoc-mode)
 
 
-;; ========== AUTO-DIM BUFFERS WITHOUT FOCUS ===========
-(require 'smart-mode-line)
-(setq sml/theme 'respectful)
-(sml/setup)
-
-
-;; ========== AUTO-DIM BUFFERS WITHOUT FOCUS ===========
-
-(require 'auto-dim-other-buffers)
-(add-hook 'after-init-hook (lambda ()
-  (when (fboundp 'auto-dim-other-buffers-mode)
-    (auto-dim-other-buffers-mode t))))
+;; ;; ========== AUTO-DIM BUFFERS WITHOUT FOCUS ===========
+;; (require 'auto-dim-other-buffers)
+;; (add-hook 'after-init-hook
+;;     (lambda ()
+;;         (when (fboundp 'auto-dim-other-buffers-mode)
+;;             (auto-dim-other-buffers-mode t))))
 
 ;; ========== INTERACTIVE DO COMPLETION=================
 
-(require 'ido)
-(ido-mode 1)
-(setq ido-enable-flex-matching t)
-(setq ido-everywhere t)
-(setq ido-use-filename-at-point 'guess)
-(setq ido-use-url-at-point t)
-(setq ido-file-extensions-order '(".c" ".cpp" ".h" ".js" ".css" ".htm" ".html" ".txt"))
+;; (require 'ido)
+;; (ido-mode 1)
+;; (setq ido-enable-flex-matching t)
+;; (setq ido-everywhere t)
+;; (setq ido-use-filename-at-point 'guess)
+;; (setq ido-use-url-at-point t)
+;; (setq ido-file-extensions-order '(".c" ".cpp" ".h" ".js" ".css" ".htm" ".html" ".txt"))
 
-;; ========== IVY COMPLETION ===========================
+;; ========== IVY COMPLETION (REPLACES IDO) =============
 (require 'ivy)
 (ivy-mode t)
 (setq ivy-use-virtual-buffers t)
-(global-set-key "\C-s" 'swiper)
+(global-set-key (kbd "C-s") 'swiper)
 (global-set-key (kbd "C-c C-r") 'ivy-resume)
 (global-set-key (kbd "<f6>") 'ivy-resume)
 (global-set-key (kbd "M-x") 'counsel-M-x)
@@ -162,13 +161,14 @@
 (global-set-key (kbd "<f1> f") 'counsel-describe-function)
 (global-set-key (kbd "<f1> v") 'counsel-describe-variable)
 (global-set-key (kbd "<f1> l") 'counsel-find-library)
-(global-set-key (kbd "<f2> i") 'counsel-info-lookup-symbol)
-(global-set-key (kbd "<f2> u") 'counsel-unicode-char)
+;; removed f2 -- couldn't make it work
+;;(global-set-key (kbd "<f2> i") 'counsel-info-lookup-symbol)
+;;(global-set-key (kbd "<f2> u") 'counsel-unicode-char)
 (global-set-key (kbd "C-c g") 'counsel-git)
-(global-set-key (kbd "C-c j") 'counsel-git-grep)
+(global-set-key (kbd "C-c j") 'counselgit-grep)
 (global-set-key (kbd "C-c k") 'counsel-ag)
 (global-set-key (kbd "C-x l") 'counsel-locate)
-(global-set-key (kbd "C-S-o") 'counsel-rhythmbox)
+;(global-set-key (kbd "C-S-o") 'counsel-rhythmbox)
 (define-key read-expression-map (kbd "C-r") 'counsel-expression-history)
 
 
@@ -221,51 +221,57 @@
 
 (autoload 'ibuffer "ibuffer" "List Buffers Interactively" t)
 (global-set-key (kbd "C-x C-b") 'ibuffer)
-(add-hook 'ibuffer-mode-hook 
-    '(lambda ()
-         ;; Use human readable Size column instead of original one
-         (define-ibuffer-column prettysize
-             (:name "Size" :inline t)
-             (cond
-                 ((> (buffer-size) 1000000) (format "%7.1fM" (/ (buffer-size) 1000000.0)))
-                 ((> (buffer-size) 100000) (format "%7.0fk" (/ (buffer-size) 1000.0)))
-                 ((> (buffer-size) 1000) (format "%7.1fk" (/ (buffer-size) 1000.0)))
-                 (t (format "%8d" (buffer-size)))))
+(defun my-ibuffer-set-columns ()
+    ;; Use human readable Size column instead of original one
+    (define-ibuffer-column prettysize
+        (:name "Size" :inline t)
+        (cond
+            ((> (buffer-size) 1000000) (format "%7.1fM" (/ (buffer-size) 1000000.0)))
+            ((> (buffer-size) 100000) (format "%7.0fk" (/ (buffer-size) 1000.0)))
+            ((> (buffer-size) 1000) (format "%7.1fk" (/ (buffer-size) 1000.0)))
+            (t (format "%8d" (buffer-size)))))
 
-         ;; Modify the default ibuffer-formats
-         (setq ibuffer-formats
-             '((mark modified read-only " "
-                   (name 18 18 :left :elide)
-                   " "
-                   (prettysize 9 -1 :right)
-                   " "
-                   (mode 16 16 :left :elide)
-                   " "
-                   filename-and-process)))
+    ;; Modify the default ibuffer-formats
+    (setq ibuffer-formats
+        '((mark modified read-only " "
+              (name 18 18 :left :elide)
+              " "
+              (prettysize 9 -1 :right)
+              " "
+              (mode 16 16 :left :elide)
+              " "
+              filename-and-process))))
 
-         (setq ibuffer-saved-filter-groups
-             '(("home"
-                   ("Web Dev" (or (mode . html-mode)
-                                  (mode . web-mode)
-                                  (mode . jade-mode)
-                                  (mode . json-mode)
-                                  (mode . js-mode)
-                                  (mode . js2-mode)))
-                   (mode . js3-mode)))
-             ("emacs-config" (or (filename . "\.emacs\.d")
-                                 (filename . "emacs")
-                                 (filename . "\.emacs")
-                                 (filename . ".*\.el$")))
-             ("Bitcoin" (filename . ".*bitcoin.*"))
-             ("Magit" (name . "\*magit"))
-             ("Org" (or (mode . org-mode)
-                        (filename . "OrgMode")))
-             ("Help" (or (name . "\*Help\*")
-                         (name . "\*Apropos\*")
-                         (name . "\*info\*"))))
+(defun my-ibuffer-mode-hook ()
+    (setq ibuffer-saved-filter-groups
+        '(("home"
+              ("Web Dev" (or (mode . html-mode)
+                             (mode . web-mode)
+                             (mode . jade-mode)
+                             (mode . json-mode)
+                             (mode . js-mode)
+                             (mode . js2-mode)
+                             (mode . js3-mode)))
+              ("emacs-config" (or (filename . "\.emacs\.d")
+                                  (filename . "emacs")
+                                  (filename . "\.emacs")
+                                  (filename . ".*\.el$")))
+              ("Viacoin13" (filename . "/viacoin13.*/"))
+              ("Viacoin" (filename . "/viacoin.*/"))
+              ("Bitcoin" (filename . "/bitcoin.*/"))
+              ("Magit" (name . "\*magit"))
+              ("Dired"  (mode . dired-mode))
+              ("Org" (or (mode . org-mode)
+                         (filename . "OrgMode")
+                         (filename . "org")))
+              ("Help" (or (name . "\*Help\*")
+                          (name . "\*Apropos\*")
+                          (name . "\*info\*")))
+              ("*temp*" (name . "^\*.*\*$")))))
 
-         (ibuffer-switch-to-saved-filter-groups "home")
-         ))
+    (ibuffer-switch-to-saved-filter-groups "home"))
+
+(add-hook 'ibuffer-mode-hook 'my-ibuffer-mode-hook)
 
 ;; TODO - Ibuffer filters
 
@@ -281,6 +287,14 @@
         (blank-mode 0)
         (global-set-key [f12] 'blank-mode)))
 
+
+;; ========== xcsope mode ===============================
+
+(if (require 'xcscope "xcscope" t)
+    (progn
+        (setq cscope-option-use-inverted-index t) ; use -q option on database
+        (cscope-setup)
+        (message "cscope done")))
 
 ;; ========== SUBLIMITY ================================
 
@@ -317,17 +331,118 @@
   (add-hook 'after-make-frame-functions 'initialize-nlinum)
   (add-hook 'after-init-hook 'initialize-nlinum))
 
+
+;; from
+;; https://github.com/alpaker/Fill-Column-Indicator/issues/67
+(use-package fill-column-indicator
+  :ensure t
+  :init
+    (setq-default fci-rule-column 90)
+    (setq-default fci-rule-width 1)
+    (setq-default fci-rule-color "grey24")
+    (setq-default fci-rule-character 8286)          ; text modes use unicode vertical 4-ellipses
+    (setq-default fci-rule-use-dashes t)            ; graphic modes use dashes
+    (setq-default fci-dash-pattern 0.75)            ; graphic mode dash pattern
+  :config
+  (defvar eos/fci-disabled nil)
+  (make-variable-buffer-local 'eos/fci-disabled)
+  ;; Add a hook that disables fci if enabled when the window changes and it
+  ;; isn't wide enough to display it.
+  (defun eos/maybe-disable-fci ()
+    (interactive)
+    ;; Disable FCI if necessary
+    (when (and fci-mode
+               (< (window-width) (or fci-rule-column fill-column)))
+      (fci-mode -1)
+      (setq-local eos/fci-disabled t))
+    ;; Enable FCI if necessary
+    (when (and eos/fci-disabled
+               (eq fci-mode nil)
+               (> (window-width) (or fci-rule-column fill-column)))
+      (fci-mode 1)
+      (setq-local eos/fci-disabled nil)))
+
+  (defun eos/add-fci-disabling-hook ()
+    (interactive)
+    (add-hook 'window-configuration-change-hook
+              #'eos/maybe-disable-fci))
+  (add-hook 'prog-mode-hook #'eos/add-fci-disabling-hook)
+  (define-globalized-minor-mode
+    global-fci-mode
+    fci-mode
+    (lambda ()
+        (fci-mode 1)))
+  (global-fci-mode 0))
+
+
+;; ;; ========== ORIGAMI FOLDING =============
+;; ;; hooks with fci-mode to disable it when folding
+;; ;; and unfolding
+;; (use-package origami
+;;     :ensure t
+;;     :bind (("C-<return>" . my/origami-toggle-node))
+;;     :config
+;;     (defvar o/test nil)
+;;     (make-variable-buffer-local 'o/test)
+;;     (defun my/origami-toggle-node ()
+;;         (interactive)
+;;         (if fci-mode
+;;             (progn
+;;                 (fci-mode -1)
+;;                 (origami-toggle-node (current-buffer) (point))
+;;                 (fci-mode 1))
+;;             (origami-toggle-node (current-buffer) (point))))
+
+;;     (add-hook 'prog-mode-hook #'origami-mode))
+
+
+;; ========== hs-mode FOLDING =============
+;; hooks with fci-mode to disable it when folding
+;; and unfolding
+(use-package hideshow
+    :ensure t
+    :bind (("C-<return>" . my/hs-toggle-node)
+           ("C-M-<return>" . my/hs-hide-all))
+    :config
+    (require 'hideshowvis)
+
+    (defun my/hs-toggle-node ()
+        (interactive)
+        (if fci-mode
+            (progn
+                (fci-mode -1)
+                (hs-toggle-hiding)
+                (fci-mode 1))
+            (hs-toggle-hiding)))
+    (defun my/hs-hide-all ()
+        (interactive)
+        (if fci-mode
+            (progn
+                (fci-mode -1)
+                (hs-hide-all)
+                (fci-mode 1))
+            (hs-hide-all)))
+    (defun my/hs-setup ()
+        (interactive)
+        (hideshowvis-minor-mode t)
+        (hideshowvis-symbols)
+        (hs-minor-mode t))
+
+    (add-hook 'prog-mode-hook #'my/hs-setup))
+
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-; smart M-X - 
+; smart M-X -
 ; autocomplete M-X using ido-mode
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(require 'smex)
 (global-set-key (kbd "M-x") 'smex)
 (global-set-key (kbd "M-X") 'smex-major-mode-commands)
 ;; access the orginal M-x with "C-c C-c M-x"
 (global-set-key (kbd "C-c C-c M-x") 'execute-extended-command)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-; Auto-complete in source files. 
+; Auto-complete in source files.
 ; use the TAB key
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (require 'auto-complete)
@@ -343,12 +458,25 @@
 ; start yasnippet when emacs starts
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (require 'yasnippet)
-(add-to-list 'yas-snippet-dirs "~/.emacs.d/snippets")
+(add-to-list 'yas-snippet-dirs (concat user-emacs-directory "snippets"))
 (yas-global-mode 1)
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-; autosave and numbered backups
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; autosave and numbered backups
+;; from https://www.emacswiki.org/emacs/ForceBackups
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+;; auto save
+(defvar my/auto-save-dir (concat user-emacs-directory "auto-saves/"))
+(make-directory my/auto-save-dir t)
+(setq auto-save-list-file-prefix (concat my/auto-save-dir ".saves-")) ; set prefix for auto-saves
+(setq tramp-auto-save-directory my/auto-save-dir)                     ; auto-save tramp files in local directory
+(setq auto-save-file-name-transforms
+    `(("\\(?:[^/]*/\\)*\\(.*\\)" ,(concat my/auto-save-dir "\\1") t)))
+(setq auto-save-timeout 10)
+(setq auto-save-interval 0)
+
+;; backup versioning
 (setq version-control t     ;; Use version numbers for backups.
       kept-new-versions 10  ;; Number of newest versions to keep.
       kept-old-versions 0   ;; Number of oldest versions to keep.
@@ -356,19 +484,20 @@
       backup-by-copying t)  ;; Copy all files, don't rename them.
 
 (setq vc-make-backup-files t)
-(setq backup-directory-alist '(("" . "~/.emacs.d/backups/per-save")))
+(setq backup-directory-alist `(("" . ,(concat user-emacs-directory "backups/per-save"))))
 
 (defun force-backup-of-buffer ()
   ;; Make a special "per session" backup at the first save of each
   ;; emacs session.
   (when (not buffer-backed-up)
     ;; Override the default parameters for per-session backups.
-    (let ((backup-directory-alist '(("" . "~/.emacs.d/backups/per-session")))
-           (kept-new-versions 3))
+    (let ((backup-directory-alist `(("" . ,(concat user-emacs-directory "backups/per-session"))))
+          (kept-new-versions 3))
       (backup-buffer)))
   ;; Make a "per save" backup on each save.  The first save results in
   ;; both a per-session and a per-save backup, to keep the numbering
-  ;; of per-save backups consistent.
+
+    ;; of per-save backups consistent.
   (let ((buffer-backed-up nil))
     (backup-buffer)))
 
@@ -376,17 +505,17 @@
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; iedit-minor-mode.  C-; puts  you into 
+;; iedit-minor-mode.  C-; puts  you into
 ;; multiple-cursor edit mode for the word at point
 ;; Here is a function that restricts iedit to the
-;; current function scope. 
+;; current function scope.
 ;; With a prefix arg it will search the whole buffer.
 ;; from: Mastering Emacs book
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
 (require 'iedit)
 (defun iedit-dwim (arg)
-  "Start iedit but use \\[narrow-to-defun] to limit its scope. 
+  "Start iedit but use \\[narrow-to-defun] to limit its scope.
 With a prefix ARG, it will widen the scope to the whole buffer."
   (interactive "P")
   (if arg
@@ -404,6 +533,15 @@ With a prefix ARG, it will widen the scope to the whole buffer."
 
 (global-set-key (kbd "C-;") 'iedit-dwim)
 
+
+;; ========== multiple cursor mode ====================
+
+(use-package multiple-cursors
+    :bind (("C-S-c C-S-c" . mc/edit-lines)
+           ("C->" . mc/mark-next-like-this)
+           ("C-<" . mc/mark-previous-like-this)
+           ("C-c C-<" . mc/mark-all-like-this)))
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; flycheck settings
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -417,9 +555,9 @@ With a prefix ARG, it will widen the scope to the whole buffer."
 
 ;; eslint was annoying to make it work well
 ;; I'll stick with gjslint until I need support
-;; for React, jsx, or AirBnB mode 
+;; for React, jsx, or AirBnB mode
 (flycheck-add-mode 'javascript-gjslint 'web-mode)
-(flycheck-add-mode 'javascript-gjslint 'js2-mode)
+;;(flycheck-add-mode 'javascript-gjslint 'js2-mode)
 (flycheck-add-mode 'javascript-gjslint 'js3-mode)
 
 ;; customize flycheck temp file prefix
@@ -430,11 +568,12 @@ With a prefix ARG, it will widen the scope to the whole buffer."
 ;;;;;;;;;;;;;
 
 (defun my-one-true-style ()
-  "Set my style." 
+    "Set my style."
   (c-set-style "bsd")
-  (setq-default tab-width 2
-		c-basic-offset 2
-		indent-tabs-mode nil) ; use only spaces for indentation
+    (setq-default
+        tab-width 2
+        c-basic-offset 2
+        indent-tabs-mode nil) ; use only spaces for indentation
   (require 'auto-complete-c-headers)
   (add-to-list 'ac-sources 'ac-source-c-headers))
 
@@ -452,38 +591,43 @@ With a prefix ARG, it will widen the scope to the whole buffer."
 (global-font-lock-mode 1)
 (c-toggle-hungry-state 1)
 (smartparens-global-mode t)
+(require 'semantic)
 
-;; shorten the compilation window, and remove it 
+;; shorten the compilation window, and remove it
 ;; at the end of compilation ONLY if there were no errors.
 (setq compilation-window-height 8)
-(setq compilation-finish-functions
-  (lambda (buf str)
-
-    (if (string-match "exited abnormally" str)
-
-      ;;there were errors
-      (message "compilation errors, press C-x ` to visit")
-
-      ;;no errors, make the compilation window go away in 0.5 seconds
-      (run-at-time 0.5 nil 'delete-windows-on buf)
-      (message "** NO ERRORS **"))))
+(defun my/compilation-finish-function (buf str)
+    "function run at the end of compilation"
+    (interactive)
+    (when (not (eq major-mode 'grep-mode))
+        (if (string-match "exited abnormally" str)
+            ;;there were errors
+            (message "compilation errors, press C-x ` to visit")
+            ;;no errors, make the compilation window go away in 0.5 seconds
+            (run-at-time 0.5 nil 'delete-windows-on buf)
+            (message "** NO ERRORS **"))))
+(setq compilation-finish-functions #'my/compilation-finish-function)
 
 (defun my-build-tab-stop-list (width)
   (let ((num-tab-stops (/ 80 width))
-	(counter 1)
-	(ls nil))
+    (counter 1)
+    (ls nil))
     (while (<= counter num-tab-stops)
       (setq ls (cons (* width counter) ls))
       (setq counter (1+ counter)))
     (set (make-local-variable 'tab-stop-list) (nreverse ls))))
 
-(defun my-mode-common-hook ()
-  (setq tab-width 2) ;; change this to taste, 
-  (my-build-tab-stop-list tab-width)
-  (setq c-basic-offset tab-width)
-  (setq indent-tabs-mode nil) ;; use only SPACES for indentation
-  (auto-complete-mode))
-(add-hook 'c-mode-common-hook 'my-mode-common-hook)
+(defun my/mode-common-hook ()
+    (setq tab-width 2)                 ; change this to taste,
+    (my-build-tab-stop-list tab-width)
+    (setq c-basic-offset tab-width)
+    (setq indent-tabs-mode nil)        ; use only SPACES for indentation
+    (auto-complete-mode)
+    (semantic-mode t)
+    (semantic-idle-summary-mode t)
+    (semantic-idle-local-symbol-highlight-mode t)
+    (semantic-stickyfunc-mode t))
+(add-hook 'c-mode-common-hook 'my/mode-common-hook)
 
 
 ;; personal preferences
@@ -494,30 +638,33 @@ With a prefix ARG, it will widen the scope to the whole buffer."
 (c-set-offset 'topmost-intro-cont '+)
 
 ;; f1 is help
-;; f2 is party of ivy-mode
-(global-set-key [f3] 'compile)
-(global-set-key [f4] 'previous-error)
-(global-set-key [f5] 'next-error)
+;; f2 is part of ivy-mode
+(global-set-key [f2] 'compile)
+(global-set-key [f3] 'previous-error)
+(global-set-key [f4] 'next-error)
 (global-set-key [f6] 'find-tag)
 (global-set-key [f7] 'pop-tag-mark)
 (auto-compression-mode t)
 
+
+
+
 (setq gdb-many-windows t)
 (defun my-gdb-other-frame ()
 "Initialize a gdb session in a new frame.
-Save window configuration to register 'c' with \\[window-configuration-to-register] c. 
+Save window configuration to register 'c' with \\[window-configuration-to-register] c.
 Start GDB GUD with \\[execute-extended-command] gdb, then set many window mode with
-M-X gdb-many-windows.  Save this debug configuration to register d 
-with \\[window-configuration-to-register] d.  Now you can switch between coding configuration 
-and debugging configuration via the registers `c' and `d': 
-Use \\[jump-to-register] c for coding, and \\[jump-to-register] d for debug." 
+M-X gdb-many-windows.  Save this debug configuration to register d
+with \\[window-configuration-to-register] d.  Now you can switch between coding configuration
+and debugging configuration via the registers `c' and `d':
+Use \\[jump-to-register] c for coding, and \\[jump-to-register] d for debug."
 
   (interactive)
   (select-frame (make-frame))
   (call-interactively 'gdb))
 
 ;; from http://stackoverflow.com/a/24923325/475482
-;; prevent GDB from stealing windows 
+;; prevent GDB from stealing windows
 (defadvice gdb-inferior-filter
     (around gdb-inferior-filter-without-stealing)
   (with-current-buffer (gdb-get-buffer-create 'gdb-inferior-io)
@@ -552,7 +699,7 @@ buffer in current window."
 ;; Javascript/CSS/SASS/HTML, livereload and in-browser debugging
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(require 'js2-mode)
+;;(require 'js2-mode)
 (require 'js2-refactor)
 (require 'js3-mode)               ;js3-mode supports node, AMD and CommonJS best
 (require 'web-mode)
@@ -560,33 +707,34 @@ buffer in current window."
 (require 'sass-mode)
 (require 'jade-mode)
 
-(add-hook 'js2-mode-hook #'js2-refactor-mode)
-(js2r-add-keybindings-with-prefix "C-c C-m")
+;;(add-hook 'js2-mode-hook #'js2-refactor-mode)
+;;(js2r-add-keybindings-with-prefix "C-c C-m")
 ;; eg. extract function with `C-c C-m ef`.
 
-(add-hook 'js2-mode-hook
-    (lambda ()
-        (tern-mode t)
-        (linum-mode t)
-        ))
+;; (add-hook 'js2-mode-hook
+;;     (lambda ()
+;;         (tern-mode t)
+;;         (linum-mode t)
+;;         ))
 
 (add-hook 'js3-mode-hook
     (lambda ()
+        (setq js3-auto-indent-p t)         ; it's nice for commas to right themselves.
+        (setq js3-enter-indents-newline t) ; don't need to push tab before typing
+        (setq js3-indent-on-enter-key t)   ; fix indenting before moving on
         (tern-mode t)
         (linum-mode t)
-        (js3-auto-indent-p t)         ; it's nice for commas to right themselves.
-        (js3-enter-indents-newline t) ; don't need to push tab before typing
-        (js3-indent-on-enter-key t)   ; fix indenting before moving on
-        ))
+        (when (bound-and-true-p my/hs-setup)
+            (my/hs-setup))))
 
 (eval-after-load 'tern
     '(progn
          (require 'tern-auto-complete)
-         (term-ac-setup)))
+         (tern-ac-setup)))
 
 ;; Force restart of tern in new projects
 ;; $ M-x delete-tern-process
-(defun delete-tern-process () 
+(defun delete-tern-process ()
     "Force restart of tern in new project."
     (interactive)
     (delete-process "Tern"))
@@ -604,11 +752,12 @@ buffer in current window."
 (add-to-list 'auto-mode-alist '("\\.mustache\\'" . web-mode))
 (add-to-list 'auto-mode-alist '("\\.djhtml\\'" . web-mode))
 
-(add-hook 'js2-mode-hook 'my-mode-common-hook)
-(add-hook 'web-mode-hook 'my-mode-common-hook)
-(add-hook 'css-mode-hook 'my-mode-common-hook)
-(add-hook 'sass-mode-hook 'my-mode-common-hook)
-(add-hook 'json-mode-hook 'my-mode-common-hook)
+;;(add-hook 'js2-mode-hook 'my/mode-common-hook)
+(add-hook 'js3-mode-hook 'my/mode-common-hook)
+(add-hook 'web-mode-hook 'my/mode-common-hook)
+(add-hook 'css-mode-hook 'my/mode-common-hook)
+(add-hook 'sass-mode-hook 'my/mode-common-hook)
+(add-hook 'json-mode-hook 'my/mode-common-hook)
 (add-hook 'jade-mode-hook
     '(lambda ()
          (progn
@@ -641,16 +790,16 @@ directory to make multiple eshell windows easier."
                    default-directory))
          (height (/ (window-total-height) 3))
          (name   (car (last (split-string parent "/" t))))
-	 (eshell-p t))
+     (eshell-p t))
     (split-window-vertically (- height))
     (other-window 1)
     (eshell "new")
     (rename-buffer (concat "*eshell: " name "*"))
     (setq-local eshell-p t)
     ;; (add-hook 'kill-buffer-hook
-    ;; 	      (lamda () (if (or (string-prefix-p "*eshell: " (buffer-name))
-    ;; 				(bound-and-true-p eshell-p))
-    ;; 			    (eshell/x))))
+    ;;            (lamda () (if (or (string-prefix-p "*eshell: " (buffer-name))
+    ;;                  (bound-and-true-p eshell-p))
+    ;;                  (eshell/x))))
 
     ;(insert (concat "ls"))
     ;(eshell-send-input)
@@ -691,7 +840,7 @@ directory to make multiple eshell windows easier."
  (setq custom-file
        (expand-file-name "custom.el"
        (expand-file-name ".xemacs" "~")))
- 
+
  (load-file user-init-file)
  (load-file custom-file))
 
@@ -703,7 +852,7 @@ directory to make multiple eshell windows easier."
 ;;;;;;;;;;;;;;;;;
 ;; APPEARANCE
 ;;;;;;;;;;;;;;;;;
-;; (when window-system 
+;; (when window-system
 ;;   (set-frame-size (selected-frame) 140 50)
 ;;   ;; (toggle-frame-fullscreen) ;; since emacs 2.4.4
 ;;   (scroll-bar-mode 0)
@@ -723,15 +872,18 @@ directory to make multiple eshell windows easier."
 (scroll-bar-mode 0)
 (line-number-mode 1)
 (setq default-frame-alist
-      '((top . 43) 
+      '((top . 43)
 ;;	(left . (/ (- (display-pixel-width) (* 150 (frame-char-width))) 2))
-	(left . 370)
+    (left . 370)
         (width . 141) (height . 45)
         ))
 
-;;(set-frame-font "Inconsolata-g-12")
+;; ========== SMART MODE LINE ===========
+(require 'smart-mode-line)
+(setq sml/theme 'respectful)
+(sml/setup)
 
-;; the fringe is fun to play in 
+;; the fringe is fun to play in
 
 ;; (set-fringe-mode
 ;;  (/ (- (frame-pixel-width)
@@ -757,21 +909,35 @@ directory to make multiple eshell windows easier."
 (global-set-key (kbd "C-x n f") 'narrow-to-defun)
 
 (defun my-insert-date ()
-  (interactive)
-  (insert (format-time-string "%x")))
+    "inserts the date into the current document"
+    (interactive)
+    (insert (format-time-string "%x")))
 
 (defun my-insert-time ()
-  (interactive)
-  (insert (format-time-string "%X")))
+    "inserts the time into the current document"
+    (interactive)
+    (insert (format-time-string "%X")))
+
+(defun my-insert-iso8601 ()
+    "inserts the date and time into the current document in iso8601 format."
+    (interactive)
+    (insert (format-time-string "%C%y-%m-%dT%H:%M:%SZ")))
+
+(defun my-insert-utc ()
+    "inserts the date and time into the current document in utc format."
+    (interactive)
+    (insert (format-time-string "%C%y-%m-%dT%H:%M:%SZ")))
 
 (defun my-insert-name ()
-  (interactive)
-  (insert "Brian A. Onn <brian.a.onn@gmail.com>"))
+    "inserts my name and email into the current document."
+    (interactive)
+    (insert "Brian A. Onn <brian.a.onn@gmail.com>"))
 
 (global-set-key (kbd "C-c i d") 'my-insert-date)
 (global-set-key (kbd "C-c i t") 'my-insert-time)
 (global-set-key (kbd "C-c i n") 'my-insert-name)
-
+(global-set-key (kbd "C-c i i") 'my-insert-iso8601)
+(global-set-key (kbd "C-c i u") 'my-insert-utc)
 
 ;; window navigation with control arrows
 (global-set-key (kbd "C-<left>") 'windmove-left)
@@ -779,8 +945,7 @@ directory to make multiple eshell windows easier."
 (global-set-key (kbd "C-<up>") 'windmove-up)
 (global-set-key (kbd "C-<down>") 'windmove-down)
 
-;(load "server")
-;(unless (server-running-p) (server-start))
+(load "server")
+(unless (server-running-p) (server-start))
 
 ;; end
-
