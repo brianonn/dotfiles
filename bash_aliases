@@ -120,8 +120,8 @@ alias backup='rsync -av --progress --exclude='\''*/Downloads/In-Progress/'\'' --
 alias book=$HOME/bin/findebook.sh
 alias b=book
 
-## CSCOPE AND TAGS
-alias cstags='/bin/rm -f cscope.files cscope.out tags etags TAGS ETAGS ; find . \( -name "*.[cChHsS]" -o -name "*.[chCH]pp" -o -name "*.asm" -o -name "*.ASM" \) -print > cscope.files ; cscope -ubc -i cscope.files ; ctags -e --extra=+q -f ETAGS -L cscope.files ; ctags -f TAGS -L cscope.files; ccglue -o cctree.out -i cctree.idx'
+## CSCOPE AND CTAGS
+alias cstags='/bin/rm -f cscope.* tags etags TAGS ETAGS ; find . \( -name "*.[cChHsS]" -o -name "*.[chCH]pp" -o -name "*.asm" -o -name "*.ASM" -o -name "*.py" -o -name "*.java" \) -print | egrep -v '[/][.]?#.*#?$' > cscope.files ; cscope -ubq -i cscope.files ; ctags -e --extra=+q -f ETAGS -L cscope.files ; ctags -f TAGS -L cscope.files; ccglue -o cctree.out -i cctree.idx'
 
 alias llpkg='dpkg-query -W -f="\${Installed-Size}\t\${binary:Package}\n" | sort -n'
 alias shred='shred -v -n 3 -u -f'
