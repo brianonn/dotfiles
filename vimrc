@@ -191,7 +191,8 @@ autocmd VimEnter * call VimrcSetupCCTree()
 "autocmd VimEnter * TagbarToggle
 " nmap <F8> :TagbarToggle<CR>
 " let g:Tlist_Use_Right_Window = 1  
-autocmd VimEnter * NERDTree
+
+"autocmd VimEnter * NERDTree
 
 set ofu=syntaxcomplete#Complete
 
