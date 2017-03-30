@@ -567,6 +567,10 @@ With a prefix ARG, it will widen the scope to the whole buffer."
 ;;;;;;;;;;;;;
 ;;;;;;;;;;;;;
 
+;; (add-hook 'prog-mode-hook
+;;     (lambda ()
+;;         (add-to-list 'write-file-functions 'delete-trailing-whitespace)))
+
 (defun my/one-true-style ()
     "Set my style."
   (c-set-style "bsd")
@@ -574,13 +578,14 @@ With a prefix ARG, it will widen the scope to the whole buffer."
         tab-width 2
         c-basic-offset 2
         indent-tabs-mode nil) ; use only spaces for indentation
-  (require 'auto-complete-c-headers)
-  (add-to-list 'ac-sources 'ac-source-c-headers))
+    (require 'auto-complete-c-headers)
+    (add-to-list 'ac-sources 'ac-source-c-headers))
 
 (add-hook 'c-mode-hook 'my/one-true-style)
 (add-hook 'c++-mode-hook 'my/one-true-style)
 (add-hook 'objc-mode-hook 'my/one-true-style)
 (add-hook 'php-mode-hook 'my/one-true-style)
+
 
 ;; yellow is good on a dark background
 (set-face-foreground 'minibuffer-prompt "OrangeRed") ;
