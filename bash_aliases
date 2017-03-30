@@ -78,7 +78,7 @@ psdocker()
 }
 
 dmesg_with_human_timestamps () {
-    local dmesg_bin=$(type -a dmesg | tail -n 1 | awk '{ print $NF }')
+    local dmesg_bin=$(type -a dmesg | /usr/bin/tail -n 1 | awk '{ print $NF }')
     $dmesg_bin "$@" | perl -w -e 'use strict;
         my ($uptime) = do { local @ARGV="/proc/uptime";<>}; ($uptime) = ($uptime =~ /^(\d+)\./);
         foreach my $line (<>) {
@@ -207,14 +207,15 @@ ls_pager="/bin/less -S -R -X -F"
 ls_bin="/bin/ls -F --group-directories-first $color_opt"
 
 alias more=less
+alias tail=colortail
 
 alias ls=ls
 unalias ls
 ls  () { $ls_bin "$@" | $ls_pager ; }
 l   () { $ls_bin -C "$@" | $ls_pager ; }
 ll  () { $ls_bin -l "$@" | $ls_pager ; }
-lll () { $ls_bin -lt "$@" | tail -20 ; }
-llr () { $ls_bin -lrt "$@" | tail -20 ; }
+lll () { $ls_bin -lt "$@" | /usr/bin/tail -20 ; }
+llr () { $ls_bin -lrt "$@" | /usr/bin/tail -20 ; }
 alias lr=llr
 llx () { $ls_bin -X -C --si "$@" | $ls_pager ; }
 
