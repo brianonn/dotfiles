@@ -72,7 +72,7 @@ psgrep()
 psdocker()
 {
     pid=$(ps axo pid,cmd | sed -e 's,\([0-9][0-9]*\) /usr/bin/docker.*,\1,p' -e d)
-    if test "1$pid" -ne 1; then 
+    if test "1$pid" -ne 1; then
         pstree -au $pid
     fi
 }
@@ -250,5 +250,3 @@ alias utctime='date -u "+%F %T %Z"'
 
 alias qpdfview='qpdfview --unique'
 alias qp='qpdfview --unique'
-
-
