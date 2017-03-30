@@ -43,6 +43,7 @@ mkpw()
     #dd if=/dev/urandom bs=512 count=1 2>/dev/null | tr -dc 'a-zA-Z0-9' | fold -w "$len" | head -1
     dd if=/dev/urandom bs=512 count=1 2>/dev/null | tr -dc "$chars" | fold -w "$len" | head -1
 }
+alias pw=mkpw
 
 fc()
 {
