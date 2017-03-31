@@ -31,6 +31,7 @@
              dockerfile-mode
              editorconfig
              emmet-mode
+             ethan-wspace
              expand-region
              exec-path-from-shell
              fill-column-indicator
@@ -563,13 +564,22 @@ With a prefix ARG, it will widen the scope to the whole buffer."
 ;; customize flycheck temp file prefix
 (setq-default flycheck-temp-prefix ".flycheck")
 
+;;;;;;;;;;;;;
+;; whitespace cleanup using ethan-wspace
+;; this mode is nice because it only cleans up whitespace
+;; on lines that we actually edit, so it doesn't cause spurious
+;; whitespace changes in git diff outputs
+;;;;;;;;;;;;;
+(require 'ethan-wspace)
+(global-ethan-wspace-mode 1)
+
+(defun makefile-tabs-are-less-evil ()
+    "When editing Makefiles, tabs are not errors."
+    (setq ethan-wspace-errors (remove 'tabs ethan-wspace-errors)))
+(add-hook 'makefile-mode-hook 'makefile-tabs-are-less-evil)
 
 ;;;;;;;;;;;;;
 ;;;;;;;;;;;;;
-
-;; (add-hook 'prog-mode-hook
-;;     (lambda ()
-;;         (add-to-list 'write-file-functions 'delete-trailing-whitespace)))
 
 (defun my/one-true-style ()
     "Set my style."
@@ -865,7 +875,6 @@ directory to make multiple eshell windows easier."
 ;;   ;; (menu-bar-mode 0)
 ;; )
 (setq font-lock-maximum-decoration t)
-(setq require-final-newline t)
 (setq resize-mini-windows t)
 (setq column-number-mode t)
 (setq next-line-add-newlines nil)
