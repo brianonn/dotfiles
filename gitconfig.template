@@ -1,5 +1,9 @@
+[user]
+	name  = ${NAME}
+	email = ${EMAIL}
+
 [core]
-	excludefiles = ~/.gitignore
+	excludesfile = ~/.gitignore_global
 	whitespace = cr-at-eol
 	autocrlf = input
 
@@ -37,6 +41,7 @@
     changeset = log --name-status -n 1 HEAD
     cs = !"git changeset"
 	dt = difftool -d
+    permission-reset = !git diff -p -R --no-color | grep -E \"^(diff|(old|new) mode)\" --color=never | git apply
 
 [color]
     ui = auto
@@ -72,7 +77,10 @@
 
 [instaweb]
     local = true
-    httpd = python -m SimpleHTTPServer
+    #httpd = python -m SimpleHTTPServer
+    httpd = apache2 -f
     port = 4321
-    browser = /usr/local/bin/chrome
+    modulePath = /usr/lib/apache2/modules
 
+[web]
+	browser = google-chrome

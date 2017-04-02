@@ -1,0 +1,83 @@
+# -*- mode: gitignore; -*-
+
+# Ignore tag file and indexes created by etags, ctags, gtags, cscope, cctree
+TAGS
+CTAGS
+ETAGS
+.TAGS
+!TAGS/
+tags
+.tags
+!tags/
+gtags.files
+GTAGS
+GRTAGS
+GPATH
+GSYMS
+cscope.files
+cscope.out
+cscope.in.out
+cscope.po.out
+cctree.*
+
+# Emacs
+*~
+\#*\#
+/.emacs.desktop
+/.emacs.desktop.lock
+*.elc
+auto-save-list
+tramp
+.#*
+.dir-locals.el
+
+# Org-mode
+.org-id-locations
+*_archive
+
+
+# Vim
+# swap
+[._]*.s[a-v][a-z]
+[._]*.sw[a-p]
+[._]s[a-v][a-z]
+[._]sw[a-p]
+# session
+Session.vim
+# temporary
+.netrwhist
+*~
+
+# GNU Autotools cache
+autom4te.cache
+
+# eslint
+.eslintrc
+
+# Flycheck and Flymake
+flycheck_*.el
+.flycheck*
+*_flymake.*
+
+# eshell files
+/eshell/history
+/eshell/lastdir
+
+# elpa packages
+/elpa/
+
+# reftex files
+*.rel
+
+# AUCTeX auto folder
+/auto/
+
+# cask packages
+.cask/
+dist/
+
+# server auth directory
+/server/
+
+# projectiles files
+.projectile
