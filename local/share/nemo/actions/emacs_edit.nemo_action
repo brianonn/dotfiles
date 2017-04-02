@@ -1,8 +1,7 @@
 [Nemo Action]
-Name=Edit with Sublime
-Comment=Edit the selected file(s) with the Sublime Text Editor
+Name=Edit with Emacs
+Comment=Edit the selected file(s) with the Emacs Text Editor
 Quote=double
-Exec=subl %F
+Exec=emacsclient --alternate-editor="" -c %F
 Selection = any
 Extensions=bash;c;c++;coffee;conf;cpp;css;dart;go;h;h++;hpp;htm;html;ini;jade;js;log;lua;md;me;opa;pl;py;rb;rc;sh;sql;ts;txt;yaml
-
