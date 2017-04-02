@@ -26,23 +26,33 @@ dir="readlink -f `dirname $0`"
 dir=`eval $dir`
 
 # templates
-for path in $dir/*.template; do
-    cp -pf "$path" `basename "$path" ".template"`
+for infile in $dir/*.template; do
+    outfile=$(basename "$infile" ".template")
+    $rm -f "$outfile"
+    # TODO: read the username and email from the user
+    NAME="Joe Smith"
+    EMAIL="joe@example.com"
+    sed < "$infile" > "$outfile" \
+        -e 's/${NAME}/'$NAME'/'\
+        -e 's/${EMAIL}/'$EMAIL'/'
 done
 
 #make symlinks
 for path in $dir/*; do
     filename=`basename "$path"`
-    if [ "$filename" = "bootstrap.sh" ]; then
-        continue;
-    else
+    case "$filename" in
+    *.template|bootstrap.sh)
+        continue
+        ;;
+    *)
         dotfile="$HOME/.$filename"
         if [ -e "$dotfile" ]; then
             [ -e "$SAVEDIR" ] || mkdir -p "$SAVEDIR"
             mv "$dotfile" "$SAVEDIR"
         fi
         ln -s "$path" "$dotfile"
-    fi
+        ;;
+    esac
 done
 
 ## setup eslint
