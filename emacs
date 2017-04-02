@@ -27,11 +27,11 @@
         '( auto-complete auto-complete-c-headers
              auto-complete-etags auto-complete-exuberant-ctags
              auto-dim-other-buffers
+             company
              dart-mode
              dockerfile-mode
              editorconfig
              emmet-mode
-             ethan-wspace
              expand-region
              exec-path-from-shell
              fill-column-indicator
@@ -345,35 +345,33 @@
     (setq-default fci-rule-use-dashes t)            ; graphic modes use dashes
     (setq-default fci-dash-pattern 0.75)            ; graphic mode dash pattern
   :config
-  (defvar eos/fci-disabled nil)
-  (make-variable-buffer-local 'eos/fci-disabled)
-  ;; Add a hook that disables fci if enabled when the window changes and it
-  ;; isn't wide enough to display it.
-  (defun eos/maybe-disable-fci ()
-    (interactive)
-    ;; Disable FCI if necessary
-    (when (and fci-mode
-               (< (window-width) (or fci-rule-column fill-column)))
-      (fci-mode -1)
-      (setq-local eos/fci-disabled t))
-    ;; Enable FCI if necessary
-    (when (and eos/fci-disabled
-               (eq fci-mode nil)
-               (> (window-width) (or fci-rule-column fill-column)))
-      (fci-mode 1)
-      (setq-local eos/fci-disabled nil)))
+    (defvar eos/fci-disabled nil)
+    (make-variable-buffer-local 'eos/fci-disabled)
+    ;; Add a hook that disables fci if enabled when the window changes and it
+    ;; isn't wide enough to display it.
+    (defun eos/maybe-disable-fci ()
+        "Disable `fill-column-indicator' if necessary."
+        (interactive)
+        ;; Disable FCI if necessary
+        (when (and fci-mode
+                  (< (window-width) (or fci-rule-column fill-column)))
+            (fci-mode -1)
+            (setq-local eos/fci-disabled t))
+        ;; Enable FCI if necessary
+        (when (and eos/fci-disabled
+                  (eq fci-mode nil)
+                  (> (window-width) (or fci-rule-column fill-column)))
+            (fci-mode 1)
+            (setq-local eos/fci-disabled nil)))
 
-  (defun eos/add-fci-disabling-hook ()
-    (interactive)
-    (add-hook 'window-configuration-change-hook
-              #'eos/maybe-disable-fci))
-  (add-hook 'prog-mode-hook #'eos/add-fci-disabling-hook)
-  (define-globalized-minor-mode
-    global-fci-mode
-    fci-mode
-    (lambda ()
-        (fci-mode 1)))
-  (global-fci-mode 0))
+    (defun eos/add-fci-disabling-hook ()
+        (interactive)
+        (add-hook 'window-configuration-change-hook #'eos/maybe-disable-fci)
+        (add-hook 'prog-mode-hook #'eos/add-fci-disabling-hook))
+    (define-globalized-minor-mode global-fci-mode fci-mode
+        (lambda ()
+            (fci-mode 1)))
+    (global-fci-mode 0))
 
 
 ;; ;; ========== ORIGAMI FOLDING =============
@@ -446,13 +444,13 @@
 ; Auto-complete in source files.
 ; use the TAB key
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-(require 'auto-complete)
-(require 'auto-complete-c-headers)
-(setq-default ac-sources '(ac-source-semantic-raw))
-(require 'auto-complete-config)
-(ac-config-default)
+;; (require 'auto-complete)
+;; (require 'auto-complete-c-headers)
+;; (setq-default ac-sources '(ac-source-semantic-raw))
+;; (require 'auto-complete-config)
+;; (ac-config-default)
 
-(require 'expand-region)		;downloaded via packages
+(require 'expand-region)                ;downloaded via packages
 (global-set-key (kbd "C-=") 'er/expand-region)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -570,17 +568,22 @@ With a prefix ARG, it will widen the scope to the whole buffer."
 ;; on lines that we actually edit, so it doesn't cause spurious
 ;; whitespace changes in git diff outputs
 ;;;;;;;;;;;;;
-(require 'ethan-wspace)
-(global-ethan-wspace-mode 1)
+;;(require 'ethan-wspace)
+;;(global-ethan-wspace-mode 1)
 
-(defun makefile-tabs-are-less-evil ()
-    "When editing Makefiles, tabs are not errors."
-    (setq ethan-wspace-errors (remove 'tabs ethan-wspace-errors)))
-(add-hook 'makefile-mode-hook 'makefile-tabs-are-less-evil)
+;; (defun makefile-tabs-are-less-evil ()
+;;     "When editing Makefiles, tabs are not errors."
+;;     (setq ethan-wspace-errors (remove 'tabs ethan-wspace-errors)))
+;; (add-hook 'makefile-mode-hook #'makefile-tabs-are-less-evil)
 
 ;;;;;;;;;;;;;
 ;;;;;;;;;;;;;
 
+(require 'company)
+(require 'company-custom)
+
+;;;;;;;;;;;;;
+;;;;;;;;;;;;;
 (defun my/one-true-style ()
     "Set my style."
   (c-set-style "bsd")
@@ -588,14 +591,22 @@ With a prefix ARG, it will widen the scope to the whole buffer."
         tab-width 2
         c-basic-offset 2
         indent-tabs-mode nil) ; use only spaces for indentation
-    (require 'auto-complete-c-headers)
-    (add-to-list 'ac-sources 'ac-source-c-headers))
+;;  (require 'auto-complete-c-headers)
+;;  (add-to-list 'ac-sources 'ac-source-c-headers)
+    )
 
 (add-hook 'c-mode-hook 'my/one-true-style)
 (add-hook 'c++-mode-hook 'my/one-true-style)
 (add-hook 'objc-mode-hook 'my/one-true-style)
 (add-hook 'php-mode-hook 'my/one-true-style)
 
+;; this is better done as a per-project directory variable
+;; but I could not get it to work
+(add-hook 'c++-mode-hook
+    (lambda ()
+        (setq flycheck-checker 'c/c++-gcc)
+        (setq flycheck-gcc-language-standard "c++11")
+        (setq flycheck-clang-language-standard "c++11")))
 
 ;; yellow is good on a dark background
 (set-face-foreground 'minibuffer-prompt "OrangeRed") ;
@@ -637,7 +648,7 @@ With a prefix ARG, it will widen the scope to the whole buffer."
     (my/build-tab-stop-list tab-width)
     (setq c-basic-offset tab-width)
     (setq indent-tabs-mode nil)        ; use only SPACES for indentation
-    (auto-complete-mode)
+    ;;(auto-complete-mode)
     (semantic-mode t)
     (semantic-idle-summary-mode t)
     (semantic-idle-local-symbol-highlight-mode t)
@@ -698,8 +709,7 @@ Use \\[jump-to-register] c for coding, and \\[jump-to-register] d for debug."
 
 ;; http://emacs.stackexchange.com/a/2198
 (defun toggle-window-dedicated ()
-  "Control whether or not Emacs is allowed to display another
-buffer in current window."
+  "Control whether or not Emacs is allowed to display another buffer in current window."
   (interactive)
   (message
    (if (let (window (get-buffer-window (current-buffer)))
