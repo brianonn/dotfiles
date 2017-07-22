@@ -64,7 +64,7 @@ set history=1000
 set undolevels=1000
 set ignorecase
 set infercase
-set wildignore=*.swp,*.bak,*.pyc,*.class,*.o,*.obj,*.a
+set wildignore=*.swp,*.bak,*.pyc,*.class,*.o,*.obj,*.a,*.DS_Store
 if exists("&wildignorecase")
     set wildignorecase
 endif
