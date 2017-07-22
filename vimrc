@@ -70,14 +70,14 @@ if exists("&wildignorecase")
 endif
 
 filetype on
-filetype plugin indent on 
+filetype plugin indent on
 call pathogen#infect()
 call pathogen#helptags()
 
 if has('autocmd')
 
     " Remove all autocommands first so they don't duplicate when sourcing this file
-    autocmd! 
+    autocmd!
 
     autocmd BufRead,BufNewFile *.v,*.vh setfiletype verilog
     autocmd BufRead,BufNewFile *.vhd    setfiletype vhdl
@@ -93,7 +93,7 @@ if has('autocmd')
 endif
 
 " center the line
-nmap <space> zz 
+nmap <space> zz
 
 " highlight next
 nnoremap <silent> n n:call HLNext(0.4)<cr>
@@ -173,7 +173,7 @@ imap <C-e> <ESC>A
 
 nmap <silent> ,/ :nohlsearch<CR>
 
-" map ; to : so you can press ;w not <shift>:<unshift>w 
+" map ; to : so you can press ;w not <shift>:<unshift>w
 nnoremap ; :
 
 " swap tick and backtick.  backtick command is more useful but tick is easier
@@ -184,7 +184,7 @@ nnoremap ` '
 vmap Q gq
 nmap Q gqap
 
-" forgot to SU?? can't write a file?? use w!! 
+" forgot to SU?? can't write a file?? use w!!
 cmap w!! w !sudo tee % >/dev/null
 
 "Rebuild cscope
@@ -198,9 +198,9 @@ let g:pop = '<C-[>'     " pop a ctags tag
 fun! VimrcSetupCCTree()
     "prefer cctree.out over cscope.out
 
-    if filereadable('cctree.out') 
+    if filereadable('cctree.out')
 	CCTreeLoadXRefDBFromDisk cctree.out
-    elseif filereadable('cscope.out') 
+    elseif filereadable('cscope.out')
 	CCTreeLoadDB cscope.out
     endif
 
@@ -220,7 +220,7 @@ autocmd VimEnter * call VimrcSetupCCTree()
 " autocmd VimEnter * TlistToggle
 "autocmd VimEnter * TagbarToggle
 " nmap <F8> :TagbarToggle<CR>
-" let g:Tlist_Use_Right_Window = 1  
+" let g:Tlist_Use_Right_Window = 1
 
 "autocmd VimEnter * NERDTree
 
