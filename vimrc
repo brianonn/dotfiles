@@ -85,9 +85,9 @@ if has('autocmd')
     autocmd FileType c,cc,cpp,h set cindent
     autocmd FileType c,cc,cpp,h colorscheme  camo
     autocmd FileType ruby,python colorscheme camo
-    autocmd FileType python set expandtab
-    autocmd FileType verilog set expandtab tabstop=4 softtabstop=2 shiftwidth=2
-    autocmd FileType vhdl    set expandtab tabstop=4 softtabstop=2 shiftwidth=2
+    autocmd FileType python    set expandtab
+    autocmd FileType verilog   set expandtab tabstop=4 softtabstop=2 shiftwidth=2
+    autocmd FileType vhdl      set expandtab tabstop=4 softtabstop=2 shiftwidth=2
     autocmd FileType ChangeLog set tw=80
     autocmd Filetype gitcommit setlocal spell textwidth=72
     autocmd FileType yaml,yml  set expandtab tabstop=2 softtabstop=2 shiftwidth=2
