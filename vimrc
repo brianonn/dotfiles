@@ -92,7 +92,6 @@ if has('autocmd')
     autocmd Filetype gitcommit setlocal spell textwidth=72
 endif
 
-let mapleader=','
 " center the line
 nmap <space> zz 
 
@@ -122,6 +121,8 @@ function! HLNext (blinktime)
         exec 'sleep ' . float2nr(a:blinktime / (2*blinks) * 1000) . 'm'
     endfor
 endfunction
+
+let mapleader=','
 
 " Quickly edit/reload the vimrc file
 nmap <silent> <leader>ev :e $MYVIMRC<CR>
@@ -301,4 +302,3 @@ endif
 "paste code use :IX or :SP or :start,end SP. URL is in clipbpard register +
 command! -range=% SP  silent execute <line1> . "," . <line2> . "w !curl -F 'sprunge=<-' http://sprunge.us | tr -d '\\n' | xclip -selection clipboard"
 command! -range=% IX  silent execute <line1> . "," . <line2> . "w !curl -F 'f:1=<-' ix.io | tr -d '\\n' | xclip -selection clipboard"
-
