@@ -251,3 +251,7 @@ alias utctime='date -u "+%F %T %Z"'
 
 alias qpdfview='qpdfview --unique'
 alias qp='qpdfview --unique'
+
+# pretty print json files with python
+alias jsp='python -mjson.tool'
+alias size='du -skh'
