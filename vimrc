@@ -18,10 +18,39 @@ set ruler
 set hls
 set incsearch
 set number
-set title
 set nobackup
 set enc=utf-8
 set modeline
+
+let &titlestring = "vim@" . hostname() . "%(\ %M%)%(\ \(%F\)%)%a"
+if &term == "screen" || &term == "screen-256color"
+    set t_ts=k
+    set t_fs=\
+endif
+if &term == "screen" || &term == "xterm" || &term == "tmux"
+    set title
+endif
+
+set statusline=%F%m%r%h%w\ %y\ [%{&ff}]\ %l,%v\ [\%03.3b\ 0x\%02.2B]\ %p%%\ (%L)
+
+" turn ruler on
+set ruler
+set rulerformat=%15(%c%V\ %p%%%)
+
+" display partially-typed commands in the status line
+set showcmd
+
+" make sure status line is always visible
+set laststatus=2
+
+" make command line one lines high
+set ch=1
+
+" leave some space at the bottom
+set scrolloff=2
+
+" Use colours that work well on a dark background
+set background=dark
 
 "TODO: install vundle plugin manager
 "ctrlp - fuzzt file finder like sublime
