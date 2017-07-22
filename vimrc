@@ -90,7 +90,10 @@ if has('autocmd')
     autocmd FileType vhdl    set expandtab tabstop=4 softtabstop=2 shiftwidth=2
     autocmd FileType ChangeLog set tw=80
     autocmd Filetype gitcommit setlocal spell textwidth=72
+    autocmd FileType yaml,yml  set expandtab tabstop=2 softtabstop=2 shiftwidth=2
 endif
+
+let g:ansible_options = {'ignore_blank_lines': 0, 'documentation_mapping': '<C-K>'}
 
 " center the line
 nmap <space> zz
