@@ -1,41 +1,35 @@
 # -*- mode: sh; c-basic-offset: 4; tab-width: 4; indent-tabs-mode: nil -*-
 # vi: set ft=sh shiftwidth=4 tabstop=4 expandtab :
 
-# File: ~/.bash_profile 
+# File: ~/.bash_profile
 
-# source ~/.profile, if available
-#if [[ -r ~/.profile ]]; then
-#      . ~/.profile
-#fi
+# When: this file is sourced for all login shells.  If it exists,
+#      then .profile is not run, so we must source .profile here to
+#      get the shell environment variables
 
-SSH_ENV="$HOME/.ssh/environment"
+# ATTENTION:
+#      put all environment variables in $HOME/.profile so
+#      a /bin/sh (even a remote /bin/sh) will get it too
 
-function start_agent {
-    echo "Initialising new SSH agent..."
-    /bin/rm -rf "${SSH_ENV}"
-    /usr/bin/ssh-agent | sed 's/^echo/#echo/' > "${SSH_ENV}"
-    echo succeeded
-    chmod 600 "${SSH_ENV}"
-    . "${SSH_ENV}" > /dev/null
-    /usr/bin/ssh-add;
-}
+# source $HOME/.profile, if available, to get all the environment
+# variables that can be used across all shells
 
-# Source SSH settings, if applicable
+#echo I am the bash_profile
 
-if [ -f "${SSH_ENV}" ]; then
-    . "${SSH_ENV}" > /dev/null
-    # does this work under cygwin ?
-    kill -0 "${SSH_AGENT_PID}" 2>-
-    ps -ef | grep ${SSH_AGENT_PID} | grep ssh-agent$ > /dev/null || {
-        start_agent;
-    }
-else
-    start_agent;
+profile="$HOME/.profile"
+if [[ -r "$profile" ]]; then
+      source "$profile"
 fi
 
-export QSYS_ROOTDIR="$HOME/altera_lite/15.1/quartus/sopc_builder/bin"
-export ALTERAOCLSDKROOT="$HOME/altera_lite/15.1/hld"
+## Put bash specific login items here
+##
+
+# Golang Version Manager
+# gvm list
+# gvm use <version>
+[[ -s "$HOME/.gvm/scripts/gvm" ]] && source "$HOME/.gvm/scripts/gvm"
+
+## End
 
 # are we interactive, source .bashrc
-case $- in *i*) source $HOME/.bashrc;; esac 
-
+case $- in *i*) source $HOME/.bashrc;; esac

@@ -1,5 +1,8 @@
 # -*- mode: gitignore; -*-
 
+# Apple
+.AppleDouble
+
 # Ignore tag file and indexes created by etags, ctags, gtags, cscope, cctree
 TAGS
 CTAGS
@@ -16,8 +19,9 @@ GPATH
 GSYMS
 cscope.files
 cscope.out
-cscope.in.out
-cscope.po.out
+cscope.out.*
+cscope.in.*
+cscope.po.*
 cctree.*
 
 # Emacs

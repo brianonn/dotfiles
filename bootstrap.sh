@@ -1,12 +1,11 @@
 #!/bin/sh
 
-
-##
-## ALL THIS COULD PROBABLY BE DONE
-## BETTER WITH PUPPET
-##
+# bootstrap your dotfiles
 
 SAVEDIR="$HOME/.dotfiles_orig"
+EXCLUDES= \
+        "*.template" \
+        "bootstrap.sh"
 
 RM=/bin/rm
 GIT=/usr/bin/git

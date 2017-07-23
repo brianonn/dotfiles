@@ -156,36 +156,3 @@ fi
 if [ -f /etc/bash_completion ] && ! shopt -oq posix; then
     . /etc/bash_completion
 fi
-
-LOCATE_PATH=
-for i in /home/brian/.mlocate/*.db; do 
-    LOCATE_PATH="$LOCATE_PATH:$i"
-done
-export LOCATE_PATH
-function findroms() {  mlocate -i --regex "roms.*$1"; }
-
-# include arm tools for cross compiling arm source for embedded devices
-export PATH="$PATH":$HOME/arm/tools:$HOME/arm/tools/gcc-arm-none-eabi-4_7-2013q1/bin
-export PATH="$PATH":/opt/WebStorm-135.547/bin
-export KIGITHUB=https://github.com/KiCad
-
-export PHP_IDE_CONFIG='servername=localhost'
-export NODE_PATH=/usr/local/lib/node_modules
-export NVM_DIR="/home/brian/.nvm"
-[ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"  # This loads nvm
-
-export DART_SDK="/usr/lib/dart"
-[ -d $DART_SDK ] && export PATH="${DART_SDK}/bin:$PATH"
-
-export QSYS_ROOTDIR="/home/brian/altera_lite/15.1/quartus/sopc_builder/bin"
-export ALTERAOCLSDKROOT="/home/brian/altera_lite/15.1/hld"
-
-export LESS="-f -S -X -R -F" LESSOPEN="||~/.lessfilter %s"
- 
-export DOCKER_HOST="0.0.0.0:4243"  # this depends on DOCKER_OPTS set in /etc/default/docker
-
-# Golang Version Manager 
-# gvm list
-# gvm use <version>
-[[ -s "/home/brian/.gvm/scripts/gvm" ]] && source "/home/brian/.gvm/scripts/gvm"
-
