@@ -56,8 +56,15 @@ done
 
 ## setup eslint
 
+## setup vim pathogen modules
+#
+VIMBUNDLEDIR="$HOME/.vim/bundle"
+[[ ! -d "$VIMBUNDLEDIR" ]] && mkdir "$VIMBUNDLEDIR"
+git submodule init
+git submodule update
 
 ## set up yasnippets for emacs
+#
 GITHUB="https://github.com/brianonn/yasnippet-snippets.git"
 YASSNIPPETDIR="~/.emacs.d/snippets"
 $RM -fr $YASSNIPPETDIR
