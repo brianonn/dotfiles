@@ -62,3 +62,7 @@ GITHUB="https://github.com/brianonn/yasnippet-snippets.git"
 YASSNIPPETDIR="~/.emacs.d/snippets"
 $RM -fr $YASSNIPPETDIR
 git clone $GITHUB $YASSNIPPETDIR
+
+## setup local nemo actions
+mkdir -p ~/.local/share/nemo/actions 
+/bin/cp -pr --remove-destination local/share/nemo/actions/* ~/.local/share/nemo/actions/
