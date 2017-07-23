@@ -92,7 +92,7 @@ if [ "$color_prompt" = yes ]; then
     #PS1='${debian_chroot:+($debian_chroot)}\[\033[01;32m\]\u@\h\[\033[00m\][\[\033[01;34m\]\w\[\033[00m\]]\$ '
     #PS1="${debian_chroot:+($debian_chroot)}[\[\033[32m\]\w\[\033[00m]\n\[\033[1;36m\]\u\[\033[1;33m\]-> \[\033[00m\]"
 
-    # A two-line colored Bash prompt (PS1) with Git branch 
+    # A two-line colored Bash prompt (PS1) with Git branch
 
 
 
@@ -107,7 +107,7 @@ if [ "$color_prompt" = yes ]; then
         PS_GIT_BRANCH="git:${ref#refs/heads/} "
     }
     PROMPT_COMMAND=parse_git_branch
-    PS_INFO="$GREEN\u@\h$RESET:$BLUE\w" 
+    PS_INFO="$GREEN\u@\h$RESET:$BLUE\w"
     PS_INFO=""
     PS_GIT="$BOLD$ORANGE\$PS_GIT_BRANCH$RESET"
     PS_TIME="\[\033[\$((COLUMNS-10))G\] $RED[\t]"
@@ -117,7 +117,7 @@ if [ "$color_prompt" = yes ]; then
 ## Left and Right sides of the path string
   #L="ÃÂ«" R="ÃÂ»"
   #L="<<" R=">>"
-  #R= L= 
+  #R= L=
   L="[" R="]"
 
   #export PS1="\n${UID_COLOR}\342\226\210\342\226\210 \u${WHT} (\h) ${ORANGE}${L}${PS_GIT}${ORANGE} \w ${R}\n${CYAN}\342\226\210\342\226\210 [\!] ${P}${RESET}${WHT} "
