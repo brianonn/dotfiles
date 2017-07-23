@@ -27,13 +27,13 @@ dir=`eval $dir`
 # templates
 for infile in $dir/*.template; do
     outfile=$(basename "$infile" ".template")
-    $rm -f "$outfile"
+    $RM -f "$outfile"
     # TODO: read the username and email from the user
     NAME="Joe Smith"
     EMAIL="joe@example.com"
     sed < "$infile" > "$outfile" \
-        -e 's/${NAME}/'$NAME'/'\
-        -e 's/${EMAIL}/'$EMAIL'/'
+        -e 's/\${NAME}/'$NAME'/' \
+        -e 's/\${EMAIL}/'$EMAIL'/'
 done
 
 #make symlinks
@@ -58,7 +58,7 @@ done
 
 
 ## set up yasnippets for emacs
-GITHUB="git@github.com:brianonn/yasnippet-snippets.git"
+GITHUB="https://github.com/brianonn/yasnippet-snippets.git"
 YASSNIPPETDIR="~/.emacs.d/snippets"
 $RM -fr $YASSNIPPETDIR
 git clone $GITHUB $YASSNIPPETDIR

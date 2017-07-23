@@ -284,6 +284,7 @@
     (setq ibuffer-saved-filter-groups
         '(("home"
               ("Web Dev" (or (mode . html-mode)
+                             (mode . vue-mode)
                              (mode . web-mode)
                              (mode . css-mode)
                              (mode . jade-mode)
@@ -425,6 +426,8 @@
 ;; Handy key definition
 (define-key global-map "\M-S-q" 'unfill-paragraph)
 
+
+(add-hook 'yaml-mode-hook (lambda () (setq yaml-indent-offset 2)))
 
 ;; ;; ========== ORIGAMI FOLDING =============
 ;; ;; hooks with fci-mode to disable it when folding
@@ -607,9 +610,9 @@ With a prefix ARG, it will widen the scope to the whole buffer."
 ;; eslint was annoying to make it work well
 ;; I'll stick with gjslint until I need support
 ;; for React, jsx, or AirBnB mode
-(flycheck-add-mode 'javascript-gjslint 'web-mode)
+;; (flycheck-add-mode 'javascript-gjslint 'web-mode)
 ;;(flycheck-add-mode 'javascript-gjslint 'js2-mode)
-(flycheck-add-mode 'javascript-gjslint 'js3-mode)
+;; (flycheck-add-mode 'javascript-gjslint 'js2-mode)
 
 ;; customize flycheck temp file prefix
 (setq-default flycheck-temp-prefix ".flycheck")
@@ -664,6 +667,15 @@ With a prefix ARG, it will widen the scope to the whole buffer."
 ;; yellow is good on a dark background
 (set-face-foreground 'minibuffer-prompt "OrangeRed") ;
 
+
+;; exclude directories from grep
+(eval-after-load 'grep
+    '(progn
+         (add-to-list 'grep-find-ignored-directories "auto")
+         (add-to-list 'grep-find-ignored-directories "elpa")
+         (add-to-list 'grep-find-ignored-directories "node_modules")
+         (add-to-list 'grep-find-ignored-directories "build")))
+(add-hook 'grep-mode-hook (lambda () (toggle-truncate-lines 1)))
 
 ;; C/C++ programming
 (require 'cc-mode)
@@ -783,9 +795,8 @@ Use \\[jump-to-register] c for coding, and \\[jump-to-register] d for debug."
 ;; Javascript/CSS/SASS/HTML, livereload and in-browser debugging
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-;;(require 'js2-mode)
 (require 'js2-refactor)
-(require 'js3-mode)               ;js3-mode supports node, AMD and CommonJS best
+(require 'js2-mode)               ; apparently js3-mode supports node, AMD and CommonJS best but I had no luck
 (require 'web-mode)
 (require 'css-mode)
 (require 'sass-mode)
@@ -823,7 +834,7 @@ Use \\[jump-to-register] c for coding, and \\[jump-to-register] d for debug."
     (interactive)
     (delete-process "Tern"))
 
-(add-to-list 'auto-mode-alist `(,(rx ".js" string-end) . js3-mode))
+(add-to-list 'auto-mode-alist `(,(rx ".js" string-end) . web-mode))
 (add-to-list 'auto-mode-alist `(,(rx ".jsx" string-end) . web-mode))
 (add-to-list 'auto-mode-alist `(,(rx ".vue" string-end) . web-mode))
 (add-to-list 'auto-mode-alist `(,(rx ".htm" string-end) . web-mode))
@@ -836,8 +847,8 @@ Use \\[jump-to-register] c for coding, and \\[jump-to-register] d for debug."
 (add-to-list 'auto-mode-alist '("\\.mustache\\'" . web-mode))
 (add-to-list 'auto-mode-alist '("\\.djhtml\\'" . web-mode))
 
-;;(add-hook 'js2-mode-hook 'my/mode-common-hook)
-(add-hook 'js3-mode-hook 'my/mode-common-hook)
+(add-hook 'js2-mode-hook 'my/mode-common-hook)
+;;(add-hook 'js3-mode-hook 'my/mode-common-hook)
 (add-hook 'web-mode-hook 'my/mode-common-hook)
 (add-hook 'css-mode-hook 'my/mode-common-hook)
 (add-hook 'sass-mode-hook 'my/mode-common-hook)
@@ -987,7 +998,6 @@ directory to make multiple eshell windows easier."
 ;  'custom-prompt-customize-unsaved-options)
 
 ;; allow narrow and widen
-(put 'narrow-to-region 'disabled nil)
 (global-set-key (kbd "C-x n r") 'narrow-to-region)
 (global-set-key (kbd "C-x n f") 'narrow-to-defun)
 
@@ -1029,8 +1039,26 @@ directory to make multiple eshell windows easier."
 (global-set-key (kbd "C-<down>") 'windmove-down)
 
 (global-set-key (kbd "C-x g") 'magit-status)
-
 (load "disable-trackpad" t)
+
+(require 'desktop)
+(desktop-save-mode 1)
+(setq desktop-path (list "." "~" "~/.emacs.d/"))
+(setq desktop-auto-save-enable t)
+(setq desktop-auto-save-timeout 10)
+(setq desktop-restore-eager 5)
+(setq history-length 250)
+(add-to-list 'desktop-globals-to-save 'file-name-history)
+(setq desktop-buffers-not-to-save
+    (concat "\\("
+        "^nn\\.a[0-9]+\\|\\.log\\|(ftp)\\|^tags\\|^TAGS\\|^ETAGS"
+        "\\|\\.emacs.*\\|\\.diary\\|\\.newsrc-dribble\\|\\.bbdb"
+        "\\)$"))
+(add-to-list 'desktop-modes-not-to-save 'dired-mode)
+(add-to-list 'desktop-modes-not-to-save 'Info-mode)
+(add-to-list 'desktop-modes-not-to-save 'Shell-mode)
+(add-to-list 'desktop-modes-not-to-save 'info-lookup-mode)
+(add-to-list 'desktop-modes-not-to-save 'fundamental-mode)
 
 (load "server")
 (if (not(server-running-p))
