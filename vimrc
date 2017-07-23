@@ -27,7 +27,7 @@ if &term == "screen" || &term == "screen-256color"
     set t_ts=k
     set t_fs=\
 endif
-if &term == "screen" || &term == "xterm" || &term == "tmux"
+if &term == "screen" || &term == "screen-256color" || &term == "xterm"
     set title
 endif
 
