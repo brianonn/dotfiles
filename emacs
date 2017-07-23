@@ -4,6 +4,8 @@
 ;;; Commentary:
 ;;; Change Log:
 
+;;; TODO : change all (global-set-key ... ) to (define-key (current-global-map) key cmd)
+
 ;;; Code:
 
 (prefer-coding-system 'utf-8)
@@ -37,8 +39,10 @@
              fill-column-indicator
              flycheck
              go-mode golint go-scratch
+             htmlize
              ibuffer
              iedit
+             impatient-mode
              ivy counsel
              jade-mode
              js2-mode js2-refactor
@@ -53,6 +57,7 @@
              nodejs-repl
              php-mode php+-mode
              rust rust-mode
+             simple-httpd
              smartparens
              smart-mode-line
              smex
@@ -60,6 +65,7 @@
              sublimity
              tern tern-auto-complete
              use-package
+             vue-mode vue-html
              web-mode
              xcscope
              yasnippet)
@@ -130,7 +136,9 @@
 ;; ========== MARKDOWN SUPPORT ===========
 (require 'markdown-mode)
 (require 'pandoc-mode)
+(add-to-list 'auto-mode-alist `(,(rx ".md" string-end) . gfm-mode))
 (add-hook 'markdown-mode-hook 'pandoc-mode)
+(setq markdown-command "pandoc -c ~/.emacs.d/github-pandoc.css --from markdown_github -t html5 --mathjax --highlight-style pygments --standalone")
 
 
 ;; ;; ========== AUTO-DIM BUFFERS WITHOUT FOCUS ===========
@@ -154,7 +162,7 @@
 (require 'ivy)
 (ivy-mode t)
 (setq ivy-use-virtual-buffers t)
-(global-set-key (kbd "C-s") 'swiper)
+(define-key global-map (kbd "C-s") 'swiper)
 (global-set-key (kbd "C-c C-r") 'ivy-resume)
 (global-set-key (kbd "<f6>") 'ivy-resume)
 (global-set-key (kbd "M-x") 'counsel-M-x)
@@ -181,11 +189,40 @@
 (define-key dired-mode-map "k" 'dired-previous-line)
 (define-key dired-mode-map "S" 'dired-do-relsymlink)
 (define-key dired-mode-map "i" 'ido-find-file)
+
+;; create a file with capital 'C'
+;; Copy files with lowercase 'c'
+(eval-after-load 'dired
+  '(progn
+     (define-key dired-mode-map (kbd "C") 'my/dired-create-file)
+     (define-key dired-mode-map (kbd "c") 'dired-do-copy)
+     (defun my/dired-create-file (file)
+       "Create a file called FILE. If FILE already exists, signal an error."
+       (interactive
+        (list (read-file-name "Create file: " (dired-current-directory))))
+       (let* ((expanded (expand-file-name file))
+              (try expanded)
+              (dir (directory-file-name (file-name-directory expanded)))
+              new)
+         (if (file-exists-p expanded)
+             (error "Cannot create file %s: file exists" expanded))
+         ;; Find the topmost nonexistent parent dir (variable `new')
+         (while (and try (not (file-exists-p try)) (not (equal new try)))
+           (setq new try
+                 try (directory-file-name (file-name-directory try))))
+         (when (not (file-exists-p dir))
+           (make-directory dir t))
+         (write-region "" nil expanded t)
+         (when new
+           (dired-add-file new)
+           (dired-move-to-filename))))))
+
+;; [f8] starts neotree in the current directory
 (defun my/dired-neotree-set-root ()
+    "Start neotree in the current dired directory."
     (interactive)
     (save-selected-window
         (neo-global--open-dir (dired-current-directory))))
-
 (define-key dired-mode-map [f8] 'my/dired-neotree-set-root)
 
 
@@ -248,11 +285,14 @@
         '(("home"
               ("Web Dev" (or (mode . html-mode)
                              (mode . web-mode)
+                             (mode . css-mode)
                              (mode . jade-mode)
                              (mode . json-mode)
                              (mode . js-mode)
                              (mode . js2-mode)
                              (mode . js3-mode)))
+              ("Solidity" (mode . solidity-mode))
+              ("Magit" (name . "\*magit"))
               ("emacs-config" (or (filename . "\.emacs\.d")
                                   (filename . "emacs")
                                   (filename . "\.emacs")
@@ -260,7 +300,6 @@
               ("Viacoin13" (filename . "/viacoin13.*/"))
               ("Viacoin" (filename . "/viacoin.*/"))
               ("Bitcoin" (filename . "/bitcoin.*/"))
-              ("Magit" (name . "\*magit"))
               ("Dired"  (mode . dired-mode))
               ("Org" (or (mode . org-mode)
                          (filename . "OrgMode")
@@ -372,6 +411,19 @@
         (lambda ()
             (fci-mode 1)))
     (global-fci-mode 0))
+
+;; unfill paragraph - useful for markdown docs
+;;
+;; Stefan Monnier <foo at acm.org>. It is the opposite of fill-paragraph
+(defun unfill-paragraph (&optional region)
+    "Takes a multi-line paragraph and makes it into a single line of text."
+    (interactive (progn (barf-if-buffer-read-only) '(t)))
+    (let ((fill-column (point-max))
+             ;; This would override `fill-column' if it's an integer.
+             (emacs-lisp-docstring-fill-column t))
+        (fill-paragraph nil region)))
+;; Handy key definition
+(define-key global-map "\M-S-q" 'unfill-paragraph)
 
 
 ;; ;; ========== ORIGAMI FOLDING =============
@@ -581,6 +633,7 @@ With a prefix ARG, it will widen the scope to the whole buffer."
 
 (require 'company)
 (require 'company-custom)
+(setq company-dabbrev-downcase nil)     ; dont downcase inserted autocompletions
 
 ;;;;;;;;;;;;;
 ;;;;;;;;;;;;;
@@ -655,6 +708,12 @@ With a prefix ARG, it will widen the scope to the whole buffer."
     (semantic-stickyfunc-mode t))
 (add-hook 'c-mode-common-hook 'my/mode-common-hook)
 
+(defun my-inhibit-semantic-p ()
+    (or (not (equal major-mode 'c-mode))
+        (not (equal major-mode 'python-mode))))
+
+(with-eval-after-load 'semantic
+      (add-to-list 'semantic-inhibit-functions #'my-inhibit-semantic-p))
 
 ;; personal preferences
 (c-set-offset 'substatement-open 0)
@@ -766,11 +825,11 @@ Use \\[jump-to-register] c for coding, and \\[jump-to-register] d for debug."
 
 (add-to-list 'auto-mode-alist `(,(rx ".js" string-end) . js3-mode))
 (add-to-list 'auto-mode-alist `(,(rx ".jsx" string-end) . web-mode))
+(add-to-list 'auto-mode-alist `(,(rx ".vue" string-end) . web-mode))
 (add-to-list 'auto-mode-alist `(,(rx ".htm" string-end) . web-mode))
 (add-to-list 'auto-mode-alist `(,(rx ".html" string-end) . web-mode))
 (add-to-list 'auto-mode-alist `(,(rx ".phtml" string-end) . web-mode))
 (add-to-list 'auto-mode-alist `(,(rx ".php" string-end) . web-mode))
-(add-to-list 'auto-mode-alist `(,(rx ".phtml" string-end) . web-mode))
 (add-to-list 'auto-mode-alist '("\\.[agj]sp\\'" . web-mode))
 (add-to-list 'auto-mode-alist '("\\.as[cp]x\\'" . web-mode))
 (add-to-list 'auto-mode-alist '("\\.erb\\'" . web-mode))
@@ -969,7 +1028,13 @@ directory to make multiple eshell windows easier."
 (global-set-key (kbd "C-<up>") 'windmove-up)
 (global-set-key (kbd "C-<down>") 'windmove-down)
 
-(load "server")
-(unless (server-running-p) (server-start))
+(global-set-key (kbd "C-x g") 'magit-status)
 
-;; end
+(load "disable-trackpad" t)
+
+(load "server")
+(if (not(server-running-p))
+    (server-start))
+
+(provide 'emacs)
+;;; emacs ends here
