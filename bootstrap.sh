@@ -8,7 +8,7 @@ SYMLINK_EXCLUDES="local | *.template | bootstrap.sh | TODO | *.md"
 RM=/bin/rm
 GIT=/usr/bin/git
 
-[[ ! -x "$GIT" ]] && echo "run 'sudo apt-get install git' first"
+[ ! -x "$GIT" ] && echo "run 'sudo apt-get install git' first"
 
 echo "This will bootstrap a new system environment, install necessary files and tools"
 echo "and create symlinks to your dotfiles in the home directory of this user"
@@ -24,6 +24,7 @@ dir=`eval $dir`
 
 # templates
 for infile in $dir/*.template; do
+    [ ! -e "$infile" ] && continue
     outfile=$(basename "$infile" ".template")
     $RM -f "$outfile"
     # TODO: read the username and email from the user
@@ -39,7 +40,7 @@ done
 for path in $dir/*; do
     filename=`basename "$path"`
     case "$filename" in
-    ${SYMLINK_EXCLUDES})
+    *~|*.tmp|local|TODO|*.md|bootstrap.sh)
         echo "Skipping excluded file or directory: $filename"
         continue
         ;;
@@ -60,14 +61,14 @@ done
 ## setup vim pathogen modules
 #
 VIMBUNDLEDIR="$HOME/.vim/bundle"
-[[ ! -d "$VIMBUNDLEDIR" ]] && mkdir "$VIMBUNDLEDIR"
+[ ! -d "$VIMBUNDLEDIR" ] && mkdir "$VIMBUNDLEDIR"
 git submodule init
 git submodule update
 
 ## set up yasnippets for emacs
 #
 GITHUB="https://github.com/brianonn/yasnippet-snippets.git"
-YASSNIPPETDIR="~/.emacs.d/snippets"
+YASSNIPPETDIR="$HOME/.emacs.d/snippets"
 $RM -fr $YASSNIPPETDIR
 git clone $GITHUB $YASSNIPPETDIR
 
