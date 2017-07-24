@@ -3,9 +3,7 @@
 # bootstrap your dotfiles
 
 SAVEDIR="$HOME/.dotfiles_orig"
-EXCLUDES= \
-        "*.template" \
-        "bootstrap.sh"
+SYMLINK_EXCLUDES="local | *.template | bootstrap.sh | TODO | *.md"
 
 RM=/bin/rm
 GIT=/usr/bin/git
@@ -37,19 +35,22 @@ for infile in $dir/*.template; do
 done
 
 #make symlinks
+[ ! -e "$SAVEDIR" ] && mkdir -p "$SAVEDIR"
 for path in $dir/*; do
     filename=`basename "$path"`
     case "$filename" in
-    *.template|bootstrap.sh)
+    ${SYMLINK_EXCLUDES})
+        echo "Skipping excluded file or directory: $filename"
         continue
         ;;
     *)
         dotfile="$HOME/.$filename"
-        if [ -e "$dotfile" ]; then
-            [ -e "$SAVEDIR" ] || mkdir -p "$SAVEDIR"
+        if [ ! -L "$dotfile" ] ; then
             mv "$dotfile" "$SAVEDIR"
+            ln -s "$path" "$dotfile"
+        else
+            echo "skipping already linked file: $dotfile"
         fi
-        ln -s "$path" "$dotfile"
         ;;
     esac
 done
@@ -71,5 +72,5 @@ $RM -fr $YASSNIPPETDIR
 git clone $GITHUB $YASSNIPPETDIR
 
 ## setup local nemo actions
-mkdir -p ~/.local/share/nemo/actions 
-/bin/cp -pr --remove-destination local/share/nemo/actions/* ~/.local/share/nemo/actions/
+mkdir -p ~/.local/share/nemo/actions 2>/dev/null 1>&2
+/bin/cp -pr --remove-destination local/share/nemo/actions/* ~/.local/share/nemo/actions/ 2>/dev/null 1>&2
