@@ -18,11 +18,24 @@ set ruler
 set hls
 set incsearch
 set number
-set nobackup
 set enc=utf-8
 set modeline
 
-let &titlestring = "vim@" . hostname() . "%(\ %M%)%(\ \(%F\)%)%a"
+set backup
+let backupdir = $HOME . "/.vim/autobackups"
+if !isdirectory(backupdir)
+    call mkdir(backupdir)
+endif
+let &backupdir = backupdir
+augroup prewrites
+    autocmd BufWritePre,FileWritePre * let &bex = "-" . strftime("%Y%m%d-%H%M%S") . "~"
+augroup end
+
+autocmd BufEnter * let &titlestring = "vim@" . hostname() . "%(\ %M%)%(\ \(%F\)%)%a"
+if exists('$TMUX')
+    autocmd VimLeave * call system("tmux setw automatic-rename")
+endif
+
 if &term == "screen" || &term == "screen-256color"
     set t_ts=k
     set t_fs=\
@@ -74,6 +87,15 @@ filetype plugin indent on
 call pathogen#infect()
 call pathogen#helptags()
 
+" syntax hylighting if there are enough colors
+fun! SetColorScheme (theScheme)
+    if &t_Co > 2 || has('gui_running')
+    syntax on
+    execute 'colorscheme ' . a:theScheme
+    endif
+endfun
+call SetColorScheme("torte")
+
 if has('autocmd')
 
     " Remove all autocommands first so they don't duplicate when sourcing this file
@@ -83,8 +105,8 @@ if has('autocmd')
     autocmd BufRead,BufNewFile *.vhd    setfiletype vhdl
 
     autocmd FileType c,cc,cpp,h set cindent
-    autocmd FileType c,cc,cpp,h colorscheme  camo
-    autocmd FileType ruby,python colorscheme camo
+    autocmd FileType c,cc,cpp,h call SetColorScheme("antares")
+    autocmd FileType ruby,python call SetColorScheme("camo")
     autocmd FileType python    set expandtab
     autocmd FileType verilog   set expandtab tabstop=4 softtabstop=2 shiftwidth=2
     autocmd FileType vhdl      set expandtab tabstop=4 softtabstop=2 shiftwidth=2
@@ -147,12 +169,6 @@ else
   endif
 endif
 
-" syntax hylighting if there are enough colors
-if &t_Co > 2 || has('gui_running')
-  syntax on
-  colorscheme camo
-endif
-
 "-----------------------------------------------------------
 " scroll horizontally     {{{2
 "-----------------------------------------------------------
@@ -175,6 +191,13 @@ map <C-e> <ESC>A
 imap <C-e> <ESC>A
 
 nmap <silent> ,/ :nohlsearch<CR>
+
+" stop J from jumoing to the end of the joined text, by setting a mark
+nnoremap J mzJ`z
+
+" center after next search
+nnoremap n nzz
+nnoremap } }zz
 
 " map ; to : so you can press ;w not <shift>:<unshift>w
 nnoremap ; :
@@ -240,9 +263,16 @@ autocmd FileType php set omnifunc=phpcomplete#CompletePHP
 " " autocmd FileType c set omnifunc=ccomplete#CompleteCpp
 
 fun! StripTrailingWhitespace()
+    " only strip when b:noStripWhitespace is not set
+    if exists('b:noStripWhitespace')
+        return
+    endif
+    :%s/\s\+$//e | %s/\r$//e
 endfun
-"do something before writing a file
-"autocmd BufWritePre * call StripTrailingWhitespace()
+augroup prewrites
+        autocmd BufWritePre,FileWritePre * call StripTrailingWhitespace()
+        autocmd FileType jade,md,markdown let b:noStripWhitespace = 1
+augroup end
 
 " use :set list  to turn on (use :set nolist to turn off)
 set listchars=eol:$,tab:>.,trail:.,extends:>,precedes:<
