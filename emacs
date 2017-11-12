@@ -237,6 +237,8 @@
 
 ;; ========== ORG MODE ===========================
 
+(add-to-list 'auto-mode-alist '("\\.org\\'" . org-mode))
+(setq-default org-directory "~/Org")
 (org-babel-do-load-languages
   'org-babel-load-languages
   '(
