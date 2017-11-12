@@ -224,6 +224,7 @@ alias findgrep='find . -type f \( -name \*.git -o -name .snaphot -o -name .bak -
 
 # helpful docker aliases
 alias dclr='_i=$(docker ps -qa);[ ! -z "$_i" ] && docker rm $_i; _i=$(docker images -q --filter dangling=true); [ ! -z "$_i" ] && docker rmi $_i'
+alias vclr='docker volume rm `docker volume ls -q -f dangling=true`'
 alias   d1="docker ps | awk 'NR==2 { print \$1 }'"
 alias  dip="docker inspect --format='{{.NetworkSettings.IPAddress}}' \`d1\`"
 
