@@ -662,10 +662,17 @@ With a prefix ARG, it will widen the scope to the whole buffer."
 ;;  (add-to-list 'ac-sources 'ac-source-c-headers)
     )
 
+(defun my/java-style ()
+    "Set my Java style."
+    (my/one-true-style)
+    (setq c-basic-offset 4
+        tab-width 4))
+
 (add-hook 'c-mode-hook 'my/one-true-style)
 (add-hook 'c++-mode-hook 'my/one-true-style)
 (add-hook 'objc-mode-hook 'my/one-true-style)
 (add-hook 'php-mode-hook 'my/one-true-style)
+(add-hook 'java-mode-hook 'my/java-style)
 
 ;; this is better done as a per-project directory variable
 ;; but I could not get it to work
