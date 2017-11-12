@@ -140,6 +140,15 @@
 (add-hook 'markdown-mode-hook 'pandoc-mode)
 (setq markdown-command "pandoc -c ~/.emacs.d/github-pandoc.css --from markdown_github -t html5 --mathjax --highlight-style pygments --standalone")
 
+;; ========== DEFT in ORG SUPPORT ===========
+;; http://jblevins.org/projects/deft/
+(when (require 'deft nil 'noerror)
+    (setq
+        deft-extension "org"
+        deft-directory "~/Org/deft/"
+        deft-text-mode 'org-mode)
+    (global-set-key (kbd "<f9>") 'deft))
+
 
 ;; ;; ========== AUTO-DIM BUFFERS WITHOUT FOCUS ===========
 ;; (require 'auto-dim-other-buffers)
