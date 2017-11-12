@@ -257,3 +257,4 @@ alias qp='qpdfview --unique'
 # pretty print json files with python
 alias jsp='python -mjson.tool'
 alias size='du -skh'
+alias ipy='ipython notebook --pylab inline'
