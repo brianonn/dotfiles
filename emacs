@@ -1084,6 +1084,22 @@ directory to make multiple eshell windows easier."
 (add-to-list 'desktop-modes-not-to-save 'info-lookup-mode)
 (add-to-list 'desktop-modes-not-to-save 'fundamental-mode)
 
+(setq-default buffer-quit-function
+   #'(lambda ()
+       (if (yes-or-no-p "Are you trying to close all windows? ")
+           (delete-other-windows))))
+
+(defun my-yes-or-mumble-p (prompt)
+   "PROMPT user with a yes-or-no question, but only test for yes."
+    (if (string= "yes"
+          (downcase
+            (read-from-minibuffer
+              (concat prompt "(yes or no) "))))
+        t
+        nil))
+
+(defalias 'yes-or-no-p 'my-yes-or-mumble-p)
+
 (load "server")
 (if (not(server-running-p))
     (server-start))
