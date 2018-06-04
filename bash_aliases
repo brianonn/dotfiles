@@ -248,6 +248,8 @@ alias mpb='/bin/nc paste.linuxmint.com 9999 <<< "${*:-`cat`}"'
 alias iso8601='date -u +%FT%TZ'
 alias localtime='date "+%F %T %Z"'
 alias utctime='date -u "+%F %T %Z"'
+alias utc=utctime
+alias unixtime='date "+%s"'
 
 alias qpdfview='qpdfview --unique'
 alias qp='qpdfview --unique'
