@@ -232,7 +232,17 @@
          (write-region "" nil expanded t)
          (when new
            (dired-add-file new)
-           (dired-move-to-filename))))))
+             (dired-move-to-filename))))
+
+       (defun my/find-file-read-only-at-point ()
+           "Open the file at point in a read-only buffer"
+           (interactive)
+           (find-file-read-only (dired-file-name-at-point)))
+
+       (define-key dired-mode-map (kbd "M-RET") 'my/find-file-read-only-at-point)
+       ;;(define-key dired-mode-map (kbd "RET") 'find-file-read-only-at-point)
+       ;;(define-key dired-mode-map (kbd "RET") 'dired-find-file)
+       ))
 
 ;; [f8] starts neotree in the current directory
 (defun my/dired-neotree-set-root ()
