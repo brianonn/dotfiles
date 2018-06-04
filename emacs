@@ -322,6 +322,8 @@
                              (mode . js2-mode)
                              (mode . js3-mode)))
               ("Solidity" (mode . solidity-mode))
+              ("Golang"  (mode . go-mode))
+              ("YAML"  (mode . yaml-mode))
               ("Magit" (name . "\*magit"))
               ("emacs-config" (or (filename . "\.emacs\.d")
                                   (filename . "emacs")
