@@ -124,6 +124,7 @@ function serve {
 alias backup='rsync -av --progress --exclude='\''*/Downloads/In-Progress/'\'' --exclude='\''*/Downloads/Torrents/'\'' --exclude='\''*/Downloads/Completed/'\'' --exclude='\''*/.cache/'\'' --exclude='\''*/.thumb*/'\'' $HOME /zpool0/downloads/'
 alias book=$HOME/bin/findebook.sh
 alias b=book
+alias rs='rsync -az --dry-run --delete-after --out-format="[%t]:%o:%f:Last Modified %M" source destination | less'
 
 ## CSCOPE AND CTAGS
 alias cstags='/bin/rm -f cscope.* tags etags TAGS ETAGS ; find . \( -name "*.[cChHsS]" -o -name "*.[chCH]pp" -o -name "*.asm" -o -name "*.ASM" -o -name "*.py" -o -name "*.java" \) -print | egrep -v '[/][.]?#.*#?$' > cscope.files ; cscope -ubq -i cscope.files ; ctags -e --extra=+q -f ETAGS -L cscope.files ; ctags -f TAGS -L cscope.files; ccglue -o cctree.out -i cctree.idx'
@@ -264,3 +265,5 @@ alias qp='qpdfview --unique'
 alias jsp='python -mjson.tool'
 alias size='du -skh'
 alias ipy='ipython notebook --pylab inline'
+alias bcryptpass='htpasswd -nBC 10 "" | tr -d ":\n"'
+alias qu='qemu-system-x86_64 -machine accel=kvm:tcg -m 4096 -hda /dev/sdc -net tap -net nic --monitor stdio'
