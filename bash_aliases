@@ -224,6 +224,7 @@ lll () { $ls_bin -lt "$@" | /usr/bin/tail -20 ; }
 llr () { $ls_bin -lrt "$@" | /usr/bin/tail -20 ; }
 alias lr=llr
 llx () { $ls_bin -X -C --si "$@" | $ls_pager ; }
+lw  () { $ls_bin -w $(tput cols) "$@" | $ls_pager ; }
 
 alias findgrep='find . -type f \( -name \*.git -o -name .snaphot -o -name .bak -prune \) -print0 | xargs -0 grep -in'
 
