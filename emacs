@@ -34,6 +34,7 @@
              dockerfile-mode
              editorconfig
              emmet-mode
+             ethan-wspace
              expand-region
              exec-path-from-shell
              fill-column-indicator
@@ -634,13 +635,13 @@ With a prefix ARG, it will widen the scope to the whole buffer."
 ;; on lines that we actually edit, so it doesn't cause spurious
 ;; whitespace changes in git diff outputs
 ;;;;;;;;;;;;;
-;;(require 'ethan-wspace)
-;;(global-ethan-wspace-mode 1)
+(require 'ethan-wspace)
+(global-ethan-wspace-mode 1)
 
-;; (defun makefile-tabs-are-less-evil ()
-;;     "When editing Makefiles, tabs are not errors."
-;;     (setq ethan-wspace-errors (remove 'tabs ethan-wspace-errors)))
-;; (add-hook 'makefile-mode-hook #'makefile-tabs-are-less-evil)
+(defun makefile-tabs-are-less-evil ()
+    "When editing Makefiles, tabs are not errors."
+    (setq ethan-wspace-errors (remove 'tabs ethan-wspace-errors)))
+(add-hook 'makefile-mode-hook #'makefile-tabs-are-less-evil)
 
 ;;;;;;;;;;;;;
 ;;;;;;;;;;;;;
