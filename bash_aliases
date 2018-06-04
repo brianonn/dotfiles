@@ -33,16 +33,7 @@ rmkernel () {
 # mogrify -path ./tmp  -level 35%,100%,0.70 -resize x1024\> -quality 87 -format jpg *.png
 #
 
-# Make random passwords of the given length. If length is not give, the default is 16 chars.
-# mkpw <length>
-mkpw()
-{
-    [ $# -eq 0 ] && len=16 || len="$1"
-    #chars='a-zA-Z0-9'
-    chars='a-hj-np-zA-HJ-NP-Z2-9'
-    #dd if=/dev/urandom bs=512 count=1 2>/dev/null | tr -dc 'a-zA-Z0-9' | fold -w "$len" | head -1
-    dd if=/dev/urandom bs=512 count=1 2>/dev/null | tr -dc "$chars" | fold -w "$len" | head -1
-}
+## mkpw is now a function in my ~/bin
 alias pw=mkpw
 
 fc()
