@@ -1046,7 +1046,7 @@ directory to make multiple eshell windows easier."
     (insert (format-time-string "%C%y-%m-%dT%H:%M:%SZ")))
 
 (defun my/insert-name ()
-    "inserts my name and email into the current document."
+    "Insert my name and email into the current document."
     (interactive)
     (insert "Brian A. Onn <brian.a.onn@gmail.com>"))
 
