@@ -88,3 +88,4 @@ DOCKER_HOST="0.0.0.0:4243"  # this depends on DOCKER_OPTS set in /etc/default/do
 export DOCKER_HOST
 
 export PATH
+export NPM_CONFIG_PREFIX=~/.npm-global
