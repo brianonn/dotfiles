@@ -1062,6 +1062,9 @@ directory to make multiple eshell windows easier."
 (global-set-key (kbd "C-<up>") 'windmove-up)
 (global-set-key (kbd "C-<down>") 'windmove-down)
 
+(global-set-key (kbd "C-x o") 'next-multiframe-window)
+(global-set-key (kbd "C-x p") 'previous-multiframe-window)
+
 (global-set-key (kbd "C-x g") 'magit-status)
 (load "disable-trackpad" t)
 
