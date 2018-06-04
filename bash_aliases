@@ -18,6 +18,10 @@ countext () {
 
 # functions as aliases
 
+bu() {
+ cp "$@" "$@".backup-`date +%Y%m%d`&& echo "`date +%Y-%m-%d` backed up $PWD/$@" >> ~/.backups.log;
+}
+
 # remove all kernels except the running one
 rmkernel () {
    local cur_kernel=$(uname -r|sed 's/-*[a-z]//g'|sed 's/-386//g')
