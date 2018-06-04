@@ -25,10 +25,10 @@ case "$1" in
     ;;
 
     # syntax highlighting using Pygments
-    *.[ch]|*.[ch]pp|*.[ch]xx|*.cc|*.hh|*.py|*.pl|*.rb|*.asm|*.java| \
+    *.[ch]|*.[ch]pp|*.[ch]xx|*.cc|*.hh|*.go|*.py|*.pl|*.rb|*.asm|*.java| \
         *.awk|*.sql|*.el|*.clj|*.nim| *.pas|*.p| *.php | *.f | \
         *.fortran | *.fth | *.4th | *.patch | *.diff | *.css| \
-        *.js|*.scss|*.jade|*.htm|*.html|*.json|*.ini)
+        *.js|*.scss|*.jade|*.htm|*.html|*.json|*.ini|*.yml|*.yaml|*.v|*.sv)
     pygmentize -f 256 -O style=${style} "$1"
     exit 0
     ;;
