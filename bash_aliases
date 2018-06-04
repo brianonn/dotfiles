@@ -115,6 +115,11 @@ viewmd() {
   xdg-open "${1%md}.html"
 }
 
+function serve {
+  port="${1:-3000}"
+  ruby -run -e httpd . -p $port
+}
+
 
 alias backup='rsync -av --progress --exclude='\''*/Downloads/In-Progress/'\'' --exclude='\''*/Downloads/Torrents/'\'' --exclude='\''*/Downloads/Completed/'\'' --exclude='\''*/.cache/'\'' --exclude='\''*/.thumb*/'\'' $HOME /zpool0/downloads/'
 alias book=$HOME/bin/findebook.sh
