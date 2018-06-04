@@ -1066,7 +1066,7 @@ directory to make multiple eshell windows easier."
 (global-set-key (kbd "C-x p") 'previous-multiframe-window)
 
 (global-set-key (kbd "C-x g") 'magit-status)
-(load "disable-trackpad" t)
+; (load "disable-trackpad" t)
 
 (require 'desktop)
 (desktop-save-mode 1)
