@@ -1,12 +1,32 @@
-#!/bin/sh
+#!/bin/bash
 
 # bootstrap your dotfiles
 
 SAVEDIR="$HOME/.dotfiles_orig"
 SYMLINK_EXCLUDES="local | *.template | bootstrap.sh | TODO | *.md"
 
-RM=/bin/rm
-GIT=/usr/bin/git
+# we are bootstrapping , let's not rely on which 
+find_on_path() {
+    for path in /sbin /usr/sbin/ /bin /usr/bin ; do 
+        if test -x $path/$1; then
+            echo $path/$1
+            return 0
+        fi
+    done
+    return ""
+}
+
+get_input() {
+    prompt="$1"
+    echo -n $prompt ": "
+    read ans
+    echo $ans
+    return 0
+}
+
+
+RM="$(find_on_path rm)
+GIT=$(find_on_path git)
 
 [ ! -x "$GIT" ] && echo "run 'sudo apt-get install git' first"
 
@@ -19,17 +39,16 @@ echo -n "Enter Y to continue, or N to exit this script: "
 read ans
 case "$ans" in [yY]*) ;; *) exit 1 ;; esac
 
-dir="readlink -f `dirname $0`"
-dir=`eval $dir`
+LOCALDIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
 
 # templates
-for infile in $dir/*.template; do
+for infile in $LOCALDIR/*.template; do
     [ ! -e "$infile" ] && continue
     outfile=$(basename "$infile" ".template")
     $RM -f "$outfile"
     # TODO: read the username and email from the user
-    NAME="Joe Smith"
-    EMAIL="joe@example.com"
+    NAME=$(get_input "Enter your fullname (for git commits)" )
+    EMAIL=$(get_input "Enter your email (for git commits)" )
     sed < "$infile" > "$outfile" \
         -e 's/\${NAME}/'$NAME'/' \
         -e 's/\${EMAIL}/'$EMAIL'/'
@@ -37,7 +56,7 @@ done
 
 #make symlinks
 [ ! -e "$SAVEDIR" ] && mkdir -p "$SAVEDIR"
-for path in $dir/*; do
+for path in $LOCALDIR/*; do
     filename=`basename "$path"`
     case "$filename" in
     *~|*.tmp|local|TODO|*.md|bootstrap.sh)
