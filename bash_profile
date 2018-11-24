@@ -23,6 +23,9 @@ fi
 
 ## Put bash specific login items here
 ##
+if [ -f ~/.git-completion.bash ]; then
+  . ~/.git-completion.bash
+fi
 
 # Golang Version Manager
 # gvm list
