@@ -184,7 +184,7 @@ alias fastboot="$HOME/android-sdk-linux/platform-tools/fastboot"
 alias diamond='sudo rmmod ftdi_sio usbserial; fakemac 00:1a:4d:92:e6:dc /opt/usr/local/diamond/2.2_x64/bin/lin64/diamond'
 
 # safe mv(1) and rm(1) will move to xdesktop Trash can
-alias rm="$HOME/Source/del.sh"
+[ -x $HOME/Source/del.sh ] && alias rm="$HOME/Source/del.sh"
 alias mv='mv -i'
 alias del=/bin/rm
 
@@ -268,3 +268,7 @@ alias ipy='ipython notebook --pylab inline'
 alias bcryptpass='htpasswd -nBC 10 "" | tr -d ":\n"'
 alias qu='qemu-system-x86_64 -machine accel=kvm:tcg -m 4096 -hda /dev/sdc -net tap -net nic --monitor stdio'
 alias mount='mount | column -t'
+
+# hub
+# brew install hub
+[ -x $(which hub) ] && alias git=hub
