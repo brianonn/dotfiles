@@ -20,4 +20,8 @@ tramp
 Session.vim
 # temporary
 .netrwhist
+*.rej
+*.bak
+*.tmp
+*.patch
 *~
