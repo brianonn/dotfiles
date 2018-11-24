@@ -7,6 +7,10 @@
 # This file should never be pushed up to a public server in the dotfiles.
 source ~/.bash_sensitive_aliases
 
+real_less=$(which less)
+real_tail=$(which tail)
+real_ls=$(which gls) || real_ls=$(which ls)
+
 #
 # TODO: make an alias for counting extensions in a directory (or list of directories)
 countext () {
@@ -119,7 +123,7 @@ function serve {
 alias backup='rsync -av --progress --exclude='\''*/Downloads/In-Progress/'\'' --exclude='\''*/Downloads/Torrents/'\'' --exclude='\''*/Downloads/Completed/'\'' --exclude='\''*/.cache/'\'' --exclude='\''*/.thumb*/'\'' $HOME /zpool0/downloads/'
 alias book=$HOME/bin/findebook.sh
 alias b=book
-alias rs='rsync -az --dry-run --delete-after --out-format="[%t]:%o:%f:Last Modified %M" source destination | less'
+alias rs='rsync -az --dry-run --delete-after --out-format="[%t]:%o:%f:Last Modified %M" source destination | ${real_less}'
 
 ## CSCOPE AND CTAGS
 alias cstags='/bin/rm -f cscope.* tags etags TAGS ETAGS ; find . \( -name "*.[cChHsS]" -o -name "*.[chCH]pp" -o -name "*.asm" -o -name "*.ASM" -o -name "*.py" -o -name "*.java" \) -print | egrep -v '[/][.]?#.*#?$' > cscope.files ; cscope -ubq -i cscope.files ; ctags -e --extra=+q -f ETAGS -L cscope.files ; ctags -f TAGS -L cscope.files; ccglue -o cctree.out -i cctree.idx'
@@ -204,23 +208,22 @@ alias grep="grep $color_opt"
 alias fgrep="fgrep $color_opt"
 alias egrep="egrep $color_opt"
 
-ls_pager="perl -lpe 's/(\S+)\//[\1]/g' | /bin/less -S -R -X -F"
-ls_pager="/bin/less -S -R -X -F"
-ls_bin="/bin/ls -F --group-directories-first $color_opt"
+ls_pager="perl -lpe 's/(\S+)\//[\1]/g' | ${real_less} -S -R -X -F"
+ls_pager="${real_less} -S -R -X -F"
+ls_bin="${real_ls} -F --group-directories-first $color_opt"
 
 alias more=less
-alias tail=colortail
+[ -x $(which colortail) ] && alias tail=colortail
 
 alias ls=ls
 unalias ls
 ls  () { $ls_bin "$@" | $ls_pager ; }
 l   () { $ls_bin -C "$@" | $ls_pager ; }
-ll  () { $ls_bin -l "$@" | $ls_pager ; }
-lll () { $ls_bin -lt "$@" | /usr/bin/tail -20 ; }
-llr () { $ls_bin -lrt "$@" | /usr/bin/tail -20 ; }
-alias lr=llr
-llx () { $ls_bin -X -C --si "$@" | $ls_pager ; }
-lw  () { $ls_bin -w $(tput cols) "$@" | $ls_pager ; }
+ll  () { $ls_bin -l "$@" | $ls_pager ; }		# long list
+lt  () { $ls_bin -lt "$@" | ${real_tail} -20 ; }	# time order long list
+lr  () { $ls_bin -lrt "$@" | ${real_tail} -20 ; } 	# reverse time ordered long list
+lx  () { $ls_bin -X -C --si "$@" | $ls_pager ; }	# list ordered by extension
+lw  () { $ls_bin -w $(tput cols) "$@"; }		# list wide
 
 alias findgrep='find . -type f \( -name \*.git -o -name .snaphot -o -name .bak -prune \) -print0 | xargs -0 grep -in'
 
