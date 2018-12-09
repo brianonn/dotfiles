@@ -31,7 +31,7 @@ rmkernel () {
    local cur_kernel=$(uname -r|sed 's/-*[a-z]//g'|sed 's/-386//g')
    local kernel_pkg="linux-(image|headers|ubuntu-modules|restricted-modules)"
    local meta_pkg="${kernel_pkg}-(generic|i386|server|common|rt|xen|ec2)"
-   sudo aptitude purge $(dpkg -l | egrep $kernel_pkg | egrep -v "${cur_kernel}|${meta_pkg}" | awk '{print $2}')
+   sudo dpkg -P --force-all $(dpkg -l | egrep --color=no $kernel_pkg | egrep --color=no -v "${cur_kernel}|${meta_pkg}" | awk '{print $2}')
    sudo update-grub
 }
 
