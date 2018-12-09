@@ -158,3 +158,9 @@ if [ -f /etc/bash_completion ] && ! shopt -oq posix; then
 fi
 
 [[ -s "/home/brian/.gvm/scripts/gvm" ]] && source "/home/brian/.gvm/scripts/gvm"
+
+export DOCKER_HOST=
+export GOPATH=
+EPCTL_PROFILE=/home/brian/go/src/github.com/etherparty/epctl/scripts/bash_profile
+[ -r "$EPCTL_PROFILE" ] && source $EPCTL_PROFILE
+
