@@ -1,7 +1,3 @@
 let g:netrw_dirhistmax  =10
-let g:netrw_dirhist_cnt =5
-let g:netrw_dirhist_1='/usr/share/nginx/puretrade'
-let g:netrw_dirhist_2='/home/brian/src/Newnote/puretrade/web'
-let g:netrw_dirhist_3='/etc/php5/conf.d'
-let g:netrw_dirhist_4='/home/brian/src/Newnote/puretrade/api/config/deploy'
-let g:netrw_dirhist_5='/home/brian/Pictures/Keithley/Keithley 196/Keithley_196_ROMs'
+let g:netrw_dirhist_cnt =1
+let g:netrw_dirhist_5='/home/brian/.config'
