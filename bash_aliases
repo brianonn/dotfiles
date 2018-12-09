@@ -278,3 +278,6 @@ alias mount='mount | column -t'
 # hub
 # brew install hub
 [ -x $(which hub) ] && alias git=hub
+
+# glances monitors system process and io and docker and temps
+alias glance=glances
