@@ -15,6 +15,10 @@
 
 (add-to-list 'load-path (concat user-emacs-directory "site-lisp"))
 
+;; zenburn theme
+(add-to-list 'custom-theme-load-path "~/.emacs.d/themes/")
+(load-theme 'zenburn t)
+
 ;; packages. Access with M-X package-list-packages
 (when (>= emacs-major-version 24)
     (require 'package)
