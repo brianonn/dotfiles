@@ -6,13 +6,17 @@
 # see /usr/share/doc/bash/examples/startup-files (in the package bash-doc)
 # for examples
 
-# If not running interactively, don't do anything
+# echo in bashrc
+# If not running interactively, just exit.
 [[ $- != *i* ]] && return
+
+# echo interactive, so continuing bashrc
 
 ##
 ## Below here is useful stuff only when sitting at an
-## interactive terminal shell.  Don't push stuff here that you need in
-## a remote rsh(1) or ssh shell. That should be in .bash_profile
+## interactive terminal shell.  Don't put stuff here that you need in
+## a remote shell started non-interactively, or shell scripts.
+## These should go in the .bash_profile file
 ##
 
 set -o noclobber
@@ -164,3 +168,23 @@ export GOPATH=
 EPCTL_PROFILE=/home/brian/go/src/github.com/etherparty/epctl/scripts/bash_profile
 [ -r "$EPCTL_PROFILE" ] && source $EPCTL_PROFILE
 
+if [ -f ~/.git-completion.bash ]; then
+  . ~/.git-completion.bash
+fi
+
+# Golang Version Manager
+# gvm list
+# gvm use <version>
+[[ -s "$HOME/.gvm/scripts/gvm" ]] && source "$HOME/.gvm/scripts/gvm"
+export GOPATH="$HOME/go"
+export PATH="$GOPATH/bin:$PATH"
+
+epctl_profile="$GOPATH/src/github.com/etherparty/epctl/scripts/bash_profile"
+[[ -s "$epctl_profile" ]] && source "$epctl_profile"
+
+export NVM_DIR="$HOME/.nvm"
+[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
+[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
+
+# added by travis gem
+[ -f /home/brian/.travis/travis.sh ] && source /home/brian/.travis/travis.sh

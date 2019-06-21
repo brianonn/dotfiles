@@ -9,7 +9,7 @@
 # for ssh logins, install and configure the libpam-umask package.
 #umask 022
 
-#echo I am the profile
+# echo I am the profile
 
 # Start an ssh agent for the login session
 ssh_env="$HOME/.ssh/environment"
@@ -69,23 +69,25 @@ export LOCATE_PATH
 findroms() {  mlocate -i --regex "roms.*$1"; }
 
 # include arm tools for cross compiling arm source for embedded devices
-PATH="$PATH":$HOME/arm/tools:$HOME/arm/tools/gcc-arm-none-eabi-4_7-2013q1/bin
-PATH="$PATH":/opt/WebStorm-135.547/bin
+append_path "$HOME/arm/tools:$HOME/arm/tools/gcc-arm-none-eabi-4_7-2013q1/bin"
+append_path "/opt/WebStorm-135.547/bin"
 KIGITHUB=https://github.com/KiCad; export KIGITHUB
 
-PHP_IDE_CONFIG='servername=localhost' && export PHP_IDE_CONFIG
-NODE_PATH=/usr/local/lib/node_modules && export NODE_PATH
-NVM_DIR="/home/brian/.nvm" && export NVM_DIR
+PHP_IDE_CONFIG='servername=localhost' ; export PHP_IDE_CONFIG
+NODE_PATH=/usr/local/lib/node_modules ; export NODE_PATH
+NVM_DIR="/home/brian/.nvm" ; export NVM_DIR
 [ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"  # This loads nvm
 
-DART_SDK="/usr/lib/dart" && export DART_SDK
-[ -d $DART_SDK ] && PATH="${DART_SDK}/bin:$PATH"
+DART_SDK="/usr/lib/dart"
+if prepend_path "${DART_SDK}/bin" ; then  export DART_SDK; fi
 
 LESS="-f -S -X -R -F" && export LESS
 LESSOPEN="||~/.lessfilter %s" && export LESSOPEN
 
-DOCKER_HOST="0.0.0.0:4243"  # this depends on DOCKER_OPTS set in /etc/default/docker
-export DOCKER_HOST
+#DOCKER_HOST="0.0.0.0:4243"  # this depends on DOCKER_OPTS set in /etc/default/docker
+#export DOCKER_HOST
 
 export PATH
 export NPM_CONFIG_PREFIX=~/.npm-global
+prepend_path $HOME/.nimble/bin
+

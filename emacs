@@ -37,6 +37,7 @@
              dart-mode
              dockerfile-mode
              editorconfig
+             elm-mode
              emmet-mode
              ethan-wspace
              expand-region
@@ -293,6 +294,7 @@
 (autoload 'ibuffer "ibuffer" "List Buffers Interactively" t)
 (global-set-key (kbd "C-x C-b") 'ibuffer)
 (defun my/ibuffer-set-columns ()
+    "My custom ibuffer mode display."
     ;; Use human readable Size column instead of original one
     (define-ibuffer-column prettysize
         (:name "Size" :inline t)
@@ -314,6 +316,7 @@
               filename-and-process))))
 
 (defun my/ibuffer-mode-hook ()
+    "My custom ibuffer mode hook."
     (setq ibuffer-saved-filter-groups
         '(("home"
               ("Web Dev" (or (mode . html-mode)
@@ -325,10 +328,11 @@
                              (mode . js-mode)
                              (mode . js2-mode)
                              (mode . js3-mode)))
-              ("Solidity" (mode . solidity-mode))
-              ("Golang"  (mode . go-mode))
-              ("YAML"  (mode . yaml-mode))
-              ("Magit" (name . "\*magit"))
+              ("Solidity"    (mode . solidity-mode))
+              ("Golang"      (mode . go-mode))
+              ("Elm"         (mode . elm-mode))
+              ("YAML"        (mode . yaml-mode))
+              ("Magit"       (name . "\*magit"))
               ("emacs-config" (or (filename . "\.emacs\.d")
                                   (filename . "emacs")
                                   (filename . "\.emacs")
@@ -399,13 +403,14 @@
 ; new linum mode - faster than linum-mode
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (defvar nlinum-highlight-current-line t)
-(defun initialize-nlinum (&optional frame)
+(defun my/initialize-nlinum (&optional frame)
+    "Apply my custom nlinum-mode initializer to FRAME."
   (require 'linum) ; for faces
   (require 'nlinum)
   (add-hook 'prog-mode-hook 'nlinum-mode))
 (if (daemonp)
-  (add-hook 'after-make-frame-functions 'initialize-nlinum)
-  (add-hook 'after-init-hook 'initialize-nlinum))
+  (add-hook 'after-make-frame-functions 'my/initialize-nlinum)
+  (add-hook 'after-init-hook 'my/initialize-nlinum))
 
 
 ;; from
@@ -451,15 +456,15 @@
 ;; unfill paragraph - useful for markdown docs
 ;;
 ;; Stefan Monnier <foo at acm.org>. It is the opposite of fill-paragraph
-(defun unfill-paragraph (&optional region)
-    "Takes a multi-line paragraph and makes it into a single line of text."
+(defun my/unfill-paragraph (&optional region)
+    "Take a multi-line paragraph (optional REGION) and make it into a single line of text."
     (interactive (progn (barf-if-buffer-read-only) '(t)))
     (let ((fill-column (point-max))
              ;; This would override `fill-column' if it's an integer.
              (emacs-lisp-docstring-fill-column t))
         (fill-paragraph nil region)))
 ;; Handy key definition
-(define-key global-map "\M-S-q" 'unfill-paragraph)
+(define-key global-map "\M-S-q" 'my/unfill-paragraph)
 
 
 (add-hook 'yaml-mode-hook (lambda () (setq yaml-indent-offset 2)))
@@ -575,9 +580,8 @@
 (setq vc-make-backup-files t)
 (setq backup-directory-alist `(("" . ,(concat user-emacs-directory "backups/per-save"))))
 
-(defun force-backup-of-buffer ()
-  ;; Make a special "per session" backup at the first save of each
-  ;; emacs session.
+(defun my/force-backup-of-buffer ()
+  "My custom function to force a per-session backup at the first save of each Emacs session."
   (when (not buffer-backed-up)
     ;; Override the default parameters for per-session backups.
     (let ((backup-directory-alist `(("" . ,(concat user-emacs-directory "backups/per-session"))))
@@ -590,7 +594,7 @@
   (let ((buffer-backed-up nil))
     (backup-buffer)))
 
-(add-hook 'before-save-hook  'force-backup-of-buffer)
+(add-hook 'before-save-hook  'my/force-backup-of-buffer)
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -698,6 +702,11 @@ With a prefix ARG, it will widen the scope to the whole buffer."
 (add-hook 'php-mode-hook 'my/one-true-style)
 (add-hook 'java-mode-hook 'my/java-style)
 
+;; fix errors with buffers that set require-final-newline to t (its handled by ethan-wspace now)
+(add-hook 'prog-mode-hook '(lambda ()
+                               (setq require-final-newline nil)
+                               (setq mode-require-final-newline nil)))
+
 ;; this is better done as a per-project directory variable
 ;; but I could not get it to work
 (add-hook 'c++-mode-hook
@@ -730,7 +739,9 @@ With a prefix ARG, it will widen the scope to the whole buffer."
 ;; at the end of compilation ONLY if there were no errors.
 (setq compilation-window-height 8)
 (defun my/compilation-finish-function (buf str)
-    "function run at the end of compilation"
+    "My custom function run at the end of compilation.
+BUF is the compilation buffer.
+STR is a string describing how the compilation finished."
     (interactive)
     (when (not (eq major-mode 'grep-mode))
         (if (string-match "exited abnormally" str)
@@ -742,6 +753,7 @@ With a prefix ARG, it will widen the scope to the whole buffer."
 (setq compilation-finish-functions #'my/compilation-finish-function)
 
 (defun my/build-tab-stop-list (width)
+    "My custom function to build a tab stop list for programming.  WIDTH is the desired tab width."
   (let ((num-tab-stops (/ 80 width))
     (counter 1)
     (ls nil))
@@ -751,6 +763,7 @@ With a prefix ARG, it will widen the scope to the whole buffer."
     (set (make-local-variable 'tab-stop-list) (nreverse ls))))
 
 (defun my/mode-common-hook ()
+    "My custom mode hook for common programming environment setup."
     (setq tab-width 2)                 ; change this to taste,
     (my/build-tab-stop-list tab-width)
     (setq c-basic-offset tab-width)
@@ -762,12 +775,15 @@ With a prefix ARG, it will widen the scope to the whole buffer."
     (semantic-stickyfunc-mode t))
 (add-hook 'c-mode-common-hook 'my/mode-common-hook)
 
-(defun my-inhibit-semantic-p ()
-    (or (not (equal major-mode 'c-mode))
-        (not (equal major-mode 'python-mode))))
+;; Disable Semantic mode for everything except C and Python modes
+(defun my/inhibit-semantic-p ()
+    "My custom function to decide when to inhibit Semantic mode for a buffer.
+Returns t for all buffers except `c-mode' and `python-mode'."
+    (and (not (equal major-mode 'c-mode))
+         (not (equal major-mode 'python-mode))))
 
 (with-eval-after-load 'semantic
-      (add-to-list 'semantic-inhibit-functions #'my-inhibit-semantic-p))
+      (add-to-list 'semantic-inhibit-functions #'my/inhibit-semantic-p))
 
 ;; personal preferences
 (c-set-offset 'substatement-open 0)
@@ -1050,32 +1066,40 @@ directory to make multiple eshell windows easier."
 (global-set-key (kbd "C-x n f") 'narrow-to-defun)
 
 (defun my/insert-date ()
-    "inserts the date into the current document"
+    "Insert the date into the current document."
     (interactive)
     (insert (format-time-string "%x")))
 
 (defun my/insert-time ()
-    "inserts the time into the current document"
+    "Insert the time into the current document."
     (interactive)
     (insert (format-time-string "%X")))
 
 (defun my/insert-iso8601 ()
-    "inserts the date and time into the current document in iso8601 format."
+    "Insert the date and time into the current document in iso8601 format."
     (interactive)
     (insert (format-time-string "%C%y-%m-%dT%H:%M:%SZ")))
 
 (defun my/insert-utc ()
-    "inserts the date and time into the current document in utc format."
+    "Insert the date and time into the current document in utc format."
     (interactive)
     (insert (format-time-string "%C%y-%m-%dT%H:%M:%SZ")))
+
+(defun my/insert-email ()
+    "Insert my email into the current document."
+    (interactive)
+    (insert "brian.a.onn@gmail.com"))
 
 (defun my/insert-name ()
     "Insert my name and email into the current document."
     (interactive)
-    (insert "Brian A. Onn <brian.a.onn@gmail.com>"))
+    (or (insert "Brian A. Onn <")
+        (my/insert-email)
+        (insert ">")))
 
 (global-set-key (kbd "C-c i d") 'my/insert-date)
 (global-set-key (kbd "C-c i t") 'my/insert-time)
+(global-set-key (kbd "C-c i e") 'my/insert-email)
 (global-set-key (kbd "C-c i n") 'my/insert-name)
 (global-set-key (kbd "C-c i i") 'my/insert-iso8601)
 (global-set-key (kbd "C-c i u") 'my/insert-utc)

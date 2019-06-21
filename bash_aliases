@@ -274,6 +274,7 @@ alias ipy='ipython notebook --pylab inline'
 alias bcryptpass='htpasswd -nBC 10 "" | tr -d ":\n"'
 alias qu='qemu-system-x86_64 -machine accel=kvm:tcg -m 4096 -hda /dev/sdc -net tap -net nic --monitor stdio'
 alias mount='mount | column -t'
+alias diff='colordiff -w -t --tabsize=4'
 
 # hub
 # brew install hub
@@ -281,3 +282,6 @@ alias mount='mount | column -t'
 
 # glances monitors system process and io and docker and temps
 alias glance=glances
+
+# list all the fonts available
+alias fonts="fc-list | awk '{\$1=\"\"}1' | cut -d: -f1 | sort| uniq"

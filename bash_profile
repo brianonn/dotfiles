@@ -14,25 +14,22 @@
 # source $HOME/.profile, if available, to get all the environment
 # variables that can be used across all shells
 
-#echo I am the bash_profile
+# echo I am the bash_profile
 
 profile="$HOME/.profile"
 if [[ -r "$profile" ]]; then
       source "$profile"
 fi
 
-## Put bash specific login items here
-##
-if [ -f ~/.git-completion.bash ]; then
-  . ~/.git-completion.bash
-fi
-
-# Golang Version Manager
-# gvm list
-# gvm use <version>
-[[ -s "$HOME/.gvm/scripts/gvm" ]] && source "$HOME/.gvm/scripts/gvm"
-
-## End
+# at login, remove dangerous rm and del from old history
+#
+HISTFILE="$HOME/.bash_history"
+temphist="/tmp/temphist.$$"
+( umask 077 && grep --color=never -E -v '^(rm(dir)?|del|/bin/rm(dir)?|/usr/bin/rm(dir)?)[ \t]+' "$HISTFILE" > "$temphist" )
+mv "$temphist" "$HISTFILE"
 
 # are we interactive, source .bashrc
 case $- in *i*) source $HOME/.bashrc;; esac
+
+## End
+

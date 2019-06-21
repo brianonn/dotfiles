@@ -94,7 +94,10 @@ fun! SetColorScheme (theScheme)
     execute 'colorscheme ' . a:theScheme
     endif
 endfun
-call SetColorScheme("torte")
+"call SetColorScheme("twilight256")
+"call SetColorScheme("wombat256mod")
+"call SetColorScheme("base")
+call SetColorScheme("distinguished")
 
 if has('autocmd')
 
