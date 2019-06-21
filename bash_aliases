@@ -224,6 +224,12 @@ lt  () { $ls_bin -lt "$@" | ${real_tail} -20 ; }	# time order long list
 lr  () { $ls_bin -lrt "$@" | ${real_tail} -20 ; } 	# reverse time ordered long list
 lx  () { $ls_bin -X -C --si "$@" | $ls_pager ; }	# list ordered by extension
 lw  () { $ls_bin -w $(tput cols) "$@"; }		# list wide
+### ll  () { $ls_bin -l "$@" | $ls_pager ; }
+### lll () { $ls_bin -lt "$@" | /usr/bin/tail -20 | $ls_pager; }
+### llr () { $ls_bin -lrt "$@" | /usr/bin/tail -20 | $ls_pager; }
+### alias lr=llr
+### llx () { $ls_bin -X -C --si "$@" | $ls_pager ; }
+### lw  () { $ls_bin -w $(tput cols) "$@" | $ls_pager ; }
 
 alias findgrep='find . -type f \( -name \*.git -o -name .snaphot -o -name .bak -prune \) -print0 | xargs -0 grep -in'
 
