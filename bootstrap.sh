@@ -5,9 +5,19 @@
 SAVEDIR="$HOME/.dotfiles_orig"
 SYMLINK_EXCLUDES="local | *.template | bootstrap.sh | TODO | *.md"
 
-# we are bootstrapping , let's not rely on which 
+machine="UNKNOWN:$(uname -s)"
+case "$machine" in
+    *:Linux*)   machine=Linux ;;
+    *:Darwin*)  machine=Mac ;;
+    *CYGWIN*)   machine=Cygwin ;;
+    *MINGW*)    machine=MinGw ;;
+    *)          ;;
+esac
+
+# we are bootstrapping , let's not rely on which(1), it's not always there
 find_on_path() {
-    for path in /sbin /usr/sbin/ /bin /usr/bin ; do 
+    for path in ${PATH//:/ } ; do
+        echo testing for $path/$1
         if test -x $path/$1; then
             echo $path/$1
             return 0
@@ -18,15 +28,14 @@ find_on_path() {
 
 get_input() {
     prompt="$1"
-    echo -n $prompt ": "
+    echo -n "$prompt : " > /dev/tty
     read ans
-    echo $ans
-    return 0
+    echo "$ans"
 }
 
 
-RM="$(find_on_path rm)
-GIT=$(find_on_path git)
+RM="$(find_on_path rm)"
+GIT="$(find_on_path git)"
 
 [ ! -x "$GIT" ] && echo "run 'sudo apt-get install git' first"
 
@@ -40,7 +49,6 @@ read ans
 case "$ans" in [yY]*) ;; *) exit 1 ;; esac
 
 LOCALDIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
-
 # templates
 for infile in $LOCALDIR/*.template; do
     [ ! -e "$infile" ] && continue
@@ -91,6 +99,8 @@ YASSNIPPETDIR="$HOME/.emacs.d/snippets"
 $RM -fr $YASSNIPPETDIR
 git clone $GITHUB $YASSNIPPETDIR
 
-## setup local nemo actions
-mkdir -p ~/.local/share/nemo/actions 2>/dev/null 1>&2
-/bin/cp -pr --remove-destination local/share/nemo/actions/* ~/.local/share/nemo/actions/ 2>/dev/null 1>&2
+## on linux, setup local nemo actions
+if $machine = Linux; then
+    mkdir -p ~/.local/share/nemo/actions 2>/dev/null 1>&2
+    /bin/cp -pr --remove-destination local/share/nemo/actions/* ~/.local/share/nemo/actions/ 2>/dev/null 1>&2
+fi
