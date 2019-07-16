@@ -19,7 +19,7 @@ hexdump=$(which hexdump)
 
 case "$1" in
     # markdown with pandoc
-    *.1|*.rst|*.md|*.markdown)
+    *.1|*.rst|*.[mM][dD]|*.markdown)
     pandoc -s -f markdown -t man "$1" | groff -T utf8 -man -t
     exit 0
     ;;
