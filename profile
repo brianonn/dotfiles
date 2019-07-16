@@ -91,5 +91,6 @@ export PATH
 export NPM_CONFIG_PREFIX=~/.npm-global
 prepend_path $HOME/.nimble/bin
 
+# TODO: only do these next two lines on OS X
 prepend_path /usr/local/opt/gnu-tar/libexec/gnubin
 export MANPATH="/usr/local/opt/gnu-tar/libexec/gnuman:$MANPATH"
