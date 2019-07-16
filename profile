@@ -82,7 +82,7 @@ DART_SDK="/usr/lib/dart"
 if prepend_path "${DART_SDK}/bin" ; then  export DART_SDK; fi
 
 LESS="-f -S -X -R -F" && export LESS
-LESSOPEN="||$HOME/.lessfilter %s" && export LESSOPEN
+LESSOPEN="||$HOME/.lessfilter.sh %s" && export LESSOPEN
 
 #DOCKER_HOST="0.0.0.0:4243"  # this depends on DOCKER_OPTS set in /etc/default/docker
 #export DOCKER_HOST
