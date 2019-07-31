@@ -88,7 +88,6 @@ LESSOPEN="||$HOME/.lessfilter.sh %s" && export LESSOPEN
 #export DOCKER_HOST
 
 export PATH
-export NPM_CONFIG_PREFIX=~/.npm-global
 prepend_path $HOME/.nimble/bin
 
 # TODO: only do these next two lines on OS X
