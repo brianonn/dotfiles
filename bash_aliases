@@ -7,9 +7,9 @@
 # This file should never be pushed up to a public server in the dotfiles.
 source ~/.bash_sensitive_aliases
 
-real_less=$(which less)
-real_tail=$(which tail)
-real_ls=$(which gls) || real_ls=$(which ls)
+real_less=$(which less 2>/dev/null)
+real_tail=$(which tail 2>/dev/null)
+real_ls=$(which gls 2>/dev/null) || real_ls=$(which ls 2>/dev/null)
 
 #
 # TODO: make an alias for counting extensions in a directory (or list of directories)
@@ -210,10 +210,10 @@ alias egrep="egrep $color_opt"
 
 ls_pager="perl -lpe 's/(\S+)\//[\1]/g' | ${real_less} -S -R -X -F"
 ls_pager="${real_less} -S -R -X -F"
-ls_bin="${real_ls} -F --group-directories-first $color_opt"
+ls_bin="${real_ls} -C -F --group-directories-first $color_opt"
 
 alias more=less
-[ -x $(which colortail) ] && alias tail=colortail
+[ -x $(which colortail 2>/dev/null) ] && alias tail=colortail
 
 alias ls=ls
 unalias ls
@@ -278,7 +278,7 @@ alias diff='colordiff -w -t --tabsize=4'
 
 # hub
 # brew install hub
-[ -x $(which hub) ] && alias git=hub
+[ -x $(which hub 2>/dev/null) ] && alias git=hub
 
 # glances monitors system process and io and docker and temps
 alias glance=glances
