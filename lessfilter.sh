@@ -25,29 +25,29 @@ case "$1" in
     ;;
 
     # syntax highlighting using Pygments
-    *.[ch]|*.[ch]pp|*.[ch]xx|*.cc|*.hh|*.go|*.py|*.pl|*.rb|*.asm|*.java| \
+    Dockerfile|*.[ch]|*.[ch]pp|*.[ch]xx|*.cc|*.hh|*.go|*.py|*.pl|*.rb|*.R|*.asm|*.java| \
         *.awk|*.sql|*.el|*.clj|*.nim| *.pas|*.p| *.php | *.f | \
         *.fortran | *.fth | *.4th | *.patch | *.diff | *.css| \
         *.js|*.scss|*.jade|*.htm|*.html|*.json|*.ini|*.yml|*.yaml|*.v|*.sv)
-    pygmentize -f 256 -O style=${style} "$1"
+    pygmentize -f 16m -O style=${style} "$1"
     exit 0
     ;;
 
-    # Vagrantfile
-    [vV]agrantfile)
-    pygmentize -f 256 -l ruby  -O style="${style}" "$1"
+    # Vagrantfile, Capfile, Rakefile, Gemfile, Guardfile, *.ru is ruby
+    [vV]agrantfile | [Cc]apfile | [Rr]akefile | [Gg]emfile | [Gg]uardfile | *.ru)
+    pygmentize -f 16m -l ruby  -O style="${style}" "$1"
     exit 0
     ;;
 
     # makefiles
     [mM]akefile*|*.mak|*.make)
-    pygmentize -f 256 -l Makefile  -O style="${style}" "$1"
+    pygmentize -f 16m -l Makefile  -O style="${style}" "$1"
     exit 0
     ;;
 
     # sh and bash using Pygments
     *.sh|.profile|*.bash*)
-    pygmentize -f 256 -l sh -O style="${bash_style}" "$1"
+    pygmentize -f 16m -l sh -O style="${bash_style}" "$1"
     exit 0
     ;;
 
@@ -71,7 +71,7 @@ case "$1" in
     mimetype=$(file -i -L -F'|' "$1" )
     case ${mimetype} in
       *text/lisp*|*text/x-lisp*)
-        pygmentize -f 256 -l lisp -O style="${bash_style}" "$1"
+        pygmentize -f 16m -l lisp -O style="${bash_style}" "$1"
         exit 0
         ;;
       *application/zip*binary)
@@ -107,7 +107,7 @@ esac
 
 head -1 "$1" | egrep '(#!/bin/sh|#!/bin/bash|#!/usr/bin/env.*(ba)?sh)' > /dev/null 2>&1
 if test $? -eq 0; then
-    pygmentize -f 256 -l sh -O style="${bash_style}" "$1"
+    pygmentize -f 16m -l sh -O style="${bash_style}" "$1"
 else
     exit 1
 fi
