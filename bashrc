@@ -161,11 +161,11 @@ if [ -f /etc/bash_completion ] && ! shopt -oq posix; then
     . /etc/bash_completion
 fi
 
-[[ -s "/home/brian/.gvm/scripts/gvm" ]] && source "/home/brian/.gvm/scripts/gvm"
+[[ -s "$HOME/.gvm/scripts/gvm" ]] && source "$HOME/.gvm/scripts/gvm"
 
 export DOCKER_HOST=
 export GOPATH=
-EPCTL_PROFILE=/home/brian/go/src/github.com/etherparty/epctl/scripts/bash_profile
+EPCTL_PROFILE=$HOME/go/src/github.com/etherparty/epctl/scripts/bash_profile
 [ -r "$EPCTL_PROFILE" ] && source $EPCTL_PROFILE
 
 if [ -f ~/.git-completion.bash ]; then
@@ -187,4 +187,11 @@ export NVM_DIR="$HOME/.nvm"
 [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
 
 # added by travis gem
-[ -f /home/brian/.travis/travis.sh ] && source /home/brian/.travis/travis.sh
+[ -f $HOME/.travis/travis.sh ] && source $HOME/.travis/travis.sh
+
+# The next line updates PATH for the Google Cloud SDK.
+if [ -f "$HOME/Library/GoogleCloudSDK/path.bash.inc" ]; then . "$HOME/Library/GoogleCloudSDK/path.bash.inc"; fi
+
+# The next line enables shell command completion for gcloud.
+if [ -f "$HOME/Library/GoogleCloudSDK/completion.bash.inc" ]; then . "$HOME/Library/GoogleCloudSDK/completion.bash.inc"; fi
+

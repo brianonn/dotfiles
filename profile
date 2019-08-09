@@ -94,3 +94,5 @@ prepend_path $HOME/.nimble/bin
 # TODO: only do these next two lines on OS X
 prepend_path /usr/local/opt/gnu-tar/libexec/gnubin
 export MANPATH="/usr/local/opt/gnu-tar/libexec/gnuman:$MANPATH"
+
+[[ -s "$HOME/.gvm/scripts/gvm" ]] && source "$HOME/.gvm/scripts/gvm"
