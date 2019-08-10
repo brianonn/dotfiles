@@ -165,8 +165,8 @@ fi
 
 export DOCKER_HOST=
 export GOPATH=
-EPCTL_PROFILE=$HOME/go/src/github.com/etherparty/epctl/scripts/bash_profile
-[ -r "$EPCTL_PROFILE" ] && source $EPCTL_PROFILE
+# EPCTL_PROFILE=/home/brian/go/src/github.com/etherparty/epctl/scripts/bash_profile
+#[ -r "$EPCTL_PROFILE" ] && source $EPCTL_PROFILE
 
 if [ -f ~/.git-completion.bash ]; then
   . ~/.git-completion.bash
@@ -178,9 +178,6 @@ fi
 [[ -s "$HOME/.gvm/scripts/gvm" ]] && source "$HOME/.gvm/scripts/gvm"
 export GOPATH="$HOME/go"
 export PATH="$GOPATH/bin:$PATH"
-
-epctl_profile="$GOPATH/src/github.com/etherparty/epctl/scripts/bash_profile"
-[[ -s "$epctl_profile" ]] && source "$epctl_profile"
 
 export NVM_DIR="$HOME/.nvm"
 [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
@@ -195,3 +192,4 @@ if [ -f "$HOME/Library/GoogleCloudSDK/path.bash.inc" ]; then . "$HOME/Library/Go
 # The next line enables shell command completion for gcloud.
 if [ -f "$HOME/Library/GoogleCloudSDK/completion.bash.inc" ]; then . "$HOME/Library/GoogleCloudSDK/completion.bash.inc"; fi
 
+export PATH=$HOME/.gem/ruby/2.6.0/bin:$PATH
