@@ -85,3 +85,6 @@ dist/
 
 # projectiles files
 .projectile
+
+# VSCODE history
+.history/
