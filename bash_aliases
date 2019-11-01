@@ -159,8 +159,8 @@ alias gb='git branch'
 alias gba='git branch -a'
 alias gl='git log --oneline --abbrev-commit --graph --decorate'
 alias gla='git log --oneline --abbrev-commit --graph --all --decorate'
-alias gcp='git add -u && git commit -m "checkpoint $(date -u --iso-8601=seconds)" && git push'
-alias gcpw='watch -n 3600 "git add -A && git commit -m \"checkpoint $(date -u --iso-8601=seconds)\" && git push"'
+alias gcp='git add -u && git commit -m "checkpoint $(date -u +%FT%TZ)" && git push'
+alias gcpw='watch -n 3600 "git add -A && git commit -m \"checkpoint $(date -u +%FT%TZ)\" && git push"'
 alias gitu='git checkout master && git pull --rebase && git checkout - && git rebase master'
 
 # google shell
