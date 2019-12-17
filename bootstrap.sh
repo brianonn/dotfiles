@@ -103,4 +103,7 @@ git clone $GITHUB $YASSNIPPETDIR
 if $machine = Linux; then
     mkdir -p ~/.local/share/nemo/actions 2>/dev/null 1>&2
     /bin/cp -pr --remove-destination local/share/nemo/actions/* ~/.local/share/nemo/actions/ 2>/dev/null 1>&2
+    SCREENSHOTDIR="$HOME/Pictures/Screenshots"
+    /bin/mkdir -p "$SCREENSHOTDIR" 2>/dev/null 1>&2
+    gsettings set org.gnome.gnome-screenshot auto-save-directory "$SCREENSHOTDIR" 2>/dev/null 1>&2
 fi
