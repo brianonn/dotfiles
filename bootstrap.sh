@@ -94,6 +94,13 @@ for path in $LOCALDIR/*; do
     esac
 done
 
+## git completion
+GITCOMPLETION="$HOME/.git-completion.bash"
+GITCOMPLETION_URL="https://raw.githubusercontent.com/git/git/master/contrib/completion/git-completion.bash"
+if [[ ! -r "$GITCOMPLETION" ]] ; then
+    wget -q -O "$GITCOMPLETION" "$GITCOMPLETION_URL"
+fi
+
 ## setup eslint
 
 ## setup vim pathogen modules
