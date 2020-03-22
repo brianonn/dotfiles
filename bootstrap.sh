@@ -17,7 +17,6 @@ esac
 # we are bootstrapping , let's not rely on which(1), it's not always there
 find_on_path() {
     for path in ${PATH//:/ } ; do
-        echo testing for $path/$1
         if test -x $path/$1; then
             echo $path/$1
             return 0
@@ -37,7 +36,19 @@ get_input() {
 RM="$(find_on_path rm)"
 GIT="$(find_on_path git)"
 
-[ ! -x "$GIT" ] && echo "run 'sudo apt-get install git' first"
+if [ ! -x "$GIT" ]; then
+  echo "git is not found."
+  case $machine in 
+    Linux)
+      echo "run 'sudo apt-get install git' first"
+      ;;
+    Mac)   
+      echo 'run: /usr/bin/ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"'
+      echo 'then run: brew install git'
+      ;;
+    esac
+  exit 1
+fi 
 
 echo "This will bootstrap a new system environment, install necessary files and tools"
 echo "and create symlinks to your dotfiles in the home directory of this user"
@@ -100,7 +111,10 @@ $RM -fr $YASSNIPPETDIR
 git clone $GITHUB $YASSNIPPETDIR
 
 ## on linux, setup local nemo actions
-if $machine = Linux; then
+if test $machine = Linux; then
     mkdir -p ~/.local/share/nemo/actions 2>/dev/null 1>&2
     /bin/cp -pr --remove-destination local/share/nemo/actions/* ~/.local/share/nemo/actions/ 2>/dev/null 1>&2
+    SCREENSHOTDIR="$HOME/Pictures/Screenshots"
+    /bin/mkdir -p "$SCREENSHOTDIR" 2>/dev/null 1>&2
+    gsettings set org.gnome.gnome-screenshot auto-save-directory "$SCREENSHOTDIR" 2>/dev/null 1>&2
 fi
