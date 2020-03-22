@@ -180,7 +180,9 @@ fi
 # gvm use <version>
 [[ -s "$HOME/.gvm/scripts/gvm" ]] && source "$HOME/.gvm/scripts/gvm"
 export GOPATH="$HOME/go"
-export PATH="$GOPATH/bin:$PATH"
+export GOBIN="$GOPATH/bin/$(uname -s)"
+mkdir -p $GOBIN
+export PATH="$GOBIN:$PATH"
 
 export NVM_DIR="$HOME/.nvm"
 [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
