@@ -58,11 +58,13 @@ if [ "$color_prompt" = yes ]; then
     if tput setaf 1 &> /dev/null; then
         tput sgr0
         if [[ $(tput colors) -ge 256 ]] 2>/dev/null; then
-            MAGENTA=$(tput setaf 9)
+            MAGENTA=$(tput setaf 5)
             ORANGE=$(tput setaf 172)
-            GREEN=$(tput setaf 190)
+            GREEN=$(tput setaf 118)
+            YELLOW=$(tput setaf 190)
             RED=$(tput setaf 196)
             WHITE=$(tput setaf 256)
+            CYAN=$(tput setaf 14)
         else
             MAGENTA=$(tput setaf 5)
             ORANGE=$(tput setaf 3)
@@ -79,9 +81,9 @@ if [ "$color_prompt" = yes ]; then
         GREEN="\[\033[32m\]"
         ORANGE="\[\033[33m\]"
         BLUE="\[\033[34m\]"
-        MAG="\[\033[35m\]"
+        MAGENTA="\[\033[35m\]"
         CYAN="\[\033[36m\]"
-        WHT="\[\033[39m\]"
+        WHITE="\[\033[39m\]"
     fi
 
     if [ $UID = 0 ]; then
@@ -97,9 +99,8 @@ if [ "$color_prompt" = yes ]; then
     #PS1="${debian_chroot:+($debian_chroot)}[\[\033[32m\]\w\[\033[00m]\n\[\033[1;36m\]\u\[\033[1;33m\]-> \[\033[00m\]"
 
     # A two-line colored Bash prompt (PS1) with Git branch
-
-
-
+    # TODO support other VCS besides git
+    VCS=git
     export PROMPT_DIRTRIM=6
 
     PS_LINE=$(printf -- '- %.0s' {1..200})
@@ -108,27 +109,29 @@ if [ "$color_prompt" = yes ]; then
         PS_FILL=${PS_LINE:0:$COLUMNS}
         ref=$(git symbolic-ref HEAD 2> /dev/null) || return
         PROMPT_DIRTRIM=5
-        PS_GIT_BRANCH="git:${ref#refs/heads/} "
+        PS_GIT_BRANCH="${VCS}:${ref#refs/heads/} "
     }
     PROMPT_COMMAND=parse_git_branch
     PS_INFO="$GREEN\u@\h$RESET:$BLUE\w"
     PS_INFO=""
-    PS_GIT="$BOLD$ORANGE\$PS_GIT_BRANCH$RESET"
+    PS_GIT="$BOLD$RED\$PS_GIT_BRANCH$RESET"
     PS_TIME="\[\033[\$((COLUMNS-10))G\] $RED[\t]"
 #    export PS1="\${PS_FILL}\[\033[0G\]${PS_INFO} ${PS_GIT}${PS_TIME}\n${RESET}\$ "
 #
 
 ## Left and Right sides of the path string
   #L="ÃÂ«" R="ÃÂ»"
+  #L="«" R="»"
   #L="<<" R=">>"
   #R= L=
-  L="[" R="]"
+  #L="[" R="]"
+  L="[ " R=" ]"
 
-  #export PS1="\n${UID_COLOR}\342\226\210\342\226\210 \u${WHT} (\h) ${ORANGE}${L}${PS_GIT}${ORANGE} \w ${R}\n${CYAN}\342\226\210\342\226\210 [\!] ${P}${RESET}${WHT} "
-#  export PS1="\n${UID_COLOR}\342\226\210\342\226\210 ${GREEN}[\@] ${ORANGE}${L}${PS_GIT}${ORANGE}\w${R}\n${CYAN}\342\226\210\342\226\210 [\!] ${P}${RESET}${WHT} "
-  export PS1="\n${GREEN}[\@] ${ORANGE}${L}${PS_GIT}${ORANGE}\w${R}\n${CYAN}[\!] ${P}${RESET}${WHT} "
+  #export PS1="\n${UID_COLOR}\342\226\210\342\226\210 \u${WHITE} (\h) ${ORANGE}${L}${PS_GIT}${ORANGE} \w ${R}\n${CYAN}\342\226\210\342\226\210 [\!] ${P}${RESET}${WHITE} "
+#  export PS1="\n${UID_COLOR}\342\226\210\342\226\210 ${GREEN}[\@] ${ORANGE}${L}${PS_GIT}${ORANGE}\w${R}\n${CYAN}\342\226\210\342\226\210 [\!] ${P}${RESET}${WHITE} "
+  export PS1="\n${GREEN}${L}\@${R} ${ORANGE}${L}${PS_GIT}${ORANGE}\w${R}\n${CYAN}[\!] ${P}${RESET}${WHITE} "
 
-  unset P L R UID_COLOR B_UID_COLOR RESET BOLD RED GREEN ORANGE BLUE MAG CYAN WHT
+  unset P L R UID_COLOR B_UID_COLOR RESET BOLD RED GREEN ORANGE BLUE MAGENTA CYAN WHITE
   unset PS_GIT_BRANCH PS_FILL ref PS_INFO PS_GIT PS_TIME
 else
     # no color prompt, just plain
