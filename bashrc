@@ -65,12 +65,16 @@ if [ "$color_prompt" = yes ]; then
             RED=$(tput setaf 196)
             WHITE=$(tput setaf 7)
             CYAN=$(tput setaf 14)
+            BLUE=$(tput setaf 12)
+            LBLUE=$(tput setaf 110)
         else
             MAGENTA=$(tput setaf 5)
             ORANGE=$(tput setaf 3)
             GREEN=$(tput setaf 2)
             RED=$(tput setaf 1)
             WHITE=$(tput setaf 7)
+            BLUE=$(tput setaf 12)
+            LBLUE=$(tput setaf 6)
         fi
         BOLD=$(tput bold)
         RESET=$(tput sgr0)
@@ -88,39 +92,79 @@ if [ "$color_prompt" = yes ]; then
 
     if [ $UID = 0 ]; then
       UID_COLOR="$RED"
-      P="#"
+      P="${UID_COLOR}(root) #"
     else
-      UID_COLOR="$BOLD$CYAN$RESET"
-      P="$"
+      UID_COLOR="$BOLD$CYAN"
+      P="${UID_COLOR}\$${RESET}"
     fi
 
     # some unused samples here
     #PS1='${debian_chroot:+($debian_chroot)}\[\033[01;32m\]\u@\h\[\033[00m\][\[\033[01;34m\]\w\[\033[00m\]]\$ '
     #PS1="${debian_chroot:+($debian_chroot)}[\[\033[32m\]\w\[\033[00m]\n\[\033[1;36m\]\u\[\033[1;33m\]-> \[\033[00m\]"
 
-    # A two-line colored Bash prompt (PS1) with Git branch
+    # A two-line colored Bash prompt (PS1) with the VCS branch
+    # currently only works with git
     # TODO support other VCS besides git
     #
-    PS_LINE=$(printf -- '- %.0s' {1..200})
-    function parse_git_branch {
-        PS_VCS='' PS_GIT_BRANCH='' PROMPT_DIRTRIM=6 PS_GIT_L='' PS_GIT_R=''
-        PS_GIT_DIRTY=''
-        PS_FILL=${PS_LINE:0:$COLUMNS}
-        ref=$(git symbolic-ref HEAD 2> /dev/null) || return
-        PROMPT_DIRTRIM=5
-        PS_VCS="git "
-        PS_GIT_L="[ " PS_GIT_R=" ]"
-        PS_GIT_BRANCH="${ref#refs/heads/}"
-        PS_GIT_DIRTY=$(git diff --quiet || echo ' (dirty)')
+    function which_vcs {
+        if [ -d .git ]; then
+            echo git
+        fi
     }
-    PROMPT_COMMAND=parse_git_branch
+    function get_vcs_branch_name {
+        local ref
+        case $( which_vcs ) in
+        git)
+            ref=$( git symbolic-ref HEAD 2> /dev/null )
+            [[ ! -z $ref ]] && ref="${ref#refs/heads/}"
+            ;;
+        *) return 1 ;;
+        esac
+        echo $ref
+    }
+    function get_vcs_branch_status {
+        case $( which_vcs ) in
+        git)
+            #$(git status --quiet || echo ' (dirty)')
+            echo \ $( git status --porcelain | awk '/^[MAD]/{S=1}/^ [M]/{M=1}/^[?][?]?/{U=1}END{if(S+M+U){printf"("};if(S){printf" staged"};if(M){printf" modified"};if(U){printf" untracked"}if(S+M+U){printf" )"}}' )
+            ;;
+        *) return 1 ;;
+        esac
+    }
+    function get_vcs_ahead_behind {
+        case $( which_vcs ) in
+        git)
+            $( git for-each-ref --format="%(push:track)" $(git symbolic-ref HEAD) | tr -d '[]' )
+            ;;
+        *) return 1 ;;
+        esac
+    }
+    function get_vcs_info {
+        PS_VCS_CMD='' PS_VCS_BRANCH='' PROMPT_DIRTRIM=6 PS_VCS_L='' PS_VCS_R=''
+        PS_VCS_STATUS='' PS_VCS_AHEAD_BEHIND=''
+        PS_LINE=$(printf -- '- %.0s' {1..200})
+        PS_FILL=${PS_LINE:0:$COLUMNS}
+        ref="$(get_vcs_branch_name)" || return
+        # continue only if inside a VCS directory
+        PROMPT_DIRTRIM=5
+        PS_VCS_BRANCH="${ref}"
+        PS_VCS_CMD="$( which_vcs ):"
+        PS_VCS_L="[ " PS_VCS_R=" ]"
+        PS_VCS_STATUS="$( get_vcs_branch_status )"
+        PS_VCS_AHEAD_BEHIND="$( get_vcs_ahead_behind )"
+        [[ ! -z $PS_VCS_AHEAD_BEHIND ]] && PS_VCS_AHEAD_BEHIND=" ( ${PS_VCS_AHEAD_BEHIND} )"
+    }
+    PROMPT_COMMAND=get_vcs_info
+    PS_VCS_COLOR1=${BLUE}
+    PS_VCS_COLOR2=${LBLUE}
+    PS_VCS_COLOR3=${YELLOW}
     PS_INFO="$GREEN\u@\h$RESET:$BLUE\w"
     PS_INFO=""
-    PS_GIT="${BOLD}${RED}\${PS_GIT_L}\${PS_VCS}${MAGENTA}\${PS_GIT_BRANCH}${YELLOW}\${PS_GIT_DIRTY}${RED}\${PS_GIT_R}${RESET}\n"
+    PS_VCS_INFO="${BOLD}${PS_VCS_COLOR1}\${PS_VCS_CMD}\${PS_VCS_L}${PS_VCS_COLOR2}\${PS_VCS_BRANCH}${PS_VCS_COLOR3}\${PS_VCS_STATUS}\${PS_VCS_AHEAD_BEHIND}${PS_VCS_COLOR1}\${PS_VCS_R}${RESET}\n"
     PS_TIME="\[\033[\$((COLUMNS-10))G\] $RED[\t]"
     PS_TIME='\t'
     PS_DATE='\d'
-#    export PS1="\${PS_FILL}\[\033[0G\]${PS_INFO} ${PS_GIT}${PS_TIME}\n${RESET}\$ "
+#    export PS1="\${PS_FILL}\[\033[0G\]${PS_INFO} ${PS_VCS_INFO}${PS_TIME}\n${RESET}\$ "
 #
 
 ## Left and Right sides of the path string
@@ -132,12 +176,12 @@ if [ "$color_prompt" = yes ]; then
   L="[ " R=" ]"
 
 
-  #export PS1="\n${UID_COLOR}\342\226\210\342\226\210 \u${WHITE} (\h) ${ORANGE}${L}${PS_GIT}${ORANGE} \w ${R}\n${CYAN}\342\226\210\342\226\210 [\!] ${P}${RESET}${WHITE} "
-#  export PS1="\n${UID_COLOR}\342\226\210\342\226\210 ${GREEN}[\@] ${ORANGE}${L}${PS_GIT}${ORANGE}\w${R}\n${CYAN}\342\226\210\342\226\210 [\!] ${P}${RESET}${WHITE} "
-  export PS1="\n${GREEN}${L}${PS_DATE} ${PS_TIME}${R} ${ORANGE}${PS_GIT}${ORANGE}${L}\w${R}\n${CYAN}[\!] ${P}${RESET}${WHITE} "
+  #export PS1="\n${UID_COLOR}\342\226\210\342\226\210 \u${WHITE} (\h) ${ORANGE}${L}${PS_VCS_INFO}${ORANGE} \w ${R}\n${CYAN}\342\226\210\342\226\210 [\!] ${P}${RESET}${WHITE} "
+#  export PS1="\n${UID_COLOR}\342\226\210\342\226\210 ${GREEN}[\@] ${ORANGE}${L}${PS_VCS_INFO}${ORANGE}\w${R}\n${CYAN}\342\226\210\342\226\210 [\!] ${P}${RESET}${WHITE} "
+  export PS1="\n${GREEN}${L}${PS_DATE} ${PS_TIME}${R} ${ORANGE}${PS_VCS_INFO}${ORANGE}${L}\w${R}\n${CYAN}[\!] ${P}${RESET}${WHITE} "
 
   unset P L R UID_COLOR B_UID_COLOR RESET BOLD RED GREEN ORANGE BLUE MAGENTA CYAN WHITE
-  unset PS_GIT_BRANCH PS_FILL ref PS_INFO PS_GIT PS_TIME
+  unset PS_VCS_BRANCH PS_FILL ref PS_INFO PS_VCS_INFO PS_TIME
 else
     # no color prompt, just plain
     PS1='${debian_chroot:+($debian_chroot)}\u@\h[\w]\$ '
