@@ -106,10 +106,23 @@ if [ "$color_prompt" = yes ]; then
     # currently only works with git
     # TODO support other VCS besides git
     #
+    function update_user_badge {
+        if [[ $TERM_PROGRAM = iTerm.app ]]; then
+            iterm2_set_user_var gitStatus "$(get_vcs_project_name)"
+        fi
+    }
     function which_vcs {
-        if [ -d .git ]; then
+        if git rev-parse --is-inside-work-tree 2>/dev/null 1>&2; then
             echo git
         fi
+    }
+    function get_vcs_project_name {
+        case $( which_vcs ) in
+        git)
+            echo $(basename $(git rev-parse --show-toplevel))
+            ;;
+        *) return 1 ;;
+        esac
     }
     function get_vcs_branch_name {
         local ref
@@ -153,6 +166,7 @@ if [ "$color_prompt" = yes ]; then
         PS_VCS_STATUS="$( get_vcs_branch_status )"
         PS_VCS_AHEAD_BEHIND="$( get_vcs_ahead_behind )"
         [[ ! -z $PS_VCS_AHEAD_BEHIND ]] && PS_VCS_AHEAD_BEHIND=" ( ${PS_VCS_AHEAD_BEHIND} )"
+        update_user_badge
     }
     PROMPT_COMMAND=get_vcs_info
     PS_VCS_COLOR1=${BLUE}
