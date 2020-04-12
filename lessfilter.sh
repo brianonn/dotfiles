@@ -11,8 +11,19 @@
 #   export LESSOPEN="|~/.lessfilter"
 #
 
-# TODO: make the style selection based on mime-type or file extension
-style="monokai"
+# requirements: install the following before you use it
+#     hexdump
+#     pandoc
+#     pygments
+#     gzip
+#     bzip2
+#     tar
+#     vue-lexer (for .vue files) 
+#               
+# TODO: There is only two hardcoded style choices right now. Ideally,
+#       the style should be selected based on mime-type or file extension
+
+default_style="monokai"
 bash_style="paraiso-dark"
 
 hexdump=$(which hexdump)
@@ -24,24 +35,24 @@ case "$1" in
     exit 0
     ;;
 
-    # syntax highlighting using Pygments
+    # syntax highlighting using Pygments. Pygments handles quite a lot ! 
     Dockerfile|*.[ch]|*.[ch]pp|*.[ch]xx|*.cc|*.hh|*.go|*.py|*.pl|*.rb|*.R|*.asm|*.java| \
         *.awk|*.sql|*.el|*.clj|*.nim| *.pas|*.p| *.php | *.f | \
-        *.fortran | *.fth | *.4th | *.patch | *.diff | *.css| \
+        *.fortran | *.fth | *.4th | *.patch | *.diff | *.css | *.rs | *.vue | \
         *.js|*.scss|*.jade|*.htm|*.html|*.json|*.ini|*.yml|*.yaml|*.v|*.sv)
-    pygmentize -f 16m -O style=${style} "$1"
+    pygmentize -f 16m -O style=${default_style} "$1"
     exit 0
     ;;
 
     # Vagrantfile, Capfile, Rakefile, Gemfile, Guardfile, *.ru is ruby
     [vV]agrantfile | [Cc]apfile | [Rr]akefile | [Gg]emfile | [Gg]uardfile | *.ru)
-    pygmentize -f 16m -l ruby  -O style="${style}" "$1"
+    pygmentize -f 16m -l ruby  -O style="${default_style}" "$1"
     exit 0
     ;;
 
     # makefiles
     [mM]akefile*|*.mak|*.make)
-    pygmentize -f 16m -l Makefile  -O style="${style}" "$1"
+    pygmentize -f 16m -l Makefile  -O style="${default_style}" "$1"
     exit 0
     ;;
 
@@ -71,11 +82,11 @@ case "$1" in
     mimetype=$(file -i -L -F'|' "$1" )
     case ${mimetype} in
       *text/lisp*|*text/x-lisp*)
-        pygmentize -f 16m -l lisp -O style="${bash_style}" "$1"
+	pygmentize -f 16m -l lisp -O style="${bash_style}" "$1"
         exit 0
         ;;
       *application/zip*binary)
-        unzip -tv "$1"
+        unzip -lv "$1"
         exit 0
         ;;
       *application/x-tar*binary|*application/tar*binary)
