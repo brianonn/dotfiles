@@ -105,20 +105,21 @@ if [ "$color_prompt" = yes ]; then
     # currently only works with git
     # TODO support other VCS besides git
     #
+    git=$(which git)
     function update_user_badge {
         if [[ $TERM_PROGRAM = iTerm.app ]]; then
             iterm2_set_user_var gitStatus "$(get_vcs_project_name)"
         fi
     }
     function which_vcs {
-        if git rev-parse --is-inside-work-tree 2>/dev/null 1>&2; then
+        if ${git} rev-parse --is-inside-work-tree 2>/dev/null 1>&2; then
             echo git
         fi
     }
     function get_vcs_project_name {
         case $( which_vcs ) in
         git)
-            echo $(basename $(git rev-parse --show-toplevel))
+            echo $(basename $(${git} rev-parse --show-toplevel))
             ;;
         *) return 1 ;;
         esac
@@ -127,7 +128,7 @@ if [ "$color_prompt" = yes ]; then
         local ref
         case $( which_vcs ) in
         git)
-            ref=$( git symbolic-ref HEAD 2> /dev/null )
+            ref=$( ${git} symbolic-ref HEAD 2> /dev/null )
             [[ ! -z $ref ]] && ref="${ref#refs/heads/}"
             ;;
         *) return 1 ;;
@@ -137,8 +138,8 @@ if [ "$color_prompt" = yes ]; then
     function get_vcs_branch_status {
         case $( which_vcs ) in
         git)
-            #$(git status --quiet || echo ' (dirty)')
-            echo \ $( git status --porcelain | awk '/^[MAD]/{S=1}/^ [M]/{M=1}/^[?][?]?/{U=1}END{if(S+M+U){printf"("};if(S){printf" staged"};if(M){printf" modified"};if(U){printf" untracked"}if(S+M+U){printf" )"}}' )
+            #$(${git} status --quiet || echo ' (dirty)')
+            echo \ $( ${git} status --porcelain | awk '/^[MAD]/{S=1}/^ [M]/{M=1}/^[?][?]?/{U=1}END{if(S+M+U){printf"("};if(S){printf" staged"};if(M){printf" modified"};if(U){printf" untracked"}if(S+M+U){printf" )"}}' )
             ;;
         *) return 1 ;;
         esac
@@ -146,7 +147,7 @@ if [ "$color_prompt" = yes ]; then
     function get_vcs_ahead_behind {
         case $( which_vcs ) in
         git)
-            $( git for-each-ref --format="%(push:track)" $(git symbolic-ref HEAD) | tr -d '[]' )
+            echo $( ${git} for-each-ref --format="%(push:track)" $(${git} symbolic-ref HEAD) | tr -d '[]' )
             ;;
         *) return 1 ;;
         esac
