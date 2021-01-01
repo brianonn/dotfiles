@@ -35,6 +35,22 @@ rmkernel () {
    sudo update-grub
 }
 
+## crazy web server in shell
+webserver() {
+    port=${1:-3333}
+    pipe=/tmp/pipe.$port.$RANDOM.$$
+    rm -f $pipe
+    mkfifo $pipe
+    while :
+        do {
+            read line < $pipe
+            echo -e "HTTP/1.1 200 OK\r\nServer: $SHELL $BASH_VERSION\r\nContent-Type: text/plain\r\nConnection: close\r\n"
+            echo $(date)
+        } | ncat -l $port > $pipe
+    done
+    rm -f $pipe
+}
+
 # imagemagic resize screencaps from LG G3
 #
 # mkdir tmp
@@ -43,6 +59,9 @@ rmkernel () {
 
 ## mkpw is now a function in my ~/bin
 alias pw=mkpw
+
+# random 16 lowercase letters
+alias mkpw='cat /dev/urandom | LC_CTYPE=C tr -dc a-z | fold -w 16 | head -n 1'
 
 fc()
 {
