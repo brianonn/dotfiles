@@ -9,6 +9,7 @@
 
 real_less=$(which less 2>/dev/null)
 real_tail=$(which tail 2>/dev/null)
+real_grep=$(which grep 2>/dev/null)
 real_ls=$(which gls 2>/dev/null) || real_ls=$(which ls 2>/dev/null)
 
 #
@@ -21,6 +22,13 @@ countext () {
 
 
 # functions as aliases
+
+## returns exit status 0 if running on systemd
+isSystemd() {
+    # requires sudo
+    # grep -q systemd <<<$(ls -l $(sed 's/.* //g' <<<$(sudo ls -l /proc/1/exe)))
+    ps --no-headers -o comm 1 2>/dev/null | $real_grep -q systemd || return 1
+}
 
 bu() {
  cp "$@" "$@".backup-`date +%Y%m%d`&& echo "`date +%Y-%m-%d` backed up $PWD/$@" >> ~/.backups.log;
