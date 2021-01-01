@@ -1157,3 +1157,4 @@ directory to make multiple eshell windows easier."
 
 (provide 'emacs)
 ;;; emacs ends here
+(put 'narrow-to-region 'disabled nil)
