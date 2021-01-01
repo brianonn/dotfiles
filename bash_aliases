@@ -5,7 +5,7 @@
 
 # read the sensitive aliases, that might contain passwords.
 # This file should never be pushed up to a public server in the dotfiles.
-source ~/.bash_sensitive_aliases
+[[ -r ~/.dotfile_secrets/bash_aliases ]] && source ~/.dotfile_secrets/bash_aliases
 
 real_less=$(which less 2>/dev/null)
 real_tail=$(which tail 2>/dev/null)

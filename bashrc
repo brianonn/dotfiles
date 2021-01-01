@@ -18,7 +18,6 @@
 ## a remote shell started non-interactively, or shell scripts.
 ## These should go in the .bash_profile file
 ##
-
 set -o noclobber
 
 # don't put duplicate lines in the history. See bash(1) for more options
@@ -261,3 +260,5 @@ if [ -f "$HOME/Library/GoogleCloudSDK/path.bash.inc" ]; then . "$HOME/Library/Go
 if [ -f "$HOME/Library/GoogleCloudSDK/completion.bash.inc" ]; then . "$HOME/Library/GoogleCloudSDK/completion.bash.inc"; fi
 
 export PATH=$HOME/.gem/ruby/2.6.0/bin:$PATH
+
+[[ -r $HOME/.dotfiles_secrets/bashrc ]] && source $HOME/.dotfiles_secrets/bashrc

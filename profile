@@ -94,4 +94,6 @@ prepend_path $HOME/.nimble/bin
 prepend_path /usr/local/opt/gnu-tar/libexec/gnubin
 export MANPATH="/usr/local/opt/gnu-tar/libexec/gnuman:$MANPATH"
 
-[[ -s "$HOME/.gvm/scripts/gvm" ]] && source "$HOME/.gvm/scripts/gvm"
+[[ -r "$HOME/.gvm/scripts/gvm" ]] && source "$HOME/.gvm/scripts/gvm"
+
+[[ -r "$HOME/.dotfile_secrets/profile" ]] && source "$HOME/.dotfile_secrets/profile"
