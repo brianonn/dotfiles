@@ -39,7 +39,7 @@ rmkernel () {
    local cur_kernel=$(uname -r|sed 's/-*[a-z]//g'|sed 's/-386//g')
    local kernel_pkg="linux-(image|headers|ubuntu-modules|restricted-modules)"
    local meta_pkg="${kernel_pkg}-(generic|i386|server|common|rt|xen|ec2)"
-   sudo dpkg -P --force-all $(dpkg -l | egrep --color=no $kernel_pkg | egrep --color=no -v "${cur_kernel}|${meta_pkg}" | awk '{print $2}')
+   sudo dpkg -P --force-all $(dpkg -l | ${real_grep} -E --color=no $kernel_pkg | ${real_grep} -E --color=no -v "${cur_kernel}|${meta_pkg}" | awk '{print $2}')
    sudo update-grub
 }
 
@@ -153,7 +153,7 @@ alias b=book
 alias rs='rsync -az --dry-run --delete-after --out-format="[%t]:%o:%f:Last Modified %M" source destination | ${real_less}'
 
 ## CSCOPE AND CTAGS
-alias cstags='/bin/rm -f cscope.* tags etags TAGS ETAGS ; find . \( -name "*.[cChHsS]" -o -name "*.[chCH]pp" -o -name "*.asm" -o -name "*.ASM" -o -name "*.py" -o -name "*.java" \) -print | egrep -v '[/][.]?#.*#?$' > cscope.files ; cscope -ubq -i cscope.files ; ctags -e --extra=+q -f ETAGS -L cscope.files ; ctags -f TAGS -L cscope.files; ccglue -o cctree.out -i cctree.idx'
+alias cstags='/bin/rm -f cscope.* tags etags TAGS ETAGS ; find . \( -name "*.[cChHsS]" -o -name "*.[chCH]pp" -o -name "*.asm" -o -name "*.ASM" -o -name "*.py" -o -name "*.java" \) -print | /usr/bin/grep -E -v '[/][.]?#.*#?$' > cscope.files ; cscope -ubq -i cscope.files ; ctags -e --extra=+q -f ETAGS -L cscope.files ; ctags -f TAGS -L cscope.files; ccglue -o cctree.out -i cctree.idx'
 
 alias llpkg='dpkg-query -W -f="\${Installed-Size}\t\${binary:Package}\n" | sort -n'
 alias shred='shred -v -n 3 -u -f'
@@ -186,9 +186,11 @@ alias gb='git branch'
 alias gba='git branch -a'
 alias gl='git log --oneline --abbrev-commit --graph --decorate'
 alias gla='git log --oneline --abbrev-commit --graph --all --decorate'
-alias gcp='git add -u && git commit -m "checkpoint $(date -u +%FT%TZ)" && git push'
+alias gcp='git add -u && git commit -m "checkpoint $(date -u +%FT%TZ)" '
+alias gcpp='git add -u && git commit -m "checkpoint $(date -u +%FT%TZ)" && git push'
 alias gcpw='watch -n 3600 "git add -A && git commit -m \"checkpoint $(date -u +%FT%TZ)\" && git push"'
 alias gitu='git checkout master && git pull --rebase && git checkout - && git rebase master'
+alias git-remove-untracked='git fetch --prune && git branch -r | awk "{print \$1}" | /usr/bin/grep -E --color=no -v -f /dev/fd/0 <(git branch -vv | grep --color=no origin) | awk "{print \$1}" | xargs -n1 echo git branch -d'
 
 # google shell
 alias gsh="$HOME/src/perl/goosh.pl"
@@ -312,3 +314,6 @@ alias glance=glances
 
 # list all the fonts available
 alias fonts="fc-list | awk '{\$1=\"\"}1' | cut -d: -f1 | sort| uniq"
+alias start_ubuntu='vmrun start ~/Virtual\ Machines.localized/Ubuntu\ 64-bit.vmwarevm/Ubuntu\ 64-bit.vmx nogui'
+alias start_windows='vmrun start ~/Virtual\ Machines.localized/Windows\ 10\ x64.vmwarevm/Windows\ 10\ x64.vmx'
+
