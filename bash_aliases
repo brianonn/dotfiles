@@ -317,3 +317,5 @@ alias fonts="fc-list | awk '{\$1=\"\"}1' | cut -d: -f1 | sort| uniq"
 alias start_ubuntu='vmrun start ~/Virtual\ Machines.localized/Ubuntu\ 64-bit.vmwarevm/Ubuntu\ 64-bit.vmx nogui'
 alias start_windows='vmrun start ~/Virtual\ Machines.localized/Windows\ 10\ x64.vmwarevm/Windows\ 10\ x64.vmx'
 
+# termbin.com without netcat
+alias tb="(exec 3<>/dev/tcp/termbin.com/9999; cat >&3; cat <&3; exec 3<&-)"
