@@ -212,9 +212,8 @@ xterm*|rxvt*)
 esac
 
 # Alias definitions.
-# You may want to put all your additions into a separate file like
+# put all your additions into a separate file like
 # ~/.bash_aliases, instead of adding them here directly.
-# See /usr/share/doc/bash-doc/examples in the bash-doc package.
 
 if [ -f ~/.bash_aliases ]; then
     . ~/.bash_aliases
@@ -231,7 +230,7 @@ fi
 
 export DOCKER_HOST=
 export GOPATH=
-# EPCTL_PROFILE=/home/brian/go/src/github.com/etherparty/epctl/scripts/bash_profile
+# EPCTL_PROFILE=${HOME}/go/src/github.com/etherparty/epctl/scripts/bash_profile
 #[ -r "$EPCTL_PROFILE" ] && source $EPCTL_PROFILE
 
 if [ -f ~/.git-completion.bash ]; then
@@ -254,12 +253,29 @@ export NVM_DIR="$HOME/.nvm"
 # added by travis gem
 [ -f $HOME/.travis/travis.sh ] && source $HOME/.travis/travis.sh
 
+export PATH=$HOME/.gem/ruby/2.6.0/bin:$PATH
+
+source ~/Projects/MBI/microbiome-insights/devops/scripts/00-shell-env.sh
+
 # The next line updates PATH for the Google Cloud SDK.
-if [ -f "$HOME/Library/GoogleCloudSDK/path.bash.inc" ]; then . "$HOME/Library/GoogleCloudSDK/path.bash.inc"; fi
+if [ -f '${HOME}/Projects/MBI/microbiome-insights/devops/bin/google-cloud-sdk/path.bash.inc' ]; then . '${HOME}/Projects/MBI/microbiome-insights/devops/bin/google-cloud-sdk/path.bash.inc'; fi
 
 # The next line enables shell command completion for gcloud.
-if [ -f "$HOME/Library/GoogleCloudSDK/completion.bash.inc" ]; then . "$HOME/Library/GoogleCloudSDK/completion.bash.inc"; fi
+if [ -f '${HOME}/Projects/MBI/microbiome-insights/devops/bin/google-cloud-sdk/completion.bash.inc' ]; then . '${HOME}/Projects/MBI/microbiome-insights/devops/bin/google-cloud-sdk/completion.bash.inc'; fi
 
 export PATH=$HOME/.gem/ruby/2.6.0/bin:$PATH
 
+LOCATE_PATH=
+for i in ${HOME}/.mlocate/*.db; do
+    LOCATE_PATH="$LOCATE_PATH:$i"
+done
+export LOCATE_PATH
+findroms() {  mlocate -i --regex "roms.*$1"; }
+
+# 8 colors for jq(1)
+# null:false:true:numbers:strings:arrays:objects:keys
+export JQ_COLORS="1;36:0;36:0;36:0;33:0;32:0;37:0;37:0;37"
+
+## keep this line at the end
 [[ -r $HOME/.dotfiles_secrets/bashrc ]] && source $HOME/.dotfiles_secrets/bashrc
+

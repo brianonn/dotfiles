@@ -61,13 +61,6 @@ fi
 append_path "$HOME/.cargo/bin"
 
 
-LOCATE_PATH=
-for i in /home/brian/.mlocate/*.db; do
-    LOCATE_PATH="$LOCATE_PATH:$i"
-done
-export LOCATE_PATH
-findroms() {  mlocate -i --regex "roms.*$1"; }
-
 # include arm tools for cross compiling arm source for embedded devices
 append_path "$HOME/arm/tools:$HOME/arm/tools/gcc-arm-none-eabi-4_7-2013q1/bin"
 append_path "/opt/WebStorm-135.547/bin"

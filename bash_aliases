@@ -161,6 +161,7 @@ alias smath='/opt/smath-mono/smath.sh'
 alias tff='torify32 /usr/local/firefox/firefox'
 alias t='rxvt-unicode &'
 alias vcc='valac'
+alias tf=terraform
 
 alias quartus='/opt/altera/13.0sp1/quartus/bin/quartus'
 alias ff='firefox'

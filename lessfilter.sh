@@ -18,10 +18,12 @@
 #     gzip
 #     bzip2
 #     tar
-#     vue-lexer (for .vue files) 
-#               
+#     vue-lexer (for .vue files)
+#
 # TODO: There is only two hardcoded style choices right now. Ideally,
 #       the style should be selected based on mime-type or file extension
+#
+# TODO: add LESSFILTER_HTML_VIEWER env variable to use "lynx" or "firefox" or "chrome" , etc
 
 default_style="monokai"
 bash_style="paraiso-dark"
@@ -29,14 +31,32 @@ bash_style="paraiso-dark"
 hexdump=$(which hexdump)
 
 case "$1" in
-    # markdown with pandoc
-    *.1|*.rst|*.[mM][dD]|*.markdown)
-    pandoc -s -f markdown -t man "$1" | groff -T utf8 -man -t
-    exit 0
-    ;;
+	# man pages
+	*.[1-9] | *.[1-9][a-z])
+		groff -T utf8 -man -t "$1"
+		exit 0
+		;;
 
-    # syntax highlighting using Pygments. Pygments handles quite a lot ! 
-    Dockerfile|*.[ch]|*.[ch]pp|*.[ch]xx|*.cc|*.hh|*.go|*.py|*.pl|*.rb|*.R|*.asm|*.java| \
+	# compressed man pages
+	*.[1-9].gz | *.[1-9][a-z].gz)
+		gzip -dc "$1" | groff -T utf8 -man -t
+		exit 0
+		;;
+
+	# ReStructured Text
+	*.rst)
+		pandoc -s -f rst -t html "$1" | lynx --stdin
+		exit 0
+		;;
+
+		# markdown with pandoc
+	*.[mM][dD]|*.markdown)
+		pandoc --metadata 'title=README.md' -s -f markdown -t html "$1"
+		exit 0
+		;;
+
+    # syntax highlighting using Pygments. Pygments handles quite a lot !
+    Dockerfile|*.[ch]|*.[ch]pp|*.[ch]xx|*.cc|*.hh|*.go|*.py|*.pl|*.R|*.asm|*.java| \
         *.awk|*.sql|*.el|*.clj|*.nim| *.pas|*.p| *.php | *.f | \
         *.fortran | *.fth | *.4th | *.patch | *.diff | *.css | *.rs | *.vue | \
         *.js|*.scss|*.jade|*.htm|*.html|*.json|*.ini|*.yml|*.yaml|*.v|*.sv)
@@ -44,8 +64,8 @@ case "$1" in
     exit 0
     ;;
 
-    # Vagrantfile, Capfile, Rakefile, Gemfile, Guardfile, *.ru is ruby
-    [vV]agrantfile | [Cc]apfile | [Rr]akefile | [Gg]emfile | [Gg]uardfile | *.ru)
+    # Vagrantfile, Capfile, Rakefile, Gemfile, Guardfile, *.rb, *.ru is ruby
+    [vV]agrantfile | [Cc]apfile | [Rr]akefile | [Gg]emfile | [Gg]uardfile | *.rb | *.ru)
     pygmentize -f 16m -l ruby  -O style="${default_style}" "$1"
     exit 0
     ;;
@@ -59,6 +79,12 @@ case "$1" in
     # sh and bash using Pygments
     *.sh|.profile|*.bash*)
     pygmentize -f 16m -l sh -O style="${bash_style}" "$1"
+    exit 0
+    ;;
+
+    # xml and policy-kit using Pygments
+    *.xml|*.policy)
+    pygmentize -f 16m -l xml -O style="${default_style}" "$1"
     exit 0
     ;;
 
@@ -78,11 +104,16 @@ case "$1" in
     ;;
 
     #  check the mime type last
+    #  TODO: maybe classify all files first?
     *)
-    mimetype=$(file -i -L -F'|' "$1" )
+    mimetype=$(file -b -i -L "$1" )
     case ${mimetype} in
+      *text/xml*|*/*+xml*)
+        pygmentize -f 16m -l xml -O style="${default_style}" "$1"
+        exit 0
+        ;;
       *text/lisp*|*text/x-lisp*)
-	pygmentize -f 16m -l lisp -O style="${bash_style}" "$1"
+        pygmentize -f 16m -l lisp -O style="${bash_style}" "$1"
         exit 0
         ;;
       *application/zip*binary)
