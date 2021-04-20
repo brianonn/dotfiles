@@ -1135,6 +1135,13 @@ directory to make multiple eshell windows easier."
 (add-to-list 'desktop-modes-not-to-save 'info-lookup-mode)
 (add-to-list 'desktop-modes-not-to-save 'fundamental-mode)
 
+;; forward to next whitespace
+(defun skip-to-next-whitespace ()
+  "Move point forward to next whitespace character."
+  (interactive)
+  (skip-syntax-forward "^\s"))
+(global-set-key (kbd "M-]") 'skip-to-next-whitespace)
+
 (setq-default buffer-quit-function
    #'(lambda ()
        (if (yes-or-no-p "Are you trying to close all windows? ")
