@@ -11,6 +11,9 @@
 
 # echo I am the profile
 
+## try stopping the Apple Music App from launching each time I turn on my bluetooth headphones
+[[ $(which launchctl) ]] && launchctl unload -w /System/Library/LaunchAgents/com.apple.rcd.plist > /dev/null 2>&1
+
 # Start an ssh agent for the login session
 ssh_env="$HOME/.ssh/environment"
 start_agent () {
