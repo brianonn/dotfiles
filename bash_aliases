@@ -206,9 +206,9 @@ alias cj='clojure'
 alias cji='clojure16'
 
 ## android dev
-alias android="$HOME/android-sdk-linux/tools/android"
-alias adb="$HOME/android-sdk-linux/platform-tools/adb"
-alias fastboot="$HOME/android-sdk-linux/platform-tools/fastboot"
+alias android="$HOME/Android/Sdk/tools/android"
+alias adb="$HOME/Android/Sdk/platform-tools/adb"
+alias fastboot="$HOME/Android/Sdk/platform-tools/fastboot"
 
 # lattice diamond for ECP3 and MACHXO
 alias diamond='sudo rmmod ftdi_sio usbserial; fakemac 00:1a:4d:92:e6:dc /opt/usr/local/diamond/2.2_x64/bin/lin64/diamond'
