@@ -18,10 +18,25 @@ tramp
 [._]s[a-w][a-z]
 # session
 Session.vim
-# temporary
 .netrwhist
+vim/autobackups/
+vim/.netrwhist
+
+# temporary
+*~
 *.rej
 *.bak
 *.tmp
 *.patch
-*~
+*.gho
+*.ori
+*.orig
+
+## Apple
+# General
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Thumbnails
+._*
