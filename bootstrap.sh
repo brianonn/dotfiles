@@ -134,19 +134,28 @@ YASSNIPPETDIR="$HOME/.emacs.d/snippets"
 $RM -fr $YASSNIPPETDIR
 git clone $GITHUB $YASSNIPPETDIR
 
-## on linux, setup local nemo actions
+## on linux
 if test $machine = Linux; then
-    mkdir -p ~/.local/share/nemo/actions 2>/dev/null 1>&2
-    /bin/cp -pr --remove-destination local/share/nemo/actions/* ~/.local/share/nemo/actions/ 2>/dev/null 1>&2
+    if test -x /usr/bin/nemo ]] ; then
+        ## set up local nemo actions
+        mkdir -p ~/.local/share/nemo/actions 2>/dev/null 1>&2
+        /bin/cp -pr --remove-destination local/share/nemo/actions/* ~/.local/share/nemo/actions/ 2>/dev/null 1>&2
+    fi
+    ##
+    ## TODO
+    ## setup tiling window manager
+    ## awesome? xmonad? whatever I stick with
+    ##
 
     # set up screenshot savedir
     SCREENSHOTDIR="$HOME/Pictures/Screenshots"
-    /bin/mkdir -p "$SCREENSHOTDIR" 2>/dev/null 1>&2
-    gsettings set org.gnome.gnome-screenshot auto-save-directory "$SCREENSHOTDIR" 2>/dev/null 1>&2
+    /usr/bin/mkdir -p "$SCREENSHOTDIR" 2>/dev/null 1>&2
+    [ -x /usr/bin/gsettings ] && gsettings set org.gnome.gnome-screenshot auto-save-directory "$SCREENSHOTDIR" 2>/dev/null 1>&2
 
     ##
     ## set up FIDO U2F key support
     ## see also: https://developers.yubico.com/libfido2/
+    ## TODO: is this still necessary in 2023?
     ##
     UDEV_VERSION="$(sudo udevadm --version)"
     if test $UDEV_VERSION -lt 188; then
@@ -154,12 +163,12 @@ if test $machine = Linux; then
     else
         GITHUB_RULES="master/70-u2f.rules"
     fi
-    RULES=70-u2f.rules
-    wget -q -O/tmp/$RULES "https://raw.githubusercontent.com/Yubico/libu2f-host/$GITHUB_RULES"
+    RULEFILE=70-u2f.rules
+    wget -q -O/tmp/$RULEFILE "https://raw.githubusercontent.com/Yubico/libu2f-host/$GITHUB_RULES"
     if test $? -eq 0; then
-        if test -d /etc/udev/rules.d/; then
-            sudo cp /tmp/$RULES /etc/udev/rules.d/$RULES
-            sudo chmod 644 /etc/udev/rules.d/$RULES
+        if test -s /tmp/$RULEFILE && test -d /etc/udev/rules.d/; then
+            sudo cp /tmp/$RULEFILE /etc/udev/rules.d/$RULEFILE
+            sudo chmod 644 /etc/udev/rules.d/$RULEFILE
             sudo udevadm control --reload-rules
         fi
     fi

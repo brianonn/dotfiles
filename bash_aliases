@@ -7,19 +7,32 @@
 # This file should never be pushed up to a public server in the dotfiles.
 [[ -r ~/.dotfile_secrets/bash_aliases ]] && source ~/.dotfile_secrets/bash_aliases
 
-real_less=$(which less 2>/dev/null)
-real_tail=$(which tail 2>/dev/null)
-real_grep=$(which grep 2>/dev/null)
-real_ls=$(which gls 2>/dev/null) || real_ls=$(which ls 2>/dev/null)
+real() {
+    f=$(type -a "$1" 2>/dev/null) || return 1
+    echo $f | awk 'END { print $NF }'
+}
+export -f real
+
+# alias which according to how it says to do it in the which man page
+which() {
+    (
+        alias
+        declare -f
+    ) | /usr/bin/which --tty-only --read-alias --read-functions --show-tilde --show-dot $@
+}
+export -f which
+
+real_less=$(real less)
+real_tail=$(real tail)
+real_grep=$(real grep)
+real_ls=$(real gls) || real_ls=$(real ls)
 
 #
 # TODO: make an alias for counting extensions in a directory (or list of directories)
-countext () {
+countext() {
     local dirs="$@"
     find $dirs -type f | sed -re 's/^.*\.(.{1,5})$/\1/p; d' | tr 'A-Z' 'a-z' | sort | uniq -c | sort -n
 }
-
-
 
 # functions as aliases
 
@@ -31,16 +44,16 @@ isSystemd() {
 }
 
 bu() {
- cp "$@" "$@".backup-`date +%Y%m%d`&& echo "`date +%Y-%m-%d` backed up $PWD/$@" >> ~/.backups.log;
+    cp "$@" "$@".backup-$(date +%Y%m%d) && echo "$(date +%Y-%m-%d) backed up $PWD/$@" >>~/.backups.log
 }
 
 # remove all kernels except the running one
-rmkernel () {
-   local cur_kernel=$(uname -r|sed 's/-*[a-z]//g'|sed 's/-386//g')
-   local kernel_pkg="linux-(image|headers|ubuntu-modules|restricted-modules)"
-   local meta_pkg="${kernel_pkg}-(generic|i386|server|common|rt|xen|ec2)"
-   sudo dpkg -P --force-all $(dpkg -l | ${real_grep} -E --color=no $kernel_pkg | ${real_grep} -E --color=no -v "${cur_kernel}|${meta_pkg}" | awk '{print $2}')
-   sudo update-grub
+rmkernel() {
+    local cur_kernel=$(uname -r | sed 's/-*[a-z]//g' | sed 's/-386//g')
+    local kernel_pkg="linux-(image|headers|ubuntu-modules|restricted-modules)"
+    local meta_pkg="${kernel_pkg}-(generic|i386|server|common|rt|xen|ec2)"
+    sudo dpkg -P --force-all $(dpkg -l | ${real_grep} -E --color=no $kernel_pkg | ${real_grep} -E --color=no -v "${cur_kernel}|${meta_pkg}" | awk '{print $2}')
+    sudo update-grub
 }
 
 ## crazy web server in shell
@@ -49,12 +62,12 @@ webserver() {
     pipe=/tmp/pipe.$port.$RANDOM.$$
     rm -f $pipe
     mkfifo $pipe
-    while :
-        do {
-            read line < $pipe
+    while :; do
+        {
+            read line <$pipe
             echo -e "HTTP/1.1 200 OK\r\nServer: $SHELL $BASH_VERSION\r\nContent-Type: text/plain\r\nConnection: close\r\n"
             echo $(date)
-        } | ncat -l $port > $pipe
+        } | ncat -l $port >$pipe
     done
     rm -f $pipe
 }
@@ -69,42 +82,38 @@ webserver() {
 alias pw=mkpw
 
 # random 16 lowercase letters
-alias mkpw='cat /dev/urandom | LC_CTYPE=C tr -dc a-z | fold -w 16 | head -n 1'
+alias mkpw='$HOME/bin/mkpw'
 
-fc()
-{
-  old="$1"
-  new="$2"
-  cmp -l $old $new | \
-       gawk '{printf "%08X %02X %02X\n", $1, strtonum(0$2), strtonum(0$3)}'
+fc() {
+    old="$1"
+    new="$2"
+    cmp -l $old $new |
+        gawk '{printf "%08X %02X %02X\n", $1, strtonum(0$2), strtonum(0$3)}'
 }
 
-pid2cmd()
-{
-  c=$(ps -p "$1" -o command=) && echo $c
+pid2cmd() {
+    c=$(ps -p "$1" -o command=) && echo $c
 }
 
 # grep for a process
-psgrep()
-{
-  str="$1"
-  ps axo pid,ppid,ruser,euser,stat,pcpu,pmem,stime,command | awk 'BEGIN {s=1} NR==1 {hdr=$0} $9 ~ /'"${str}"'/ { if(s) {print hdr} print $0;s=0} END {exit s}'
-  if test "$?" = 1; then
-    echo "no matching commands"
-  fi
+psgrep() {
+    str="$1"
+    ps axo pid,ppid,ruser,euser,stat,pcpu,pmem,stime,command | awk 'BEGIN {s=1} NR==1 {hdr=$0} $9 ~ /'"${str}"'/ { if(s) {print hdr} print $0;s=0} END {exit s}'
+    if test "$?" = 1; then
+        echo "no matching commands"
+    fi
 }
 
 # show the complete docker process tree
-psdocker()
-{
+psdocker() {
     pid=$(ps axo pid,cmd | sed -e 's,\([0-9][0-9]*\) /usr/bin/docker.*,\1,p' -e d)
     if test "1$pid" -ne 1; then
         pstree -au $pid
     fi
 }
 
-dmesg_with_human_timestamps () {
-    local dmesg_bin=$(type -a dmesg | /usr/bin/tail -n 1 | awk '{ print $NF }')
+dmesg_with_human_timestamps() {
+    local dmesg_bin=$(type -a dmesg dmesg.wheel 2>/dev/null | awk 'END { print $NF }')
     $dmesg_bin "$@" | perl -w -e 'use strict;
         my ($uptime) = do { local @ARGV="/proc/uptime";<>}; ($uptime) = ($uptime =~ /^(\d+)\./);
         foreach my $line (<>) {
@@ -113,13 +122,13 @@ dmesg_with_human_timestamps () {
 }
 alias dmesg=dmesg_with_human_timestamps
 
-lsR () {
+lsR() {
     if test "1$1" -eq "1"; then
-      dir=.
+        dir=.
     else
-      dir="$1"
+        dir="$1"
     fi
-    ls -lRU --time-style="+%Y-%m-%d,%H:%M:%S" "$1" | awk '  \
+    /bin/ls -lRU -I node_modules -I .git --time-style="+%Y-%m-%d,%H:%M:%S" "$dir" | awk '  \
         /:$/&&f{s=$0;f=0}                       \
         /:$/&&!f{sub(/:$/,"");s=$0;f=1;next}    \
         /^total/ {next}                         \
@@ -128,24 +137,26 @@ lsR () {
 }
 
 recent() {
-  lsR $1 | sort -r | head -20
+    lsR $1 | sort -r | head -20
 }
 
 # convert a markdown file to HTML using pandoc and a decent CSS for style
 mdtohtml() {
-  pandoc -f markdown -t html -s -c ~/Documents/buttondown.css --self-contained  "$1" -o "${1%md}.html"
+    pandoc --from=markdown+smart --to=html5 \
+        --embed-resources --standalone \
+        --css=/home/brian/Documents/styling.css -V lang=en --mathjax \
+        "$1" -o "${1%.md}.html"
 }
 # convert markdown to HTML and view it
 viewmd() {
-  mdtohtml "$1"
-  xdg-open "${1%md}.html"
+    mdtohtml "$1"
+    xdg-open "${1%.md}.html"
 }
 
-function serve {
-  port="${1:-3000}"
-  ruby -run -e httpd . -p $port
+function serve() {
+    port="${1:-3000}"
+    ruby -run -e httpd . -p $port
 }
-
 
 alias backup='rsync -av --progress --exclude='\''*/Downloads/In-Progress/'\'' --exclude='\''*/Downloads/Torrents/'\'' --exclude='\''*/Downloads/Completed/'\'' --exclude='\''*/.cache/'\'' --exclude='\''*/.thumb*/'\'' $HOME /zpool0/downloads/'
 alias book=$HOME/bin/findebook.sh
@@ -227,7 +238,7 @@ alias cd=pushd
 alias gld-solo-grid="./cgminer -c ~/.bfgminer/goldcoin.conf --gridseed-options='freq=800'"
 
 color_opt=''
-if [[ $(tput colors) > 0 ]] ; then
+if [[ $(tput colors) > 0 ]]; then
     color_opt='--color=always'
     if [ -x /usr/bin/dircolors ]; then
         [ -r ~/.dircolors ] && eval "$(dircolors -b ~/.dircolors)" || eval "$(dircolors -b)"
@@ -243,31 +254,26 @@ ls_pager="${real_less} -S -R -X -F"
 ls_bin="${real_ls} -C -F --group-directories-first $color_opt"
 
 alias more=less
-[ -x $(which colortail 2>/dev/null) ] && alias tail=colortail
+[ -x $(real colortail 2>/dev/null) ] && alias tail=colortail
 
 alias ls=ls
 unalias ls
-ls  () { $ls_bin "$@" | $ls_pager ; }
-l   () { $ls_bin -C "$@" | $ls_pager ; }
-ll  () { $ls_bin -l "$@" | $ls_pager ; }		# long list
-lt  () { $ls_bin -lt "$@" | ${real_tail} -20 ; }	# time order long list
-lr  () { $ls_bin -lrt "$@" | ${real_tail} -20 ; } 	# reverse time ordered long list
-lx  () { $ls_bin -X -C --si "$@" | $ls_pager ; }	# list ordered by extension
-lw  () { $ls_bin -w $(tput cols) "$@"; }		# list wide
-### ll  () { $ls_bin -l "$@" | $ls_pager ; }
-### lll () { $ls_bin -lt "$@" | /usr/bin/tail -20 | $ls_pager; }
-### llr () { $ls_bin -lrt "$@" | /usr/bin/tail -20 | $ls_pager; }
-### alias lr=llr
-### llx () { $ls_bin -X -C --si "$@" | $ls_pager ; }
-### lw  () { $ls_bin -w $(tput cols) "$@" | $ls_pager ; }
+ls() { $ls_bin "$@" | $ls_pager; }
+l() { $ls_bin -C "$@" | $ls_pager; }
+ll() { $ls_bin -l "$@" | $ls_pager; }             # long list
+lt() { $ls_bin -lt "$@" | ${real_tail} -20; }     # time order long list
+lr() { $ls_bin -lrt "$@" | ${real_tail} -20; }    # reverse time ordered long list
+lx() { $ls_bin -X -C --si "$@" | $ls_pager; }     # list ordered by extension
+llx() { $ls_bin -X -C --si -l "$@" | $ls_pager; } # long list ordered by extension
+lw() { $ls_bin -w $(tput cols) "$@"; }            # list wide
 
 alias findgrep='find . -type f \( -name \*.git -o -name .snaphot -o -name .bak -prune \) -print0 | xargs -0 grep -in'
 
 # helpful docker aliases
 alias dclr='_i=$(docker ps -qa);[ ! -z "$_i" ] && docker rm $_i; _i=$(docker images -q --filter dangling=true); [ ! -z "$_i" ] && docker rmi $_i'
-alias vclr='docker volume rm `docker volume ls -q -f dangling=true`'
-alias   d1="docker ps | awk 'NR==2 { print \$1 }'"
-alias  dip="docker inspect --format='{{.NetworkSettings.IPAddress}}' \`d1\`"
+alias dvclr='docker volume rm `docker volume ls -q -f dangling=true`'
+alias d1="docker ps | awk 'NR==2 { print \$1 }'"
+alias dip="docker inspect --format='{{.NetworkSettings.IPAddress}}' \`d1\`"
 
 #tmux pane titles
 #alias np=printf "'\033]2;%s\033'" "'title goes here'"
@@ -286,9 +292,11 @@ alias mdig='dig -t mx +noall +answer'
 alias cdig='dig -t cname +noall +answer'
 alias digg='dig +all'
 
+# Linux Mint pastebin maybe not working anymore -- time to self-host
 alias mpb='/bin/nc paste.linuxmint.com 9999 <<< "${*:-`cat`}"'
 
 alias iso8601='date -u +%FT%TZ'
+alias local8601='date +"%Y-%m-%dT%H:%M:%S%z"'
 alias localtime='date "+%F %T %Z"'
 alias utctime='date -u "+%F %T %Z"'
 alias utc=utctime
@@ -303,12 +311,17 @@ alias size='du -skh'
 alias ipy='ipython notebook --pylab inline'
 alias bcryptpass='htpasswd -nBC 10 "" | tr -d ":\n"'
 alias qu='qemu-system-x86_64 -machine accel=kvm:tcg -m 4096 -hda /dev/sdc -net tap -net nic --monitor stdio'
-alias mount='mount | column -t'
+
+# mount output with nice columns
+alias lsmount="/usr/bin/mount | sort | sed -e 's/ on / /;s/ type / /' | column -t -W 4 -T 4 -N 'FILE SYSTEM','MOUNT POINT','TYPE','OPTIONS'"
+alias lsmnt=lsmount
+function mount() { if [ $# -eq 0 ]; then lsmount; else /usr/bin/mount "$@"; fi; }
+
 alias diff='colordiff -w -t --tabsize=4'
 
 # hub
 # brew install hub
-[ -x $(which hub 2>/dev/null) ] && alias git=hub
+[ -x $(real hub) ] && alias git=hub
 
 # glances monitors system process and io and docker and temps
 alias glance=glances
@@ -320,3 +333,11 @@ alias start_windows='vmrun start ~/Virtual\ Machines.localized/Windows\ 10\ x64.
 
 # termbin.com without netcat
 alias tb="(exec 3<>/dev/tcp/termbin.com/9999; cat >&3; cat <&3; exec 3<&-)"
+
+# urxvt only: Change the font and size: Usage: fontsize 22 or fontsize 12
+function fontsize() {
+    printf '\33]50;%s%d\007' "xft:Dejavu Sans Mono:size=$1::antialias=false"
+}
+
+alias path='echo -e ${PATH//:/\\n}'
+alias tree='tree -I ".git|node_modules|.history"'

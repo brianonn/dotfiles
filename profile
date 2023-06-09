@@ -1,7 +1,9 @@
 # -*- mode: sh; c-basic-offset: 4; tab-width: 4; indent-tabs-mode: nil -*-
+#
 # ~/.profile: executed by the command interpreter for login shells.
 # This file is not read by bash(1), if ~/.bash_profile or ~/.bash_login
 # exists.
+#
 # see /usr/share/doc/bash/examples/startup-files for examples.
 # the files are located in the bash-doc package.
 
@@ -10,6 +12,9 @@
 #umask 022
 
 # echo I am the profile
+
+# what's my IP addr
+IPADDR=$(ip -j a|jq -r '.[]|select(.ifname|test("^wl"))|.addr_info[].local')
 
 # Start an ssh agent for the login session
 ssh_env="$HOME/.ssh/environment"

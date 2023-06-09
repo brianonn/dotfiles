@@ -1,7 +1,7 @@
 
 ! my customisations
 XTerm*faceName: Droid Sans Mono
-XTerm*faceSize: 12
+XTerm*faceSize: 14
 
 XTerm*allowSendEvents: True
 XTerm*alwaysHighlight: yes
@@ -96,29 +96,6 @@ URxvt*color14 : #34E2E2
 URxvt*color7  : #D3D7CF
 URxvt*color15 : #EEEEEC
 !
-!!urxvt fonts: 
-!
-! FONTS
-! $ fc-list lists available fonts
-!
-!
-!URxvt*font: xft:ProFontWindows:style=Regular:pixelsize=12
-!URxvt*boldFont: xft:ProFontWindows:style=Bold:pixelsize=12
-!URxvt*italicFont: xft:ProFontWindows:style=Italic:pixelsize=12
-!URxvt*boldItalicFont: xft:ProFontWindows:style=Bold Italic:pixelsize=1
-!
-URxvt*font: xft:Droid Sans Mono-12:style=Book:pixelsize=12
-URxvt*boldFont: xft:Droid Sans Mono-12:style=Bold:pixelsize=12
-URxvt*italicFont: xft:Droid Sans Mono-12:style=Oblique:pixelsize=12
-URxvt*boldItalicFont: xft:Droid Sans Mono-12:style=Bold Oblique:pixelsize=1
-URxvt*letterSpace: -2
-!
-!URxvt*font: xft:Inconsolata:pixelsize=12
-!URxvt*boldFont: xft:Inconsolata:bold:pixelsize=12
-!URxvt*italicFont: xft:Inconsolata:italic:pixelsize=12
-!URxvt*boldItalicFont: xft:Inconsolata:bold italic:pixelsize=12
-!
-!
 !!urxvt extensions:
 !
 URxvt.perl-lib: /home/brian/.urxvt/plugins
@@ -162,7 +139,25 @@ URxvt.tabbed.autohide:  yes
 URxvt.tabbed.new-button:  no
 URxvt.tabbed.title: no
 
-! URxvt*font: xft:Liberation Mono:style=Regular:pixelsize=12
-! URxvt*boldFont: xft:Liberation Mono:style=Bold:pixelsize=12
-! URxvt*italicFont: xft:Liberation Mono:style=Italic:pixelsize=12
-! URxvt*boldItalicFont: xft:Liberation Mono:style=Bold Italic:pixelsize=12
+!!urxvt fonts: 
+!
+! FONTS
+! $ fc-list lists available fonts
+!
+! URxvt*letterSpace: -1
+!
+! URxvt*font: xft:ProFontWindows:style=Regular:pixelsize=12
+! URxvt*boldFont: xft:ProFontWindows:style=Bold:pixelsize=12
+! URxvt*italicFont: xft:ProFontWindows:style=Italic:pixelsize=12
+! URxvt*boldItalicFont: xft:ProFontWindows:style=Bold Italic:pixelsize=1
+!
+! URxvt*font: xft:Liberation Mono:style=Regular:pixelsize=14
+! URxvt*boldFont: xft:Liberation Mono:style=Bold:pixelsize=14
+! URxvt*italicFont: xft:Liberation Mono:style=Italic:pixelsize=14
+! URxvt*boldItalicFont: xft:Liberation Mono:style=Bold Italic:pixelsize=14
+!
+URxvt*font: xft:Terminus:style=Roman:pixelsize=14
+URxvt*boldFont: xft:Terminus:style=Bold:pixelsize=14
+URxvt*italicFont: xft:Terminus:style=Oblique:pixelsize=14
+URxvt*boldItalicFont: xft:Terminus:style=Bold Oblique:pixelsize=14
+

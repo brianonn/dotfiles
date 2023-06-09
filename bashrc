@@ -279,3 +279,5 @@ export JQ_COLORS="1;36:0;36:0;36:0;33:0;32:0;37:0;37:0;37"
 ## keep this line at the end
 [[ -r $HOME/.dotfiles_secrets/bashrc ]] && source $HOME/.dotfiles_secrets/bashrc
 
+
+[ -f "/home/brian/.ghcup/env" ] && source "/home/brian/.ghcup/env" # ghcup-env
