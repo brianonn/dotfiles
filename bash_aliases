@@ -341,3 +341,22 @@ function fontsize() {
 
 alias path='echo -e ${PATH//:/\\n}'
 alias tree='tree -I ".git|node_modules|.history"'
+if [[ -x /usr/bin/nvim ]]; then
+    alias vi=nvim
+    alias vim=nvim
+fi
+
+lfcd () {
+    tmp="$(mktemp)"
+    # `command` is needed in case `lfcd` is aliased to `lf`
+    command lf -last-dir-path="$tmp" "$@"
+    if [ -f "$tmp" ]; then
+        dir="$(cat "$tmp")"
+        rm -f "$tmp"
+        if [ -d "$dir" ]; then
+            if [ "$dir" != "$(pwd)" ]; then
+                cd "$dir"
+            fi
+        fi
+    fi
+}
