@@ -253,15 +253,13 @@ export NVM_DIR="$HOME/.nvm"
 # added by travis gem
 [ -f $HOME/.travis/travis.sh ] && source $HOME/.travis/travis.sh
 
-export PATH=$HOME/.gem/ruby/2.6.0/bin:$PATH
-
-source ~/Projects/MBI/microbiome-insights/devops/scripts/00-shell-env.sh
+#source ~/Projects/MBI/microbiome-insights/devops/scripts/00-shell-env.sh
 
 # The next line updates PATH for the Google Cloud SDK.
-if [ -f '${HOME}/Projects/MBI/microbiome-insights/devops/bin/google-cloud-sdk/path.bash.inc' ]; then . '${HOME}/Projects/MBI/microbiome-insights/devops/bin/google-cloud-sdk/path.bash.inc'; fi
+if [ -f "${HOME}/google-cloud-sdk/path.bash.inc" ]; then . "${HOME}/google-cloud-sdk/path.bash.inc"; fi
 
 # The next line enables shell command completion for gcloud.
-if [ -f '${HOME}/Projects/MBI/microbiome-insights/devops/bin/google-cloud-sdk/completion.bash.inc' ]; then . '${HOME}/Projects/MBI/microbiome-insights/devops/bin/google-cloud-sdk/completion.bash.inc'; fi
+if [ -f "${HOME}/google-cloud-sdk/completion.bash.inc" ]; then . "${HOME}/google-cloud-sdk/completion.bash.inc"; fi
 
 export PATH=$HOME/.gem/ruby/2.6.0/bin:$PATH
 
