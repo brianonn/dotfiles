@@ -57,9 +57,9 @@ case "$1" in
 
     # syntax highlighting using Pygments. Pygments handles quite a lot !
     Dockerfile|*.[ch]|*.[ch]pp|*.[ch]xx|*.cc|*.hh|*.go|*.py|*.pl|*.R|*.asm|*.java| \
-        *.awk|*.sql|*.el|*.clj|*.nim| *.pas|*.p| *.php | *.f | \
+        *.awk|*.sql|*.el|*.clj|*.nim| *.pas|*.p| *.php | *.f | *.lua | \
         *.fortran | *.fth | *.4th | *.patch | *.diff | *.css | *.rs | *.vue | \
-        *.js|*.scss|*.jade|*.htm|*.html|*.json|*.ini|*.yml|*.yaml|*.v|*.sv)
+        *.js|*.scss|*.jade|*.htm|*.html|*.json|*.ini|*.yml|*.yaml|*.v|*.sv | *.vim)
     pygmentize -f 16m -O style=${default_style} "$1"
     exit 0
     ;;
