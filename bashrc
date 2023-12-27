@@ -286,5 +286,5 @@ export GPG_TTY=$(tty)
 ## keep this line near the end
 [[ -r $HOME/.dotfiles_secrets/bashrc ]] && source $HOME/.dotfiles_secrets/bashrc
 
-[[ type starship >/dev/null 2>&1 ]] && eval "$(starship init bash)"
+[[ $(command -v starship 2>/dev/null) ]] && eval "$(starship init bash)"
 
