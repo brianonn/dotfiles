@@ -93,6 +93,12 @@ case "$1" in
     exit 0
     ;;
 
+    # makefiles
+    CMakeList*.txt|*.cmake)
+    pygmentize -f 16m -l cmake  -O style="${default_style}" "$1"
+    exit 0
+    ;;
+
     # sh and bash using Pygments
     *.sh|.profile|*.bash*)
     pygmentize -f 16m -l sh -O style="${bash_style}" "$1"
@@ -123,7 +129,7 @@ case "$1" in
     #  check the mime type last
     #  TODO: maybe classify all files first?
     *)
-    mimetype=$(file -b -i -L "$1" )
+    mimetype=$(file -b -i -L "$1" 2>/dev/null )
     case ${mimetype} in
       *text/xml*|*/*+xml*)
         pygmentize -f 16m -l xml -O style="${default_style}" "$1"
