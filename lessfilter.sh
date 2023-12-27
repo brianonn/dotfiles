@@ -25,8 +25,8 @@
 #
 # TODO: add LESSFILTER_HTML_VIEWER env variable to use "lynx" or "firefox" or "chrome" , etc
 
-default_style="monokai"
-bash_style="paraiso-dark"
+default_style="zenburn"
+bash_style="zenburn"
 
 hexdump=$(which hexdump)
 
