@@ -3,9 +3,9 @@
 
 # File: ~/.bash_aliases
 
-# read the sensitive aliases, that might contain passwords.
+# read the sensitive aliases, that might contain inline passwords.
 # This file should never be pushed up to a public server in the dotfiles.
-[[ -r ~/.dotfile_secrets/bash_aliases ]] && source ~/.dotfile_secrets/bash_aliases
+[[ -r ~/.secrets/bash_aliases ]] && source ~/.secrets/bash_aliases
 
 real() {
     f=$(type -a "$1" 2>/dev/null) || return 1

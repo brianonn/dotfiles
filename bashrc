@@ -284,7 +284,7 @@ export GPG_TTY=$(tty)
 [[ -r ~/.fzf.bash ]] && source ~/.fzf.bash
 
 ## keep this line near the end
-[[ -r $HOME/.dotfiles_secrets/bashrc ]] && source $HOME/.dotfiles_secrets/bashrc
+[[ -r $HOME/.secrets/env ]] && source $HOME/.secrets/env
 
 [[ $(command -v starship 2>/dev/null) ]] && eval "$(starship init bash)"
 

@@ -120,7 +120,7 @@ fi
 
 ## setup eslint
 
-## setup vim pathogen modules
+## setup vim modules
 #
 VIMBUNDLEDIR="$HOME/.vim/bundle"
 [ ! -d "$VIMBUNDLEDIR" ] && mkdir "$VIMBUNDLEDIR"
