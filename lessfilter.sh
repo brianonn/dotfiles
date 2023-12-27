@@ -29,6 +29,8 @@ default_style="zenburn"
 bash_style="zenburn"
 
 hexdump=$(which hexdump)
+##OFF## htmlviewer=$(which webview)
+##OFF## [ -n "$LESSFILTER_HTML_VIEWER" ] && htmlviewer="$LESSFILTER_HTML_VIEWER"
 
 case "$1" in
 	# man pages
@@ -43,17 +45,26 @@ case "$1" in
 		exit 0
 		;;
 
-	# ReStructured Text
-	*.rst)
-		pandoc -s -f rst -t html "$1" | lynx --stdin
-		exit 0
-		;;
+##OFF##	# markdown or ReStructured Text
+##OFF##	*.[mM][dD]|*.markdown|*.rst)
+##OFF##        if [[ -r $HOME/.pandoc.css ]]; then
+##OFF##            pandoc_css="--embed-resources --standalone --css=$HOME/.pandoc.css"
+##OFF##        else
+##OFF##            pandoc_css=""
+##OFF##        fi
+##OFF##        if [[ -n "$htmlviewer" ]] ; then
+##OFF##            pandoc $pandoc_css --metadata title=$(basename "$1") -s -t html "$1" | $htmlviewer
+##OFF##        else
+##OFF##            pandoc $pandoc_css --metadata title=$(basename "$1") -s -t html "$1"
+##OFF##        fi
+##OFF##        exit 0
+##OFF##        ;;
 
-		# markdown with pandoc
-	*.[mM][dD]|*.markdown)
-		pandoc --metadata 'title=README.md' -s -f markdown -t html "$1"
-		exit 0
-		;;
+	# markdown or ReStructured Text
+	*.[mM][dD]|*.markdown|*.rst)
+        pygmentize -f 16m -O style=${default_style} "$1"
+	exit 0
+    ;;
 
     # syntax highlighting using Pygments. Pygments handles quite a lot !
     Dockerfile|*.[ch]|*.[ch]pp|*.[ch]xx|*.cc|*.hh|*.go|*.py|*.pl|*.R|*.asm|*.java| \
