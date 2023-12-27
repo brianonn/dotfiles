@@ -38,13 +38,12 @@ countext() {
 
 ## returns exit status 0 if running on systemd
 isSystemd() {
-    # requires sudo
-    # grep -q systemd <<<$(ls -l $(sed 's/.* //g' <<<$(sudo ls -l /proc/1/exe)))
-    ps --no-headers -o comm 1 2>/dev/null | $real_grep -q systemd || return 1
+    [[ $(ps --no-headers -o comm 1 2>/dev/null) =~ systemd ]] || return 1
 }
 
+## make a backup copy of a file
 bu() {
-    cp "$@" "$@".backup-$(date +%Y%m%d) && echo "$(date +%Y-%m-%d) backed up $PWD/$@" >>~/.backups.log
+    cp "$1" "$1".backup-$(date +%Y%m%d) && echo "$(date +%Y-%m-%d) backed up $PWD/$1" >>~/.backups.log
 }
 
 # remove all kernels except the running one
@@ -237,6 +236,15 @@ alias dirs='dirs -v'
 alias cd=pushd
 alias gld-solo-grid="./cgminer -c ~/.bfgminer/goldcoin.conf --gridseed-options='freq=800'"
 
+# rewrite pushd and popd to be silent
+pushd() { builtin pushd "$@" > /dev/null; }
+popd()  { builtin popd  "$@" > /dev/null; }
+
+alias u='popd'
+alias uu='popd && popd'
+alias uuu='popd && popd && popd'
+alias uuuu='popd && popd && popd && popd'
+
 color_opt=''
 if [[ $(tput colors) > 0 ]]; then
     color_opt='--color=always'
@@ -360,3 +368,15 @@ lfcd () {
         fi
     fi
 }
+
+if command -v kubeselect> /dev/null; then
+    # kubeselect and kubectl
+    # go install gitlab.com/zerok/kubeselect/cmd/kubeselect
+    # see: https://zerokspot.com/weblog/2019/05/31/kubeselect/
+    alias ks='eval $(kubeselect select)'    # select a kubeconfig and a context
+    alias k='kubeselect run -- '            # run kubectl with the selected context
+fi
+
+# ARCH pkg management
+alias yay='paru'
+alias yeet='paru -Rcs'
