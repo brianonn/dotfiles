@@ -10,6 +10,8 @@
 # If not running interactively, just exit.
 [[ $- != *i* ]] && return
 
+[[ $TERM = alacritty ]] && exec wezterm start -e /bin/bash
+
 # echo interactive, so continuing bashrc
 
 ##
@@ -96,10 +98,6 @@ if [ "$color_prompt" = yes ]; then
       UID_COLOR="$BOLD$CYAN"
       P="${UID_COLOR}\$${RESET}"
     fi
-
-    # some unused samples here
-    #PS1='${debian_chroot:+($debian_chroot)}\[\033[01;32m\]\u@\h\[\033[00m\][\[\033[01;34m\]\w\[\033[00m\]]\$ '
-    #PS1="${debian_chroot:+($debian_chroot)}[\[\033[32m\]\w\[\033[00m]\n\[\033[1;36m\]\u\[\033[1;33m\]-> \[\033[00m\]"
 
     # A two-line colored Bash prompt (PS1) with the VCS branch
     # currently only works with git
@@ -215,9 +213,7 @@ esac
 # put all your additions into a separate file like
 # ~/.bash_aliases, instead of adding them here directly.
 
-if [ -f ~/.bash_aliases ]; then
-    . ~/.bash_aliases
-fi
+[[ -r ~/.bash_aliases ]] && source ~/.bash_aliases
 
 # enable programmable completion features (you don't need to enable
 # this, if it's already enabled in /etc/bash.bashrc and /etc/profile
@@ -226,7 +222,7 @@ if [ -f /etc/bash_completion ] && ! shopt -oq posix; then
     . /etc/bash_completion
 fi
 
-[[ -s "$HOME/.gvm/scripts/gvm" ]] && source "$HOME/.gvm/scripts/gvm"
+[[ -r "$HOME/.gvm/scripts/gvm" ]] && source "$HOME/.gvm/scripts/gvm"
 
 export DOCKER_HOST=
 export GOPATH=
@@ -240,26 +236,26 @@ fi
 # Golang Version Manager
 # gvm list
 # gvm use <version>
-[[ -s "$HOME/.gvm/scripts/gvm" ]] && source "$HOME/.gvm/scripts/gvm"
+[[ -r "$HOME/.gvm/scripts/gvm" ]] && source "$HOME/.gvm/scripts/gvm"
 export GOPATH="$HOME/go"
 export GOBIN="$GOPATH/bin/$(uname -s)"
 mkdir -p $GOBIN
 export PATH="$GOBIN:$PATH"
 
 export NVM_DIR="$HOME/.nvm"
-[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
-[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
+[[ -r "$NVM_DIR/nvm.sh" ]] && source "$NVM_DIR/nvm.sh"  # This loads nvm
+[[ -r "$NVM_DIR/bash_completion" ]] && source "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
 
 # added by travis gem
-[ -f $HOME/.travis/travis.sh ] && source $HOME/.travis/travis.sh
+[[ -r $HOME/.travis/travis.sh ]] && source $HOME/.travis/travis.sh
 
 #source ~/Projects/MBI/microbiome-insights/devops/scripts/00-shell-env.sh
 
 # The next line updates PATH for the Google Cloud SDK.
-if [ -f "${HOME}/google-cloud-sdk/path.bash.inc" ]; then . "${HOME}/google-cloud-sdk/path.bash.inc"; fi
+[[ -r "${HOME}/google-cloud-sdk/path.bash.inc" ]] && source "${HOME}/google-cloud-sdk/path.bash.inc"
 
 # The next line enables shell command completion for gcloud.
-if [ -f "${HOME}/google-cloud-sdk/completion.bash.inc" ]; then . "${HOME}/google-cloud-sdk/completion.bash.inc"; fi
+[[ -r "${HOME}/google-cloud-sdk/completion.bash.inc" ]] && source "${HOME}/google-cloud-sdk/completion.bash.inc"
 
 export PATH=$HOME/.gem/ruby/2.6.0/bin:$PATH
 
@@ -274,8 +270,21 @@ findroms() {  mlocate -i --regex "roms.*$1"; }
 # null:false:true:numbers:strings:arrays:objects:keys
 export JQ_COLORS="1;36:0;36:0;36:0;33:0;32:0;37:0;37:0;37"
 
-## keep this line at the end
+# Haskell GHC compiler - ghcup-env
+[[ -f "/home/brian/.ghcup/env" ]] && source "/home/brian/.ghcup/env"
+
+# bun
+export BUN_INSTALL="$HOME/.bun"
+export PATH=$BUN_INSTALL/bin:$PATH
+
+export GPG_TTY=$(tty)
+
+[[ -d "$HOME/.local/bin" ]] && export PATH=$HOME/.local/bin:$PATH
+
+[[ -r ~/.fzf.bash ]] && source ~/.fzf.bash
+
+## keep this line near the end
 [[ -r $HOME/.dotfiles_secrets/bashrc ]] && source $HOME/.dotfiles_secrets/bashrc
 
+[[ type starship >/dev/null 2>&1 ]] && eval "$(starship init bash)"
 
-[ -f "/home/brian/.ghcup/env" ] && source "/home/brian/.ghcup/env" # ghcup-env
