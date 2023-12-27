@@ -70,9 +70,15 @@ case "$1" in
     Dockerfile|*.[ch]|*.[ch]pp|*.[ch]xx|*.cc|*.hh|*.go|*.py|*.pl|*.R|*.asm|*.java| \
         *.awk|*.sql|*.el|*.clj|*.nim| *.pas|*.p| *.php | *.f | *.lua | \
         *.fortran | *.fth | *.4th | *.patch | *.diff | *.css | *.rs | *.vue | \
-        *.js|*.scss|*.jade|*.htm|*.html|*.json|*.ini|*.yml|*.yaml|*.v|*.sv | *.vim)
+        *.js|*.scss|*.jade|*.htm|*.html|*.json|*.yml|*.yaml|*.v|*.sv | *.vim | *.toml)
     pygmentize -f 16m -O style=${default_style} "$1"
     exit 0
+    ;;
+
+    # ini files and conf files
+    *.ini|*.conf|*sshd_config*)
+        pygmentize -f 16m -l ini -O style=${default_style} "$1"
+        exit 0
     ;;
 
     # Vagrantfile, Capfile, Rakefile, Gemfile, Guardfile, *.rb, *.ru is ruby
