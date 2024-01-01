@@ -103,7 +103,7 @@ for path in $LOCALDIR/*; do
         dotfile="$HOME/.$filename"
         if [ ! -L "$dotfile" ] ; then
             mv "$dotfile" "$SAVEDIR"
-            ln -s "$path" "$dotfile"
+            ln -snf "$path" "$dotfile"
         else
             echo "skipping already linked file: $dotfile"
         fi
