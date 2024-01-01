@@ -3,6 +3,7 @@
 XTerm*faceName: Droid Sans Mono
 XTerm*faceSize: 14
 
+Xterm*disallowedWindowOps: 20,21,SetXprop
 XTerm*allowSendEvents: True
 XTerm*alwaysHighlight: yes
 XTerm*background: lemonchiffon
@@ -112,7 +113,7 @@ URxvt.clipboard.autocopy: true
 !
 URxvt.urlLauncher:      /usr/bin/chromium
 URxvt.url-Launcher:      /usr/bin/chromium
-URxvt.matcher.button:   1 
+URxvt.matcher.button:   1
 !
 !!urxvt scrolling options and cursor style:
 !
@@ -139,7 +140,7 @@ URxvt.tabbed.autohide:  yes
 URxvt.tabbed.new-button:  no
 URxvt.tabbed.title: no
 
-!!urxvt fonts: 
+!!urxvt fonts:
 !
 ! FONTS
 ! $ fc-list lists available fonts
