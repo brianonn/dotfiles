@@ -288,3 +288,5 @@ export GPG_TTY=$(tty)
 
 [[ $(command -v starship 2>/dev/null) ]] && eval "$(starship init bash)"
 
+
+[[ -s "/home/brian/.gvm/scripts/gvm" ]] && source "/home/brian/.gvm/scripts/gvm"
