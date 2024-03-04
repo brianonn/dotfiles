@@ -150,6 +150,7 @@ mdtohtml() {
 viewmd() {
     mdtohtml "$1"
     xdg-open "${1%.md}.html"
+    ( sleep 5; \rm -f "${1%.md}.html" )
 }
 
 function serve() {
@@ -171,7 +172,7 @@ alias smath='/opt/smath-mono/smath.sh'
 alias tff='torify32 /usr/local/firefox/firefox'
 alias t='rxvt-unicode &'
 alias vcc='valac'
-alias tf=terraform
+alias tf='terraform'  # TODO investigate OpenTofu
 
 alias quartus='/opt/altera/13.0sp1/quartus/bin/quartus'
 alias ff='firefox'
@@ -181,10 +182,9 @@ alias e='$HOME/bin/edit'
 alias v='vi'
 alias gv='gvim'
 alias ge='gedit'
-alias z='zile'
-alias s=subl
-alias phpstorm=/opt/phpstorm/bin/phpstorm.sh
-alias p=phpstorm
+alias ze='zile'
+alias phpstorm='/opt/phpstorm/bin/phpstorm.sh'
+alias p='phpstorm'
 
 # Git aliases for bash
 alias gs='git status'
@@ -233,17 +233,12 @@ alias matlab='~/Courses/Digital_Signal_Processing/MATLAB/R2013b/bin/matlab'
 
 alias h=history
 alias dirs='dirs -v'
-alias cd=pushd
+#alias cd=pushd
 alias gld-solo-grid="./cgminer -c ~/.bfgminer/goldcoin.conf --gridseed-options='freq=800'"
 
 # rewrite pushd and popd to be silent
 pushd() { builtin pushd "$@" > /dev/null; }
 popd()  { builtin popd  "$@" > /dev/null; }
-
-alias u='popd'
-alias uu='popd && popd'
-alias uuu='popd && popd && popd'
-alias uuuu='popd && popd && popd && popd'
 
 color_opt=''
 if [[ $(tput colors) > 0 ]]; then
@@ -286,7 +281,7 @@ alias dip="docker inspect --format='{{.NetworkSettings.IPAddress}}' \`d1\`"
 #tmux pane titles
 #alias np=printf "'\033]2;%s\033'" "'title goes here'"
 
-alias cdi='isoinfo -d -i /dev/cdrom | grep -i -E "block size|volume size"'
+alias cdinfo='isoinfo -d -i /dev/cdrom | grep -i -E "block size|volume size"'
 alias cpu="watch \"grep -E '^model name|^cpu MHz' /proc/cpuinfo\""
 
 # safe(r) strings - GNU strings normally uses libbfd to read sections, and this can be exploited with evil pointers in
@@ -380,3 +375,27 @@ fi
 # ARCH pkg management
 alias yay='paru'
 alias yeet='paru -Rcs'
+alias pso='ps -o user,pid,ppid,cpu,mem,vsz,rss,c,pri,nice,stat,start,time,command'
+
+# cc - cd with fuzzy finder
+# Usage: cc [path]
+cc() {
+    local fd_options fzf_options target
+
+    fd_options=(
+        --hidden
+    )
+
+    fzf_options=(
+        --preview='test -d {} && tree -L 1 {} || less {}'
+        --bind=ctrl-space:toggle-preview
+        --exit-0
+    )
+
+    target="$(fd . "${1:-.}" "${fd_options[@]}" | fzf "${fzf_options[@]}")"
+
+    test -f "$target" && target="${target%/*}"
+
+    \builtin cd "$target" || return 1
+}
+
