@@ -222,7 +222,8 @@ if [ -f /etc/bash_completion ] && ! shopt -oq posix; then
     . /etc/bash_completion
 fi
 
-[[ -r "$HOME/.gvm/scripts/gvm" ]] && source "$HOME/.gvm/scripts/gvm"
+[[ $(command -v starship 2>/dev/null) ]] && eval "$(starship init bash)"
+[[ $(command -v zoxide 2>/dev/null) ]] && eval "$(zoxide init --cmd cd bash)"
 
 export DOCKER_HOST=
 export GOPATH=
@@ -285,8 +286,3 @@ export GPG_TTY=$(tty)
 
 ## keep this line near the end
 [[ -r $HOME/.secrets/env ]] && source $HOME/.secrets/env
-
-[[ $(command -v starship 2>/dev/null) ]] && eval "$(starship init bash)"
-
-
-[[ -s "/home/brian/.gvm/scripts/gvm" ]] && source "/home/brian/.gvm/scripts/gvm"
