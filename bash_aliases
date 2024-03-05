@@ -170,9 +170,18 @@ alias llpkg='dpkg-query -W -f="\${Installed-Size}\t\${binary:Package}\n" | sort 
 alias shred='shred -v -n 3 -u -f'
 alias smath='/opt/smath-mono/smath.sh'
 alias tff='torify32 /usr/local/firefox/firefox'
-alias t='rxvt-unicode &'
 alias vcc='valac'
 alias tf='terraform'  # TODO investigate OpenTofu
+
+# set a terminal alias to whatever best terminal is available on the platform
+for term in qterm wezterm alacritty iterm2 iterm gnome-terminal qterminal rxvt-unicode urxvt rxvt xterm; do
+    # find all the terminals that exist on this host
+    if command -v "$term" 2>/dev/null >/dev/null; then
+        alias t=$term
+        break
+    fi
+    unalias t
+done
 
 alias quartus='/opt/altera/13.0sp1/quartus/bin/quartus'
 alias ff='firefox'
@@ -180,7 +189,6 @@ alias ff='firefox'
 # Editors
 alias e='$HOME/bin/edit'
 alias v='vi'
-alias gv='gvim'
 alias ge='gedit'
 alias ze='zile'
 alias phpstorm='/opt/phpstorm/bin/phpstorm.sh'
@@ -336,11 +344,6 @@ alias start_windows='vmrun start ~/Virtual\ Machines.localized/Windows\ 10\ x64.
 
 # termbin.com without netcat
 alias tb="(exec 3<>/dev/tcp/termbin.com/9999; cat >&3; cat <&3; exec 3<&-)"
-
-# urxvt only: Change the font and size: Usage: fontsize 22 or fontsize 12
-function fontsize() {
-    printf '\33]50;%s%d\007' "xft:Dejavu Sans Mono:size=$1::antialias=false"
-}
 
 alias path='echo -e ${PATH//:/\\n}'
 alias tree='tree -I ".git|node_modules|.history"'
