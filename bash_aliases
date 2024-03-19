@@ -36,6 +36,11 @@ countext() {
 
 # functions as aliases
 
+# list all ssh-keys in the ssh-agent
+agentlist () {
+    ssh-add -L | awk '{printf("%30.30s  %15.15s  %50.50s...\n", $3, $1, $2)}'
+}
+
 ## returns exit status 0 if running on systemd
 isSystemd() {
     [[ $(ps --no-headers -o comm 1 2>/dev/null) =~ systemd ]] || return 1
@@ -81,7 +86,14 @@ webserver() {
 alias pw=mkpw
 
 # random 16 lowercase letters
-alias mkpw='$HOME/bin/mkpw'
+if [ -x $HOME/bin/mkpw ]; then
+    alias mkpw='$HOME/bin/mkpw'
+else
+    mkpw() {
+        local len="$1"
+        cat /dev/urandom | LC_ALL=C tr -dc 'a-hjkmnpr-zA-JJKMNPR-Z35-9' | fold -w "$len" | head -n 1
+    }
+fi
 
 fc() {
     old="$1"
@@ -210,6 +222,7 @@ alias gcpp='git add -u && git commit -m "checkpoint $(date -u +%FT%TZ)" && git p
 alias gcpw='watch -n 3600 "git add -A && git commit -m \"checkpoint $(date -u +%FT%TZ)\" && git push"'
 alias gitu='git checkout master && git pull --rebase && git checkout - && git rebase master'
 alias git-remove-untracked='git fetch --prune && git branch -r | awk "{print \$1}" | /usr/bin/grep -E --color=no -v -f /dev/fd/0 <(git branch -vv | grep --color=no origin) | awk "{print \$1}" | xargs -n1 echo git branch -d'
+function gdbr(){ "1$1" && { git branch -D "$1" && git push origin --delete "$1" ; } || printf "Usage: gbr <branch>\n   delete a local and remote git branch"; }
 
 # google shell
 alias gsh="$HOME/src/perl/goosh.pl"
@@ -330,9 +343,10 @@ function mount() { if [ $# -eq 0 ]; then lsmount; else /usr/bin/mount "$@"; fi; 
 
 alias diff='colordiff -w -t --tabsize=4'
 
-# hub
+# hub deprecated. Use gh instead
 # brew install hub
-[ -x $(real hub) ] && alias git=hub
+# [ -x $(real hub) ] && alias git=hub
+# [ -x $(which hub 2>/dev/null) ] && alias git=hub
 
 # glances monitors system process and io and docker and temps
 alias glance=glances
@@ -402,3 +416,18 @@ cc() {
     \builtin cd "$target" || return 1
 }
 
+alias k=kubectl
+alias ks='kubectl -n kube-system'
+alias ka='kubectl -n aporeto'
+alias kd='kubectl -n dev'
+
+alias ggb='gogo build $(gh pr view | sed '\''s/^url:.*[/]\([^/]*\)[/]pull[/]\([0-9][0-9]*\)$/\1:pr\2/p;d'\'')'
+alias ggt='gogo test $(gh pr view | sed '\''s/^url:.*[/]\([^/]*\)[/]pull[/]\([0-9][0-9]*\)$/\1:pr\2/p;d'\'')'
+
+alias tf=terraform
+alias tp=telepresence
+#alias gimme-aws-creds='source $HOME/bin/getaws'
+#
+
+python=python3.9
+alias kb=kubie

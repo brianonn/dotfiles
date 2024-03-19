@@ -95,3 +95,4 @@ export MANPATH="/usr/local/opt/gnu-tar/libexec/gnuman:$MANPATH"
 [[ -r "$HOME/.gvm/scripts/gvm" ]] && source "$HOME/.gvm/scripts/gvm"
 
 [[ -r "$HOME/.dotfile_secrets/profile" ]] && source "$HOME/.dotfile_secrets/profile"
+. "$HOME/.cargo/env"

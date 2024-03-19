@@ -8,12 +8,18 @@
 
 ;;; Code:
 
+(setq mode-require-final-newline nil)
+(setq require-final-newline nil)
+(setq exec-path (cons "/usr/local/bin" exec-path))
+
 (prefer-coding-system 'utf-8)
 (when (>= emacs-major-version 24)
     (setq-default buffer-file-coding-system 'utf-8)
     (setq default-buffer-file-coding-system 'utf-8))
 
-(add-to-list 'load-path (concat user-emacs-directory "site-lisp"))
+(defvar my/site-lisp-dir (concat user-emacs-directory "site-lisp/")
+    "Sets the value of the local user's site-lisp directory.")
+(add-to-list 'load-path my/site-lisp-dir)
 
 ;; zenburn theme
 (add-to-list 'custom-theme-load-path "~/.emacs.d/themes/")
@@ -21,25 +27,27 @@
 
 ;; packages. Access with M-X package-list-packages
 (when (>= emacs-major-version 24)
+    (require 'time-date)
     (require 'package)
     (setq package-archives
         (append package-archives
             (list
-                '("marmalade" . "http://marmalade-repo.org/packages/")
+                ;; '("marmalade" . "http://marmalade-repo.org/packages/")
+                ;; '("melpa-stable" . "http://melpa-stable.milkbox.net/packages/")
                 '("melpa" . "http://melpa.org/packages/"))))
     (package-initialize)
 
     (defvar my/package-list
-        '( auto-complete auto-complete-c-headers
+        '(   auto-complete auto-complete-c-headers
              auto-complete-etags auto-complete-exuberant-ctags
              auto-dim-other-buffers
              company
              dart-mode
+             dash
              dockerfile-mode
              editorconfig
              elm-mode
              emmet-mode
-             ethan-wspace
              expand-region
              exec-path-from-shell
              fill-column-indicator
@@ -74,7 +82,8 @@
              vue-mode vue-html
              web-mode
              xcscope
-             yasnippet)
+             yasnippet
+             ethan-wspace)
         "A list of packages that I want to always have installed.
 
      This is used by `my/install-packages' whenever I want to
@@ -83,19 +92,22 @@
     (defvar my/packages-timestamp-file (concat user-emacs-directory "my-packages-timestamp"))
     (defvar my/packages-days-between-checks 7)
 
-    (defun my/install-packages ()
+    (defun my/install-packages (&optional force-package-update)
         "Install the packages in the list `my/package-list'.
      This function can be called in .emacs just after `package-initialize'
      or it can be manually called only once when needed for a new deployment"
         (interactive)
+        (unless force-package-update (setq force-package-update nil))
         ;; TODO: create a timestamp file and only run through this code
         ;; on the first call (i.e. timestamp does not exist) or if the timestamp
         ;; is more than 1 week old
+        (message "force-package-update is %s" (if force-package-update "t" "nil"))
         (defvar my/packages-last-update (nth 5 (file-attributes my/packages-timestamp-file)))
         (defvar my/packages-elapsed-days (- (time-to-number-of-days (current-time))
                                              (time-to-number-of-days my/packages-last-update)))
         (if (or (not my/packages-last-update)
                 (> my/packages-elapsed-days my/packages-days-between-checks))
+                (= t force-package-update)
             (progn
                 (package-refresh-contents)
                 (mapc (lambda (my/package)
@@ -262,6 +274,7 @@
 
 (add-to-list 'auto-mode-alist '("\\.org\\'" . org-mode))
 (setq-default org-directory "~/Org")
+(require 'ob-shell)
 (org-babel-do-load-languages
   'org-babel-load-languages
   '(
@@ -662,6 +675,8 @@ With a prefix ARG, it will widen the scope to the whole buffer."
 ;; on lines that we actually edit, so it doesn't cause spurious
 ;; whitespace changes in git diff outputs
 ;;;;;;;;;;;;;
+(setq mode-require-final-newline nil)
+(setq require-final-newline nil)
 (require 'ethan-wspace)
 (global-ethan-wspace-mode 1)
 
@@ -674,7 +689,7 @@ With a prefix ARG, it will widen the scope to the whole buffer."
 ;;;;;;;;;;;;;
 
 (require 'company)
-(require 'company-custom)
+;; (require 'company-custom)
 (setq company-dabbrev-downcase nil)     ; dont downcase inserted autocompletions
 
 ;;;;;;;;;;;;;
@@ -983,14 +998,15 @@ directory to make multiple eshell windows easier."
 ;;(require 'tramp)
 
 ;;; XEmacs backwards compatibility file
-(defmacro GNUEmacs (&rest x)
-  (list 'if (string-match "GNU Emacs" (version)) (cons 'progn x)))
-(defmacro XEmacs (&rest x)
-  (list 'if (string-match "XEmacs" (version)) (cons 'progn x)))
-(defmacro Xlaunch (&rest x)
-  (list 'if (or (eq window-system 'x)
-                (eq window-system 'mswindows))
-        (cons 'progn x)))
+(defmacro GNUEmacs (&rest list)
+    "Run LIST for GNU Emacs."
+  (list 'if (string-match "GNU Emacs" (version)) (cons 'progn list)))
+(defmacro XEmacs (&rest list)
+    "Run LIST for XEmacs."
+  (list 'if (string-match "XEmacs" (version)) (cons 'progn list)))
+(defmacro GraphicsMode (&rest list)
+    "Run LIST when Emacs is on a graphical display (vs tty mode)."
+  (list 'if (display-graphic-p) (cons 'progn list)))
 
 (XEmacs
  (setq user-init-file
@@ -1000,12 +1016,14 @@ directory to make multiple eshell windows easier."
        (expand-file-name "custom.el"
        (expand-file-name ".xemacs" "~")))
 
- (load-file user-init-file)
+ ;; (load-file user-init-file)
  (load-file custom-file))
 
 (GNUEmacs
-  (setq custom-file "~/.emacs.d/site-lisp/custom.el")
-  (load custom-file))
+ (message "in GNUEmacs")
+ (setq custom-file (concat my/site-lisp-dir "custom.el"))
+ (load custom-file)
+ (load (concat my/site-lisp-dir "init")))
 
 
 ;;;;;;;;;;;;;;;;;
@@ -1018,16 +1036,18 @@ directory to make multiple eshell windows easier."
 ;;   ;; (tool-bar-mode 0)
 ;;   ;; (menu-bar-mode 0)
 ;; )
+(GraphicsMode
+  (tool-bar-mode -1)
+  (tooltip-mode -1)
+  (scroll-bar-mode 0)
+  (set-cursor-color "#a2676f")
+  (blink-cursor-mode 1))
+
 (setq font-lock-maximum-decoration t)
 (setq resize-mini-windows t)
 (setq column-number-mode t)
 (setq next-line-add-newlines nil)
 (setq blink-matching-paren t)
-(blink-cursor-mode 1)
-(set-cursor-color "#a2676f")
-(tool-bar-mode -1)
-(tooltip-mode -1)
-(scroll-bar-mode 0)
 (line-number-mode 1)
 (setq default-frame-alist
       '((top . 43)
