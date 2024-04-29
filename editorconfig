@@ -19,7 +19,7 @@ indent_style = tab
 # two space indent for javascript projects
 [*.{js,css,htm,html}]
 indent_size = 2
-indent_style = space
+indent_style = tab
 
 # Matches the exact files either package.json or .travis.yml
 [{package.json,.travis.yml}]
@@ -27,4 +27,7 @@ indent_style = space
 indent_size = 2
 
 [*.{yaml,yml}]
+indent_size = 2
+
+[*.{tf,tfvars}]
 indent_size = 2

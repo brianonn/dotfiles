@@ -105,7 +105,7 @@ if [ "$color_prompt" = yes ]; then
     # currently only works with git
     # TODO support other VCS besides git
     #
-    git=$(which git)
+    git=$(command -v git)
     function update_user_badge {
         if [[ $TERM_PROGRAM = iTerm.app ]]; then
             iterm2_set_user_var gitStatus "$(get_vcs_project_name)"
@@ -119,7 +119,8 @@ if [ "$color_prompt" = yes ]; then
     function get_vcs_project_name {
         case $( which_vcs ) in
         git)
-            echo $(basename $(${git} rev-parse --show-toplevel))
+            vcs_top_level=$(${git} rev-parse --show-toplevel)
+            echo "${vcs_top_level##*/}"
             ;;
         *) return 1 ;;
         esac
@@ -133,12 +134,12 @@ if [ "$color_prompt" = yes ]; then
             ;;
         *) return 1 ;;
         esac
-        echo $ref
+        echo "$ref"
     }
     function get_vcs_branch_status {
         case $( which_vcs ) in
         git)
-            #$(${git} status --quiet || echo ' (dirty)')
+            # ${git} status >/dev/null 2>&1 || echo ' (dirty)'
             echo \ $( ${git} status --porcelain | awk '/^[MAD]/{S=1}/^ [M]/{M=1}/^[?][?]?/{U=1}END{if(S+M+U){printf"("};if(S){printf" staged"};if(M){printf" modified"};if(U){printf" untracked"}if(S+M+U){printf" )"}}' )
             ;;
         *) return 1 ;;
@@ -152,11 +153,13 @@ if [ "$color_prompt" = yes ]; then
         *) return 1 ;;
         esac
     }
+
+    PS_LINE=$(printf -- '- %.0s' {1..200})
+    PS_FILL=${PS_LINE:0:$COLUMNS}
+
     function get_vcs_info {
         PS_VCS_CMD='' PS_VCS_BRANCH='' PROMPT_DIRTRIM=6 PS_VCS_L='' PS_VCS_R=''
         PS_VCS_STATUS='' PS_VCS_AHEAD_BEHIND=''
-        PS_LINE=$(printf -- '- %.0s' {1..200})
-        PS_FILL=${PS_LINE:0:$COLUMNS}
         ref="$(get_vcs_branch_name)" || return
         # continue only if inside a VCS directory
         PROMPT_DIRTRIM=5
@@ -238,14 +241,22 @@ if [ -f ~/.git-completion.bash ]; then
   . ~/.git-completion.bash
 fi
 
+if [ -f ~/.kubie-completion.bash ]; then
+  . ~/.kubie-completion.bash
+fi
+
 # Golang Version Manager
 # gvm list
 # gvm use <version>
 [[ -s "$HOME/.gvm/scripts/gvm" ]] && source "$HOME/.gvm/scripts/gvm"
-export GOPATH="$HOME/go"
-export GOBIN="$GOPATH/bin/$(uname -s)"
+#export GOPATH="$HOME/go"
+#export GOBIN="$GOPATH/bin/$(uname -s)"
+export GOPATH=/Volumes/Go
+export GOBIN="$GOPATH/bin"
 mkdir -p $GOBIN
 export PATH="$GOBIN:$PATH"
+export GOROOT="/usr/local/Cellar/go/1.20.6/libexec"
+
 
 export NVM_DIR="$HOME/.nvm"
 [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
@@ -263,3 +274,16 @@ if [ -f "$HOME/Library/GoogleCloudSDK/completion.bash.inc" ]; then . "$HOME/Libr
 export PATH=$HOME/.gem/ruby/2.6.0/bin:$PATH
 
 [[ -r $HOME/.dotfiles_secrets/bashrc ]] && source $HOME/.dotfiles_secrets/bashrc
+
+export AWS_PROFILE="cns-enforcer-dev"
+export GPG_TTY=$(tty)
+
+[[ -z "$APO_ROOT" ]] && export APO_ROOT="$HOME/apomux"
+
+root_path=/Users/bonn/Repos/testing
+export PYTHONPATH="$root_path"
+
+export PS1="$ "
+
+#eval "$(starship init bash)"
+

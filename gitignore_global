@@ -88,3 +88,5 @@ dist/
 
 # VSCODE history
 .history/
+
+**/__debug_bin
