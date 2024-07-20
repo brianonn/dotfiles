@@ -19,7 +19,7 @@ tramp
 # session
 Session.vim
 # temporary
-.netrwhist
+**/.netrwhist
 *.rej
 *.bak
 *.tmp
