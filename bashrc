@@ -7,10 +7,11 @@
 # for examples
 
 # echo in bashrc
+
 # If not running interactively, just exit.
 [[ $- != *i* ]] && return
 
-[[ $TERM = alacritty ]] && exec wezterm start -e /bin/bash
+# [[ $TERM = alacritty ]] && exec wezterm start -e /bin/bash
 
 # echo interactive, so continuing bashrc
 
@@ -212,8 +213,18 @@ xterm*|rxvt*)
     ;;
 esac
 
-[[ -d /opt/homebrew/bin ]] && export PATH=/opt/homebrew/bin:$PATH
-[[ -d /use/local/homebrew/bin ]] && export PATH=/usr/local/homebrew/bin:$PATH
+pathlist=""
+for path in \
+  "$HOME/bin" \
+  "/usr/local/bin" \
+  "/opt/homebrew/bin" \
+  "/use/local/homebrew/bin" \
+  "/opt/homebrew/opt/openjdk/bin" \
+  "$HOME/google-cloud-sdk/bin"
+do
+    [[ -d "$path" ]] && pathlist=${pathlist}:${path}
+done
+export PATH="${pathlist}:$PATH"
 
 # Alias definitions.
 # put all your additions into a separate file like
@@ -300,10 +311,6 @@ type bat 2>/dev/null >/dev/null && export BAT_THEME='Catppuccin Macchiato'
 #[[ -r /usr/share/fzf-tab-completion/bash/fzf-bash-completion.sh ]] && source /usr/share/fzf-tab-completion/bash/fzf-bash-completion.sh
 #bind -x '"\t": fzf_bash_completion'
 
-## keep this line near the end
-[[ -r $HOME/.secrets/env ]] && source $HOME/.secrets/env
-[[ -r $HOME/.dotfiles_secrets/bashrc ]] && source $HOME/.dotfiles_secrets/bashrc
-
 export AWS_PROFILE="cns-enforcer-dev"
 export GPG_TTY=$(tty)
 
@@ -322,3 +329,15 @@ export PS1="$ "
 #eval "$(starship init bash)"
 
 . "$HOME/.cargo/env"
+
+export JAVA_HOME="/opt/homebrew/opt/openjdk@17"
+
+## keep this line near the end
+[[ -r $HOME/.secrets/env ]] && source $HOME/.secrets/env
+
+[[ -r "/opt/homebrew/etc/profile.d/bash_completion.sh" ]] && . "/opt/homebrew/etc/profile.d/bash_completion.sh"
+export BAT_THEME='Catppuccin Mocha'
+
+source <(kubectl completion bash)
+alias k=kubectl
+complete -o default -F __start_kubectl k

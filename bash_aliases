@@ -192,7 +192,7 @@ for term in qterm wezterm alacritty iterm2 iterm gnome-terminal qterminal rxvt-u
         alias t=$term
         break
     fi
-    unalias t
+    unalias t 2>/dev/null || true
 done
 
 alias quartus='/opt/altera/13.0sp1/quartus/bin/quartus'

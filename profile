@@ -14,7 +14,7 @@
 # echo I am the profile
 
 # what's my IP addr
-IPADDR=$(ip -j a|jq -r '.[]|select(.ifname|test("^wl"))|.addr_info[].local')
+#IPADDR=$(ip -j a|jq -r '.[]|select(.ifname|test("^wl"))|.addr_info[].local')
 
 # Start an ssh agent for the login session
 ssh_env="$HOME/.ssh/environment"
@@ -94,5 +94,4 @@ export MANPATH="/usr/local/opt/gnu-tar/libexec/gnuman:$MANPATH"
 
 [[ -r "$HOME/.gvm/scripts/gvm" ]] && source "$HOME/.gvm/scripts/gvm"
 
-[[ -r "$HOME/.dotfile_secrets/profile" ]] && source "$HOME/.dotfile_secrets/profile"
 . "$HOME/.cargo/env"
