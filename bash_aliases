@@ -199,7 +199,7 @@ alias quartus='/opt/altera/13.0sp1/quartus/bin/quartus'
 alias ff='firefox'
 
 # Editors
-alias e='$HOME/bin/edit'
+[[ -r $HOME/bin/edit ]] && alias e='$HOME/bin/edit'
 alias v='vi'
 alias ge='gedit'
 alias ze='zile'
@@ -392,7 +392,7 @@ fi
 # ARCH pkg management
 alias yay='paru'
 alias yeet='paru -Rcs'
-alias pso='ps -o user,pid,ppid,cpu,mem,vsz,rss,c,pri,nice,stat,start,time,command'
+alias pso='ps -o user,pid,ppid,cpu,pmem,vsz,rss,c,pri,nice,stat,start,time,command'
 
 # cc - cd with fuzzy finder
 # Usage: cc [path]
@@ -416,10 +416,11 @@ cc() {
     \builtin cd "$target" || return 1
 }
 
-alias k=kubectl
+alias k='kubectl'
 alias ks='kubectl -n kube-system'
 alias ka='kubectl -n aporeto'
 alias kd='kubectl -n dev'
+alias kb=kubie
 
 alias ggb='gogo build $(gh pr view | sed '\''s/^url:.*[/]\([^/]*\)[/]pull[/]\([0-9][0-9]*\)$/\1:pr\2/p;d'\'')'
 alias ggt='gogo test $(gh pr view | sed '\''s/^url:.*[/]\([^/]*\)[/]pull[/]\([0-9][0-9]*\)$/\1:pr\2/p;d'\'')'
@@ -427,7 +428,10 @@ alias ggt='gogo test $(gh pr view | sed '\''s/^url:.*[/]\([^/]*\)[/]pull[/]\([0-
 alias tf=terraform
 alias tp=telepresence
 #alias gimme-aws-creds='source $HOME/bin/getaws'
-#
 
-python=python3.9
-alias kb=kubie
+type lsd 2>/dev/null >/dev/null && alias l='lsd --almost-all -X --group-dirs=last --total-size -l -tr'
+type bat 2>/dev/null >/dev/null && {
+    alias cat=bat
+    export MANROFFOPT="-c"
+    export MANPAGER="sh -c 'col -bx | bat -l man -p'"
+}
