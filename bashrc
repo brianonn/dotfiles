@@ -290,12 +290,15 @@ export JQ_COLORS="1;36:0;36:0;36:0;33:0;32:0;37:0;37:0;37"
 # bun
 export BUN_INSTALL="$HOME/.bun"
 export PATH=$BUN_INSTALL/bin:$PATH
-
 export GPG_TTY=$(tty)
+type bat 2>/dev/null >/dev/null && export BAT_THEME='Catppuccin Macchiato'
 
 [[ -d "$HOME/.local/bin" ]] && export PATH=$HOME/.local/bin:$PATH
 
 [[ -r ~/.fzf.bash ]] && source ~/.fzf.bash
+#[[ -r /usr/share/fzf/fzf-extras.bash ]] && source /usr/share/fzf/fzf-extras.bash
+#[[ -r /usr/share/fzf-tab-completion/bash/fzf-bash-completion.sh ]] && source /usr/share/fzf-tab-completion/bash/fzf-bash-completion.sh
+#bind -x '"\t": fzf_bash_completion'
 
 ## keep this line near the end
 [[ -r $HOME/.secrets/env ]] && source $HOME/.secrets/env
