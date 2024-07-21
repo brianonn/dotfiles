@@ -1,0 +1,4 @@
+pack/**
+plugged/**
+!pack/.keep
+!plugged/.keep

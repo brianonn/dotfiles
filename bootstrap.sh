@@ -127,6 +127,11 @@ VIMBUNDLEDIR="$HOME/.vim/bundle"
 git submodule init
 git submodule update
 
+## setup nvim
+if [[ ! -e $HOME/.config/nvim ]]; then
+    ln -snf $LOCALDIR/nvim $HOME/.config/nvim
+fi
+
 ## set up yasnippets for emacs
 #
 GITHUB="https://github.com/brianonn/yasnippet-snippets.git"
