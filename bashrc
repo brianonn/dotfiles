@@ -259,14 +259,12 @@ fi
 # gvm list
 # gvm use <version>
 [[ -s "$HOME/.gvm/scripts/gvm" ]] && source "$HOME/.gvm/scripts/gvm"
-#export GOPATH="$HOME/go"
+[[ -d "/Volumes/Go" ]] && export GOPATH="/Volumes/Go" || export GOPATH="$HOME/go"
 #export GOBIN="$GOPATH/bin/$(uname -s)"
-export GOPATH=/Volumes/Go
 export GOBIN="$GOPATH/bin"
-mkdir -p $GOBIN
 export PATH="$GOBIN:$PATH"
 
-
+# Node version manager
 export NVM_DIR="$HOME/.nvm"
 [[ -r "$NVM_DIR/nvm.sh" ]] && source "$NVM_DIR/nvm.sh"  # This loads nvm
 [[ -r "$NVM_DIR/bash_completion" ]] && source "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
@@ -282,7 +280,7 @@ export NVM_DIR="$HOME/.nvm"
 # The next line enables shell command completion for gcloud.
 [[ -r "${HOME}/google-cloud-sdk/completion.bash.inc" ]] && source "${HOME}/google-cloud-sdk/completion.bash.inc"
 
-export PATH=$HOME/.gem/ruby/2.6.0/bin:$PATH
+[[ -d $HOME/.gem/ruby/2.6.0/bin ]] && export PATH=$HOME/.gem/ruby/2.6.0/bin:$PATH
 
 LOCATE_PATH=
 for i in ${HOME}/.mlocate/*.db; do
@@ -299,10 +297,10 @@ export JQ_COLORS="1;36:0;36:0;36:0;33:0;32:0;37:0;37:0;37"
 [[ -f "/home/brian/.ghcup/env" ]] && source "/home/brian/.ghcup/env"
 
 # bun
-export BUN_INSTALL="$HOME/.bun"
-export PATH=$BUN_INSTALL/bin:$PATH
+[[ -d $HOME/.bun ]] && { export BUN_INSTALL="$HOME/.bun"; export PATH=$BUN_INSTALL/bin:$PATH; }
+
 export GPG_TTY=$(tty)
-type bat 2>/dev/null >/dev/null && export BAT_THEME='Catppuccin Macchiato'
+type bat 2>/dev/null >/dev/null && export BAT_THEME='Catppuccin Mocha'
 
 [[ -d "$HOME/.local/bin" ]] && export PATH=$HOME/.local/bin:$PATH
 
@@ -312,8 +310,6 @@ type bat 2>/dev/null >/dev/null && export BAT_THEME='Catppuccin Macchiato'
 #bind -x '"\t": fzf_bash_completion'
 
 export AWS_PROFILE="cns-enforcer-dev"
-export GPG_TTY=$(tty)
-
 [[ -z "$APO_ROOT" ]] && export APO_ROOT="$HOME/apomux"
 
 root_path=/Users/bonn/Repos/testing
@@ -328,15 +324,13 @@ export PS1="$ "
 
 #eval "$(starship init bash)"
 
-. "$HOME/.cargo/env"
-
-export JAVA_HOME="/opt/homebrew/opt/openjdk@17"
+[[ -r "$HOME/.cargo/env" ]] && source "$HOME/.cargo/env"
+[[ -d /opt/homebrew/opt/openjdk ]] && export JAVA_HOME="/opt/homebrew/opt/openjdk"
 
 ## keep this line near the end
 [[ -r $HOME/.secrets/env ]] && source $HOME/.secrets/env
 
 [[ -r "/opt/homebrew/etc/profile.d/bash_completion.sh" ]] && . "/opt/homebrew/etc/profile.d/bash_completion.sh"
-export BAT_THEME='Catppuccin Mocha'
 
 source <(kubectl completion bash)
 alias k=kubectl
