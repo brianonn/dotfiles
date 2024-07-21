@@ -363,7 +363,7 @@ alias tb="(exec 3<>/dev/tcp/termbin.com/9999; cat >&3; cat <&3; exec 3<&-)"
 
 alias path='echo -e ${PATH//:/\\n}'
 alias tree='tree -I ".git|node_modules|.history"'
-if [[ -x /usr/bin/nvim ]]; then
+if [[ -x $(real nvim)  ]]; then
     alias vi=nvim
     alias vim=nvim
 fi
