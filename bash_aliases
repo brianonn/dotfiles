@@ -3,6 +3,8 @@
 
 # File: ~/.bash_aliases
 
+# echo running bash_aliases
+
 # read the sensitive aliases, that might contain inline passwords.
 # This file should never be pushed up to a public server in the dotfiles.
 [[ -r ~/.secrets/bash_aliases ]] && source ~/.secrets/bash_aliases

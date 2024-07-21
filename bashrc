@@ -6,7 +6,7 @@
 # see /usr/share/doc/bash/examples/startup-files (in the package bash-doc)
 # for examples
 
-# echo in bashrc
+# echo running the bashrc
 
 # If not running interactively, just exit.
 [[ $- != *i* ]] && return
@@ -235,7 +235,7 @@ export PATH="${pathlist}:$PATH"
 # enable programmable completion features (you don't need to enable
 # this, if it's already enabled in /etc/bash.bashrc and /etc/profile
 # sources /etc/bash.bashrc).
-if [ -f /etc/bash_completion ] && ! shopt -oq posix; then
+if [ -r /etc/bash_completion ] && ! shopt -oq posix; then
     . /etc/bash_completion
 fi
 
@@ -247,11 +247,11 @@ export GOPATH=
 # EPCTL_PROFILE=${HOME}/go/src/github.com/etherparty/epctl/scripts/bash_profile
 #[ -r "$EPCTL_PROFILE" ] && source $EPCTL_PROFILE
 
-if [ -f ~/.git-completion.bash ]; then
+if [ -r ~/.git-completion.bash ]; then
   . ~/.git-completion.bash
 fi
 
-if [ -f ~/.kubie-completion.bash ]; then
+if [ -r ~/.kubie-completion.bash ]; then
   . ~/.kubie-completion.bash
 fi
 
@@ -294,7 +294,7 @@ findroms() {  mlocate -i --regex "roms.*$1"; }
 export JQ_COLORS="1;36:0;36:0;36:0;33:0;32:0;37:0;37:0;37"
 
 # Haskell GHC compiler - ghcup-env
-[[ -f "/home/brian/.ghcup/env" ]] && source "/home/brian/.ghcup/env"
+[[ -r "$HOME/.ghcup/env" ]] && source "$HOME/.ghcup/env"
 
 # bun
 [[ -d $HOME/.bun ]] && { export BUN_INSTALL="$HOME/.bun"; export PATH=$BUN_INSTALL/bin:$PATH; }
@@ -311,15 +311,14 @@ type bat 2>/dev/null >/dev/null && export BAT_THEME='Catppuccin Mocha'
 
 export AWS_PROFILE="cns-enforcer-dev"
 [[ -z "$APO_ROOT" ]] && export APO_ROOT="$HOME/apomux"
-
 root_path=/Users/bonn/Repos/testing
 export PYTHONPATH="$root_path"
 
 GCLOUD="/Users/bonn/google-cloud-sdk"
 # The next line updates PATH for the Google Cloud SDK.
-if [ -f "$GCLOUD/path.bash.inc" ]; then . "$GCLOUD/path.bash.inc"; fi
+if [ -r "$GCLOUD/path.bash.inc" ]; then . "$GCLOUD/path.bash.inc"; fi
 # The next line enables shell command completion for gcloud.
-if [ -f "$GCLOUD/completion.bash.inc" ]; then . "$GCLOUD/completion.bash.inc" ; fi
+if [ -r "$GCLOUD/completion.bash.inc" ]; then . "$GCLOUD/completion.bash.inc" ; fi
 export PS1="$ "
 
 #eval "$(starship init bash)"
@@ -327,11 +326,16 @@ export PS1="$ "
 [[ -r "$HOME/.cargo/env" ]] && source "$HOME/.cargo/env"
 [[ -d /opt/homebrew/opt/openjdk ]] && export JAVA_HOME="/opt/homebrew/opt/openjdk"
 
-## keep this line near the end
-[[ -r $HOME/.secrets/env ]] && source $HOME/.secrets/env
+[[ -r "/opt/homebrew/etc/profile.d/bash_completion.sh" ]] && source "/opt/homebrew/etc/profile.d/bash_completion.sh"
+[[ -r /usr/local/etc/bash_completion ]] && source /usr/local/etc/bash_completion
 
-[[ -r "/opt/homebrew/etc/profile.d/bash_completion.sh" ]] && . "/opt/homebrew/etc/profile.d/bash_completion.sh"
+# MacOS
+[[ -r "${HOME}/.iterm2_shell_integration.bash" ]] && source "${HOME}/.iterm2_shell_integration.bash"
 
 source <(kubectl completion bash)
 alias k=kubectl
 complete -o default -F __start_kubectl k
+
+## keep this line near the end
+[[ -r $HOME/.secrets/env ]] && source $HOME/.secrets/env
+[[ -r $HOME/.bash_secrets ]] && source $HOME/.bash_secrets

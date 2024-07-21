@@ -11,7 +11,7 @@
 # for ssh logins, install and configure the libpam-umask package.
 #umask 022
 
-# echo I am the profile
+#echo running the profile
 
 # what's my IP addr
 #IPADDR=$(ip -j a|jq -r '.[]|select(.ifname|test("^wl"))|.addr_info[].local')
@@ -93,5 +93,4 @@ prepend_path /usr/local/opt/gnu-tar/libexec/gnubin
 export MANPATH="/usr/local/opt/gnu-tar/libexec/gnuman:$MANPATH"
 
 [[ -r "$HOME/.gvm/scripts/gvm" ]] && source "$HOME/.gvm/scripts/gvm"
-
-. "$HOME/.cargo/env"
+[[ -r "$HOME/.cargo/env" ]] && source "$HOME/.cargo/env"

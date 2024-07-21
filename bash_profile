@@ -14,7 +14,7 @@
 # source $HOME/.profile, if available, to get all the environment
 # variables that can be used across all shells
 
-# echo I am the bash_profile
+# echo running the bash_profile
 
 profile="$HOME/.profile"
 if [[ -r "$profile" ]]; then
@@ -23,20 +23,14 @@ fi
 
 # at login, remove dangerous rm and del from old history
 #
-HISTFILE="$HOME/.bash_history"
-temphist="/tmp/temphist.$$"
-( umask 077 && grep --color=never -E -v '^(rm(dir)?|del|/bin/rm(dir)?|/usr/bin/rm(dir)?)[ \t]+' "$HISTFILE" > "$temphist" )
-mv "$temphist" "$HISTFILE"
+_histfile="$HOME/.bash_history"
+if [ -r "$_histfile" ]; then
+    _temphist="/tmp/temphist.$$"
+    ( umask 077 && grep --color=never -E -v '^(rm(dir)?|del|/bin/rm(dir)?|/usr/bin/rm(dir)?)[ \t]+' "$_histfile" > "$_temphist" )
+    mv "$_temphist" "$_histfile"
+fi
 
 # are we interactive, source .bashrc
 case $- in *i*) source $HOME/.bashrc;; esac
 
 ## End
-
-
-test -e "${HOME}/.iterm2_shell_integration.bash" && source "${HOME}/.iterm2_shell_integration.bash"
-
-[ -f /usr/local/etc/bash_completion ] && . /usr/local/etc/bash_completion
-[ -f $HOME/.bash_secrets ] && . $HOME/.bash_secrets
-
-. "$HOME/.cargo/env"
