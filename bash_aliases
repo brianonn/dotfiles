@@ -160,12 +160,6 @@ function mdtohtml() {
         --css=/home/brian/Documents/styling.css -V lang=en --mathjax \
         "$1" -o "${1%.md}.html"
 }
-# convert markdown to HTML and view it
-function viewmd() {
-    mdtohtml "$1"
-    xdg-open "${1%.md}.html"
-    ( sleep 5; \rm -f "${1%.md}.html" )
-}
 
 function serve() {
     port="${1:-3000}"
@@ -418,6 +412,10 @@ function cc() {
     \builtin cd "$target" || return 1
 }
 
+type handlr 2>/dev/null >/dev/null && {
+    alias xdg-open='handlr open "$@"'
+}
+alias open=xdg-open
 alias k='kubectl'
 alias ks='kubectl -n kube-system'
 alias ka='kubectl -n aporeto'
@@ -437,3 +435,11 @@ type bat 2>/dev/null >/dev/null && {
     export MANROFFOPT="-c"
     export MANPAGER="sh -c 'col -bx | bat -l man -p'"
 }
+
+# convert markdown to HTML and view it
+function viewmd() {
+    mdtohtml "$1"
+    xdg-open "${1%.md}.html"
+    ( sleep 5; \rm -f "${1%.md}.html" )
+}
+
