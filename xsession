@@ -5,7 +5,9 @@
 ## or the main xsession will exit and never start.
 ##
 
-echo "$(date) : starting $1" >> $HOME/.xsession.startup.log
+log="$HOME/.xsession.startup.log"
+
+echo "$(date) : starting $1" >> ${log}
 
 ## two screens, with laptop screen to the left and HDMI screen to the right
 xrandr --output eDP1 --primary --left-of HDMI1 --output HDMI1 --auto
@@ -15,9 +17,9 @@ xset s 0 0 s noblank s noexpose dpms 3600 3600 3600
 
 case $1 in
   xmonad)
-    xmonad --recompile
+    xmonad --recompile 2>&1 >> ${log}
     ## start some apps for xmonad
-    $HOME/.config/xmonad/startup.sh
+    $HOME/.config/xmonad/startup.sh 2>&1 >> ${log}
     ;;
   *openbox-session*)
      ## do nothing special here, openbox has it's own startup in ~/.config/openbox/autostart.sh
