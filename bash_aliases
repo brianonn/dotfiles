@@ -9,14 +9,14 @@
 # This file should never be pushed up to a public server in the dotfiles.
 [[ -r ~/.secrets/bash_aliases ]] && source ~/.secrets/bash_aliases
 
-real() {
+function real() {
     f=$(type -a "$1" 2>/dev/null) || return 1
     echo $f | awk 'END { print $NF }'
 }
 export -f real
 
 # alias which according to how it says to do it in the which man page
-which() {
+function which() {
     (
         alias
         declare -f
@@ -31,7 +31,7 @@ real_ls=$(real gls) || real_ls=$(real ls)
 
 #
 # TODO: make an alias for counting extensions in a directory (or list of directories)
-countext() {
+function countext() {
     local dirs="$@"
     find $dirs -type f | sed -re 's/^.*\.(.{1,5})$/\1/p; d' | tr 'A-Z' 'a-z' | sort | uniq -c | sort -n
 }
@@ -39,22 +39,22 @@ countext() {
 # functions as aliases
 
 # list all ssh-keys in the ssh-agent
-agentlist () {
+function agentlist () {
     ssh-add -L | awk '{printf("%30.30s  %15.15s  %50.50s...\n", $3, $1, $2)}'
 }
 
 ## returns exit status 0 if running on systemd
-isSystemd() {
+function isSystemd() {
     [[ $(ps --no-headers -o comm 1 2>/dev/null) =~ systemd ]] || return 1
 }
 
 ## make a backup copy of a file
-bu() {
+function bu() {
     cp "$1" "$1".backup-$(date +%Y%m%d) && echo "$(date +%Y-%m-%d) backed up $PWD/$1" >>~/.backups.log
 }
 
 # remove all kernels except the running one
-rmkernel() {
+function rmkernel() {
     local cur_kernel=$(uname -r | sed 's/-*[a-z]//g' | sed 's/-386//g')
     local kernel_pkg="linux-(image|headers|ubuntu-modules|restricted-modules)"
     local meta_pkg="${kernel_pkg}-(generic|i386|server|common|rt|xen|ec2)"
@@ -63,7 +63,7 @@ rmkernel() {
 }
 
 ## crazy web server in shell
-webserver() {
+function webserver() {
     port=${1:-3333}
     pipe=/tmp/pipe.$port.$RANDOM.$$
     rm -f $pipe
@@ -104,12 +104,12 @@ fc() {
         gawk '{printf "%08X %02X %02X\n", $1, strtonum(0$2), strtonum(0$3)}'
 }
 
-pid2cmd() {
+function pid2cmd() {
     c=$(ps -p "$1" -o command=) && echo $c
 }
 
 # grep for a process
-psgrep() {
+function psgrep() {
     str="$1"
     ps axo pid,ppid,ruser,euser,stat,pcpu,pmem,stime,command | awk 'BEGIN {s=1} NR==1 {hdr=$0} $9 ~ /'"${str}"'/ { if(s) {print hdr} print $0;s=0} END {exit s}'
     if test "$?" = 1; then
@@ -118,14 +118,14 @@ psgrep() {
 }
 
 # show the complete docker process tree
-psdocker() {
+function psdocker() {
     pid=$(ps axo pid,cmd | sed -e 's,\([0-9][0-9]*\) /usr/bin/docker.*,\1,p' -e d)
     if test "1$pid" -ne 1; then
         pstree -au $pid
     fi
 }
 
-dmesg_with_human_timestamps() {
+function dmesg_with_human_timestamps() {
     local dmesg_bin=$(type -a dmesg dmesg.wheel 2>/dev/null | awk 'END { print $NF }')
     $dmesg_bin "$@" | perl -w -e 'use strict;
         my ($uptime) = do { local @ARGV="/proc/uptime";<>}; ($uptime) = ($uptime =~ /^(\d+)\./);
@@ -135,7 +135,7 @@ dmesg_with_human_timestamps() {
 }
 alias dmesg=dmesg_with_human_timestamps
 
-lsR() {
+function lsR() {
     if test "1$1" -eq "1"; then
         dir=.
     else
@@ -149,19 +149,19 @@ lsR() {
         ' | sort
 }
 
-recent() {
+function recent() {
     lsR $1 | sort -r | head -20
 }
 
 # convert a markdown file to HTML using pandoc and a decent CSS for style
-mdtohtml() {
+function mdtohtml() {
     pandoc --from=markdown+smart --to=html5 \
         --embed-resources --standalone \
         --css=/home/brian/Documents/styling.css -V lang=en --mathjax \
         "$1" -o "${1%.md}.html"
 }
 # convert markdown to HTML and view it
-viewmd() {
+function viewmd() {
     mdtohtml "$1"
     xdg-open "${1%.md}.html"
     ( sleep 5; \rm -f "${1%.md}.html" )
@@ -284,14 +284,14 @@ alias more=less
 
 alias ls=ls
 unalias ls
-ls() { $ls_bin "$@" | $ls_pager; }
-l() { $ls_bin -C "$@" | $ls_pager; }
-ll() { $ls_bin -l "$@" | $ls_pager; }             # long list
-lt() { $ls_bin -lt "$@" | ${real_tail} -20; }     # time order long list
-lr() { $ls_bin -lrt "$@" | ${real_tail} -20; }    # reverse time ordered long list
-lx() { $ls_bin -X -C --si "$@" | $ls_pager; }     # list ordered by extension
-llx() { $ls_bin -X -C --si -l "$@" | $ls_pager; } # long list ordered by extension
-lw() { $ls_bin -w $(tput cols) "$@"; }            # list wide
+function ls() { $ls_bin "$@" | $ls_pager; }
+function l() { $ls_bin -C "$@" | $ls_pager; }
+function ll() { $ls_bin -l "$@" | $ls_pager; }             # long list
+function lt() { $ls_bin -lt "$@" | ${real_tail} -20; }     # time order long list
+function lr() { $ls_bin -lrt "$@" | ${real_tail} -20; }    # reverse time ordered long list
+function lx() { $ls_bin -X -C --si "$@" | $ls_pager; }     # list ordered by extension
+function llx() { $ls_bin -X -C --si -l "$@" | $ls_pager; } # long list ordered by extension
+function lw() { $ls_bin -w $(tput cols) "$@"; }            # list wide
 
 alias findgrep='find . -type f \( -name \*.git -o -name .snaphot -o -name .bak -prune \) -print0 | xargs -0 grep -in'
 
@@ -368,7 +368,7 @@ if [[ -x $(real nvim)  ]]; then
     alias vim=nvim
 fi
 
-lfcd () {
+function lfcd () {
     tmp="$(mktemp)"
     # `command` is needed in case `lfcd` is aliased to `lf`
     command lf -last-dir-path="$tmp" "$@"
@@ -398,7 +398,7 @@ alias pso='ps -o user,pid,ppid,cpu,pmem,vsz,rss,c,pri,nice,stat,start,time,comma
 
 # cc - cd with fuzzy finder
 # Usage: cc [path]
-cc() {
+function cc() {
     local fd_options fzf_options target
 
     fd_options=(
