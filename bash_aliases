@@ -78,6 +78,12 @@ function webserver() {
     rm -f $pipe
 }
 
+# or run a local web server using ruby
+function serve() {
+    port="${1:-3000}"
+    ruby -run -e httpd . -p $port
+}
+
 # imagemagic resize screencaps from LG G3
 #
 # mkdir tmp
@@ -97,7 +103,7 @@ else
     }
 fi
 
-fc() {
+function fc() {
     old="$1"
     new="$2"
     cmp -l $old $new |
@@ -159,11 +165,6 @@ function mdtohtml() {
         --embed-resources --standalone \
         --css=/home/brian/Documents/styling.css -V lang=en --mathjax \
         "$1" -o "${1%.md}.html"
-}
-
-function serve() {
-    port="${1:-3000}"
-    ruby -run -e httpd . -p $port
 }
 
 alias backup='rsync -av --progress --exclude='\''*/Downloads/In-Progress/'\'' --exclude='\''*/Downloads/Torrents/'\'' --exclude='\''*/Downloads/Completed/'\'' --exclude='\''*/.cache/'\'' --exclude='\''*/.thumb*/'\'' $HOME /zpool0/downloads/'
