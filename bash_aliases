@@ -143,20 +143,6 @@ function dmesg_with_human_timestamps() {
 }
 alias dmesg=dmesg_with_human_timestamps
 
-function lsR() {
-    if test "1$1" -eq "1"; then
-        dir=.
-    else
-        dir="$1"
-    fi
-    /bin/ls -lRU -I node_modules -I .git --time-style="+%Y-%m-%d,%H:%M:%S" "$dir" | awk '  \
-        /:$/&&f{s=$0;f=0}                       \
-        /:$/&&!f{sub(/:$/,"");s=$0;f=1;next}    \
-        /^total/ {next}                         \
-        NF&&f{ print $6, s"/"$7}                \
-        ' | sort
-}
-
 function recent() {
     lsR $1 | sort -r | head -20
 }
@@ -272,23 +258,55 @@ alias grep="grep $color_opt"
 alias fgrep="fgrep $color_opt"
 alias egrep="egrep $color_opt"
 
-ls_pager="perl -lpe 's/(\S+)\//[\1]/g' | ${real_less} -S -R -X -F"
+#ls_pager="perl -lpe 's/(\S+)\//[\1]/g' | ${real_less} -S -R -X -F"
 ls_pager="${real_less} -S -R -X -F"
 ls_bin="${real_ls} -C -F --group-directories-first $color_opt"
 
 alias more=less
 [ -x $(real colortail 2>/dev/null) ] && alias tail=colortail
 
-alias ls=ls
-unalias ls
-function ls() { $ls_bin "$@" | $ls_pager; }
-function l() { $ls_bin -C "$@" | $ls_pager; }
-function ll() { $ls_bin -l "$@" | $ls_pager; }             # long list
-function lt() { $ls_bin -lt "$@" | ${real_tail} -20; }     # time order long list
-function lr() { $ls_bin -lrt "$@" | ${real_tail} -20; }    # reverse time ordered long list
-function lx() { $ls_bin -X -C --si "$@" | $ls_pager; }     # list ordered by extension
-function llx() { $ls_bin -X -C --si -l "$@" | $ls_pager; } # long list ordered by extension
-function lw() { $ls_bin -w $(tput cols) "$@"; }            # list wide
+type lsd 2>/dev/null >/dev/null &&
+    function __ls() { lsd --group-dirs=none --total-size --color=always --hyperlink=always "$@" | $ls_pager; } ||
+        function __ls() { $ls_bin "$@" | $ls_pager; }
+function lt() { __ls -1 -t "$@" | ${real_tail} -20 | $ls_pager; }  # time ordered list
+function lr() { __ls -1 -rt "$@" | ${real_tail} -20 | $ls_pager; } # reverse time ordered list
+function lx() { __ls -1 -X "$@" | $ls_pager; }                     # extension ordered list
+function lw() { $ls_bin -w $(tput cols) "$@"; }                    # list wide
+function ll() { __ls -1 -l "$@" | $ls_pager; }                     # long list
+function llt() { __ls -lt "$@" | ${real_tail} -20 | $ls_pager; }   # time ordered long list
+function llr() { __ls -lrt "$@" | ${real_tail} -20 | $ls_pager; }  # reverse time ordered long list
+function llx() { __ls -lX "$@" | $ls_pager; }                      # extension ordered long list
+type lsd 2>/dev/null >/dev/null &&
+    function lR() { __ls --tree -Inode_modules -I.git "$@" | $ls_pager; } ||
+        function lR() {
+            if test "1$1" -eq "1"; then
+                dir=.
+            else
+                dir="$1"
+            fi
+            $ls_bin -1 -RU -I node_modules -I .git --time-style="+%Y-%m-%d,%H:%M:%S" "$dir" | awk '  \
+        /:$/&&f{s=$0;f=0}                       \
+        /:$/&&!f{sub(/:$/,"");s=$0;f=1;next}    \
+        NF&&f{ print s"/"$1}                \
+        ' | sort -u
+        }
+type lsd 2>/dev/null >/dev/null &&
+    function llR() { __ls -l --tree -Inode_modules -I.git "$@" | $ls_pager; } ||
+        function llR() {
+            if test "1$1" -eq "1"; then
+                dir=.
+            else
+                dir="$1"
+            fi
+            $ls_bin -1 -RU -I node_modules -I .git --time-style="+%Y-%m-%d,%H:%M:%S" "$dir" | awk '  \
+        /:$/&&f{s=$0;f=0}                       \
+        /:$/&&!f{sub(/:$/,"");s=$0;f=1;next}    \
+        /^total/ {next}                         \
+        NF&&f{ print $6, s"/"$7}                \
+        ' | sort -u
+        }
+alias ls='__ls'
+alias l=lr
 
 alias findgrep='find . -type f \( -name \*.git -o -name .snaphot -o -name .bak -prune \) -print0 | xargs -0 grep -in'
 
@@ -436,7 +454,6 @@ alias tf=terraform
 alias tp=telepresence
 #alias gimme-aws-creds='source $HOME/bin/getaws'
 
-type lsd 2>/dev/null >/dev/null && alias l='lsd --almost-all -X --group-dirs=last --total-size -l -tr'
 type bat 2>/dev/null >/dev/null && {
     alias cat=bat
     export MANROFFOPT="-c"
