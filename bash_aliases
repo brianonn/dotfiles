@@ -143,6 +143,20 @@ function dmesg_with_human_timestamps() {
 }
 alias dmesg=dmesg_with_human_timestamps
 
+lsR() {
+    if test "1$1" -eq "1"; then
+        dir=.
+    else
+        dir="$1"
+    fi
+    /bin/ls -lRU -I node_modules -I .git --time-style="+%Y-%m-%d,%H:%M:%S" "$dir" | awk '  \
+        /:$/&&f{s=$0;f=0}                       \
+        /:$/&&!f{sub(/:$/,"");s=$0;f=1;next}    \
+        /^total/ {next}                         \
+        NF&&f{ print $6, s"/"$7}                \
+        ' | sort
+}
+
 function recent() {
     lsR $1 | sort -r | head -20
 }
