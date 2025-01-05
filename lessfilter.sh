@@ -9,6 +9,7 @@
 #
 #   export LESS="-R"
 #   export LESSOPEN="|~/.lessfilter"
+#   export LESSFILTER_COLOR_STYLE="nord" # see pygments -L styles
 #
 
 # requirements: install the following before you use it
@@ -25,8 +26,8 @@
 #
 # TODO: add LESSFILTER_HTML_VIEWER env variable to use "lynx" or "firefox" or "chrome" , etc
 
-default_style="lightbulb" #zenburn
-bash_style="lightbulb"
+default_style="${LESSFILTER_COLOR_STYLE:-nord}" #zenburn
+bash_style="${default_style}"
 
 hexdump=$(which hexdump)
 ##OFF## htmlviewer=$(which webview)
