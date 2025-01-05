@@ -41,7 +41,7 @@ function countext() {
 # functions as aliases
 
 # list all ssh-keys in the ssh-agent
-function agentlist () {
+function agentlist() {
     ssh-add -L | awk '{printf("%30.30s  %15.15s  %50.50s...\n", $3, $1, $2)}'
 }
 
@@ -182,7 +182,7 @@ alias shred='shred -v -n 3 -u -f'
 alias smath='/opt/smath-mono/smath.sh'
 alias tff='torify32 /usr/local/firefox/firefox'
 alias vcc='valac'
-alias tf='terraform'  # TODO investigate OpenTofu
+alias tf='terraform' # TODO investigate OpenTofu
 
 # set a terminal alias to whatever best terminal is available on the platform
 for term in qterm wezterm alacritty iterm2 iterm gnome-terminal qterminal rxvt-unicode urxvt rxvt xterm; do
@@ -221,7 +221,7 @@ alias gcpp='git add -u && git commit -m "checkpoint $(date -u +%FT%TZ)" && git p
 alias gcpw='watch -n 3600 "git add -A && git commit -m \"checkpoint $(date -u +%FT%TZ)\" && git push"'
 alias gitu='git checkout master && git pull --rebase && git checkout - && git rebase master'
 alias git-remove-untracked='git fetch --prune && git branch -r | awk "{print \$1}" | /usr/bin/grep -E --color=no -v -f /dev/fd/0 <(git branch -vv | grep --color=no origin) | awk "{print \$1}" | xargs -n1 echo git branch -d'
-function gdbr(){ "1$1" && { git branch -D "$1" && git push origin --delete "$1" ; } || printf "Usage: gbr <branch>\n   delete a local and remote git branch"; }
+function gdbr() { "1$1" && { git branch -D "$1" && git push origin --delete "$1"; } || printf "Usage: gbr <branch>\n   delete a local and remote git branch"; }
 
 # google shell
 alias gsh="$HOME/src/perl/goosh.pl"
@@ -257,8 +257,8 @@ alias dirs='dirs -v'
 alias gld-solo-grid="./cgminer -c ~/.bfgminer/goldcoin.conf --gridseed-options='freq=800'"
 
 # rewrite pushd and popd to be silent
-pushd() { builtin pushd "$@" > /dev/null; }
-popd()  { builtin popd  "$@" > /dev/null; }
+pushd() { builtin pushd "$@" >/dev/null; }
+popd() { builtin popd "$@" >/dev/null; }
 
 color_opt=''
 if [[ $(tput colors) > 0 ]]; then
@@ -365,7 +365,7 @@ if [[ -x $(real nvim)  ]]; then
     alias vim=nvim
 fi
 
-function lfcd () {
+function lfcd() {
     tmp="$(mktemp)"
     # `command` is needed in case `lfcd` is aliased to `lf`
     command lf -last-dir-path="$tmp" "$@"
@@ -380,12 +380,12 @@ function lfcd () {
     fi
 }
 
-if command -v kubeselect> /dev/null; then
+if command -v kubeselect >/dev/null; then
     # kubeselect and kubectl
     # go install gitlab.com/zerok/kubeselect/cmd/kubeselect
     # see: https://zerokspot.com/weblog/2019/05/31/kubeselect/
-    alias ks='eval $(kubeselect select)'    # select a kubeconfig and a context
-    alias k='kubeselect run -- '            # run kubectl with the selected context
+    alias ks='eval $(kubeselect select)' # select a kubeconfig and a context
+    alias k='kubeselect run -- '         # run kubectl with the selected context
 fi
 
 # ARCH pkg management
@@ -443,6 +443,9 @@ type bat 2>/dev/null >/dev/null && {
 function viewmd() {
     mdtohtml "$1"
     xdg-open "${1%.md}.html"
-    ( sleep 5; \rm -f "${1%.md}.html" )
+    (
+        sleep 5
+        \rm -f "${1%.md}.html"
+    )
 }
 
