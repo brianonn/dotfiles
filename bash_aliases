@@ -449,3 +449,17 @@ function viewmd() {
     )
 }
 
+function bt() {
+    case $1 in
+    on)
+        rfkill unblock bluetooth
+        ;;
+    off)
+        rfkill block bluetooth
+        ;;
+    *)
+        echo "use: bt on | off"
+        return 1
+        ;;
+    esac
+}
