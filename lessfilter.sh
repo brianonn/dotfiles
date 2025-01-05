@@ -113,6 +113,12 @@ case "$1" in
     exit 0
     ;;
 
+    # terraform
+    *.tf|*.tfstate)
+    pygmentize -f 16m -l tf -O style="${bash_style}" "$1"
+    exit 0
+    ;;
+
     # library archive
     *.ar|*.a) ar tv "$1" && exit 0 ;;
 
