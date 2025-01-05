@@ -393,18 +393,20 @@ alias yay='paru'
 alias yeet='paru -Rcs'
 alias pso='ps -o user,pid,ppid,cpu,pmem,vsz,rss,c,pri,nice,stat,start,time,command'
 
-# cc - cd with fuzzy finder
-# Usage: cc [path]
-function cc() {
+# fcd - cd with fuzzy finder using fzf
+# Usage: fcd [path]
+function fcd() {
     local fd_options fzf_options target
 
     fd_options=(
         --hidden
     )
 
+    type bat 2>/dev/null >/dev/null && cat='bat --style=numbers --color=always' || cat='less'
     fzf_options=(
-        --preview='test -d {} && tree -L 1 {} || less {}'
+        --preview="test -d {} && tree -L 1 {} || ${cat} {}"
         --bind=ctrl-space:toggle-preview
+        --walker=dir
         --exit-0
     )
 
@@ -412,7 +414,7 @@ function cc() {
 
     test -f "$target" && target="${target%/*}"
 
-    \builtin cd "$target" || return 1
+    \builtin \cd "$target" || return 1
 }
 
 type handlr 2>/dev/null >/dev/null && {
