@@ -319,7 +319,7 @@ alias digg='dig +all'
 alias mpb='/bin/nc paste.linuxmint.com 9999 <<< "${*:-`cat`}"'
 
 alias iso8601='date -u +%FT%TZ'
-alias local8601='date +"%Y-%m-%dT%H:%M:%S%z"'
+alias local8601='date +%FT%T'
 alias localtime='date "+%F %T %Z"'
 alias utctime='date -u "+%F %T %Z"'
 alias utc=utctime
