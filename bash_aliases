@@ -430,6 +430,8 @@ alias kb=kubie
 alias ggb='gogo build $(gh pr view | sed '\''s/^url:.*[/]\([^/]*\)[/]pull[/]\([0-9][0-9]*\)$/\1:pr\2/p;d'\'')'
 alias ggt='gogo test $(gh pr view | sed '\''s/^url:.*[/]\([^/]*\)[/]pull[/]\([0-9][0-9]*\)$/\1:pr\2/p;d'\'')'
 
+alias jqtopkeys="jq -r 'to_entries[] | [.key] | @tsv'"
+
 alias tf=terraform
 alias tp=telepresence
 #alias gimme-aws-creds='source $HOME/bin/getaws'
