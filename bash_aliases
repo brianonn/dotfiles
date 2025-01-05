@@ -11,7 +11,9 @@
 
 function real() {
     f=$(type -a "$1" 2>/dev/null) || return 1
-    echo $f | awk 'END { print $NF }'
+    declare -a words
+    local words=($f)
+    echo ${words[${#words[@]} - 1]} | tr -d '[\140\047\042]' # backtick,single and double quote
 }
 export -f real
 
