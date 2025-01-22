@@ -1,9 +1,41 @@
 # INSTRUCTIONS: save as ~/.config/gdb/gdbinit
 
+set $INITFILE = "/home/brian/.config/gdb/gdbinit"
+set $ESC = "\033"
+printf " %s[33mloading: %s %s[0m\n", $ESC,$INITFILE,$ESC
+
+# __________________initial gdb options_________________
+set history save on
+set history size 1000
+set history filename ~/.cache/gdb/history
+set listsize 25
+set confirm off
+set verbose on
+set prompt \033[31m(gdb) $ \033[0m
+set output-radix 0x10
+set input-radix 0x10
+# These make gdb never pause in its output
+set height 0
+set width 0
+# why do these not work???
+set $SHOW_CONTEXT = 1
+set $SHOW_NEST_INSN=0
+
+set disassembly-flavor intel
+
+# _____________ check for 32-bit or 64-bit debugging environment. On amd64, use 'gdb --arch=i386'
+if sizeof(int) == 4
+  set $arch = 32
+else
+  set $arch = 64
+end
+
 # ______________breakpoint aliases_____________
+
 
 define run1
 run --testnet -printtoconsole -server=1 -rpcuser=user -rpcpassword=12345 -rpcport=8888 --blocknotify="/tmp/captureNewBlocks.sh %s"
+end
 document run1
 Run the testnet
 end
@@ -169,7 +201,7 @@ document eflags
 Print entire eflags register
 end
 
-define reg
+define reg32
 printf " eax:%08X ebx:%08X ecx:%08X ", $eax, $ebx, $ecx
 printf " edx:%08X eflags:%08X\n", $edx, $eflags
 printf " esi:%08X edi:%08X esp:%08X ", $esi, $edi, $esp
@@ -180,8 +212,23 @@ echo \033[31m
 flags
 echo \033[0m
 end
-document reg
-Print CPU registers
+document reg32
+Print 32-bit CPU registers
+end
+
+define reg64
+printf " rax:%16X rbx:%16X rcx:%16X ", $rax, $rbx, $rcx
+printf " rdx:%16X eflags:%08X\n", $rdx, $eflags
+printf " rsi:%16X rdi:%16X rsp:%16X ", $rsi, $rdi, $rsp
+printf " rbp:%16X rip:%16X\n", $rbp, $rip
+printf " cs:%04X ds:%04X es:%04X", $cs, $ds, $es
+printf " fs:%04X gs:%04X ss:%04X ", $fs, $gs, $ss
+echo \033[31m
+flags
+echo \033[0m
+end
+document reg64
+Print 64-bit CPU registers
 end
 
 define func
@@ -238,7 +285,7 @@ end
 define ascii_char
 # thanks elaine :)
 set $_c=*(unsigned char *)($arg0)
-if ( $_c <> 0x7E )
+if ( $_c > 0x7E )
 printf "."
 else
 printf "%c", $_c
@@ -292,19 +339,24 @@ end
 # ________________data window__________________
 define ddump
 echo \033[36m
-
 printf "[%04X:%08X]------------------------", $ds, $data_addr
 printf "---------------------------------[ data]\n"
 echo \033[34m
 set $_count=0
-while ( $_count < $arg0 ) set $_i=($_count*0x10) hexdump ($data_addr+$_i) set $_count++ end end
+while ( $_count < $arg0 )
+   set $_i=($_count*0x10)
+   hexdump ($data_addr+$_i)
+   set $_count++
+end
+end
 document ddump
 Display $arg0 lines of hexdump for address $data_addr
 end
 
 define dd
 if ( ($arg0 & 0x40000000) || ($arg0 & 0x08000000) || ($arg0 & 0xBF000000) )
-set $data_addr=$arg0 ddump 0x10
+set $data_addr=$arg0
+ddump 0x10
 else printf "Invalid address: %08X\n", $arg0
 end
 end
@@ -315,12 +367,17 @@ end
 define datawin
 if ( ($esi & 0x40000000) || ($esi & 0x08000000) || ($esi & 0xBF000000) )
   set $data_addr=$esi
-else if ( ($edi & 0x40000000) || ($edi & 0x08000000) || ($edi & 0xBF000000) )
-  set $data_addr=$edi
-else if ( ($eax & 0x40000000) || ($eax & 0x08000000) || ($eax & 0xBF000000) )
-  set $data_addr=$eax else set $data_addr=$esp
-end
-end
+else
+  if ( ($edi & 0x40000000) || ($edi & 0x08000000) || ($edi & 0xBF000000) )
+    set $data_addr=$edi
+  else
+    if ( ($eax & 0x40000000) || ($eax & 0x08000000) || ($eax & 0xBF000000) )
+      set $data_addr=$eax
+    else
+      # set $data_addr=$esp  # 32-bit
+      set $data_addr=$rsp    # 64-bit
+    end
+  end
 end
 ddump 2
 end
@@ -334,15 +391,20 @@ echo \033[36m
 printf "----------------------------------------"
 printf "---------------------------------[ regs]\n"
 echo \033[32m
-reg
+reg64
 echo \033[36m
-printf "[%04X:%08X]------------------------", $ss, $esp
+#printf "[%04X:%08X]------------------------", $ss, $esp
+printf "[%04X:%16X]------------------------", $ss, $rsp
 printf "---------------------------------[stack]\n"
 echo \033[34m
-hexdump $sp+0x30 hexdump $sp+0x20 hexdump $sp+0x10 hexdump $sp
+hexdump $rsp+0x30
+hexdump $rsp+0x20
+hexdump $rsp+0x10
+hexdump $rsp
 datawin
 echo \033[36m
-printf "[%04X:%08X]------------------------", $cs, $eip
+#printf "[%04X:%08X]------------------------", $cs, $eip
+printf "[%04X:%16X]------------------------", $cs, $rip
 printf "---------------------------------[ code]\n"
 echo \033[37m
 x /6i $pc
@@ -757,11 +819,14 @@ context
 end
 if ( $SHOW_NEST_INSN > 0 )
 set $x = $_nest
-while ($x > 0 )
+while ( $x > 0 )
 printf "\t"
 set $x = $x - 1
 end
 end
+end
+document hook-stop
+Call 'context' at every BP/step
 end
 
 define assemble
@@ -920,24 +985,11 @@ end
 document tip_display
 Tips on automatically displaying values when a program stops.
 end
-# __________________gdb options_________________
-set confirm off
-set verbose off
-#set prompt \033[01;m\033] niel@gdb $ \033[0m
-set prompt \033[31mgdb $ \033[0m
-set output-radix 0x10
-set input-radix 0x10
-# These make gdb never pause in its output
-set height 0
-set width 0
-# why do these not work???
-set $SHOW_CONTEXT = 1
-set $SHOW_NEST_INSN=0
 
-set disassembly-flavor intel
 
 # DONE
-echo done loading gdbinit\n
+set verbose off
+printf "%s[33mfinished: %s %s[0m\n", $ESC,$INITFILE,$ESC
 
 #EOF
 
