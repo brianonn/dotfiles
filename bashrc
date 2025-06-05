@@ -26,40 +26,40 @@ set -o noclobber
 # this function provides me with some local help information for my customized environment
 # TODO: extract this to a .localhelp.txt file
 function _local_help() {
-  echo
-  echo "############# LOCAL HELP ############"
-  echo
-  if type tldr 2>/dev/null >/dev/null ; then
-    echo "  Use tldr <command> "
-    echo "  See also 'tldr tldr'"
     echo
-  fi
-  echo "  You can also see the output from 'help man'"
-  echo "  and try just 'man <command>'"
-  echo
-  if type info 2>/dev/null >/dev/null; then
-    echo "  The 'info' command is useful for getting help with GNU commands"
-    echo "  Try 'info' by itself, or 'info <command>'."
+    echo "############# LOCAL HELP ############"
     echo
-  fi
-  echo "  For looking up commands that might do what you want,"
-  echo "  use 'apropos <thing>' where <thing> is something about"
-  echo "  what you want the command to do for you"
-  echo
-  echo "  Ex: "
-  echo "    'apropos audio'  -- will return a list of commands that work with audio."
-  echo
-  echo "########################################"
-  echo
+    if type tldr 2>/dev/null >/dev/null; then
+        echo "  Use tldr <command> "
+        echo "  See also 'tldr tldr'"
+        echo
+    fi
+    echo "  You can also see the output from 'help man'"
+    echo "  and try just 'man <command>'"
+    echo
+    if type info 2>/dev/null >/dev/null; then
+        echo "  The 'info' command is useful for getting help with GNU commands"
+        echo "  Try 'info' by itself, or 'info <command>'."
+        echo
+    fi
+    echo "  For looking up commands that might do what you want,"
+    echo "  use 'apropos <thing>' where <thing> is something about"
+    echo "  what you want the command to do for you"
+    echo
+    echo "  Ex: "
+    echo "    'apropos audio'  -- will return a list of commands that work with audio."
+    echo
+    echo "########################################"
+    echo
 }
 
 # update the bash help command to be more useful
-function help () {
-  # run the built-in bash help first
-  \command \help
+function help() {
+    # run the built-in bash help first
+    \command \help
 
-  # then show the local help text
-  _local_help
+    # then show the local help text
+    _local_help
 }
 
 # don't put duplicate lines in the history. See bash(1) for more options
@@ -96,7 +96,7 @@ color_prompt=yes
 
 if [ "$color_prompt" = yes ]; then
 
-    if tput setaf 1 &> /dev/null; then
+    if tput setaf 1 &>/dev/null; then
         tput sgr0
         if [[ $(tput colors) -ge 256 ]] 2>/dev/null; then
             MAGENTA=$(tput setaf 5)
@@ -132,11 +132,11 @@ if [ "$color_prompt" = yes ]; then
     fi
 
     if [ $UID = 0 ]; then
-      UID_COLOR="$RED"
-      P="${UID_COLOR}(root) #"
+        UID_COLOR="$RED"
+        P="${UID_COLOR}(root) #"
     else
-      UID_COLOR="$BOLD$CYAN"
-      P="${UID_COLOR}\$${RESET}"
+        UID_COLOR="$BOLD$CYAN"
+        P="${UID_COLOR}\$${RESET}"
     fi
 
     # A two-line colored Bash prompt (PS1) with the VCS branch
@@ -155,7 +155,7 @@ if [ "$color_prompt" = yes ]; then
         fi
     }
     function get_vcs_project_name {
-        case $( which_vcs ) in
+        case $(which_vcs) in
         git)
             vcs_top_level=$(${git} rev-parse --show-toplevel)
             echo "${vcs_top_level##*/}"
@@ -165,9 +165,9 @@ if [ "$color_prompt" = yes ]; then
     }
     function get_vcs_branch_name {
         local ref
-        case $( which_vcs ) in
+        case $(which_vcs) in
         git)
-            ref=$( ${git} symbolic-ref HEAD 2> /dev/null )
+            ref=$(${git} symbolic-ref HEAD 2>/dev/null)
             [[ ! -z $ref ]] && ref="${ref#refs/heads/}"
             ;;
         *) return 1 ;;
@@ -175,18 +175,18 @@ if [ "$color_prompt" = yes ]; then
         echo "$ref"
     }
     function get_vcs_branch_status {
-        case $( which_vcs ) in
+        case $(which_vcs) in
         git)
             # ${git} status >/dev/null 2>&1 || echo ' (dirty)'
-            echo \ $( ${git} status --porcelain | awk '/^[MAD]/{S=1}/^ [M]/{M=1}/^[?][?]?/{U=1}END{if(S+M+U){printf"("};if(S){printf" staged"};if(M){printf" modified"};if(U){printf" untracked"}if(S+M+U){printf" )"}}' )
+            echo \ $(${git} status --porcelain | awk '/^[MAD]/{S=1}/^ [M]/{M=1}/^[?][?]?/{U=1}END{if(S+M+U){printf"("};if(S){printf" staged"};if(M){printf" modified"};if(U){printf" untracked"}if(S+M+U){printf" )"}}')
             ;;
         *) return 1 ;;
         esac
     }
     function get_vcs_ahead_behind {
-        case $( which_vcs ) in
+        case $(which_vcs) in
         git)
-            echo $( ${git} for-each-ref --format="%(push:track)" $(${git} symbolic-ref HEAD) | tr -d '[]' )
+            echo $(${git} for-each-ref --format="%(push:track)" $(${git} symbolic-ref HEAD) | tr -d '[]')
             ;;
         *) return 1 ;;
         esac
@@ -202,10 +202,10 @@ if [ "$color_prompt" = yes ]; then
         # continue only if inside a VCS directory
         PROMPT_DIRTRIM=5
         PS_VCS_BRANCH="${ref}"
-        PS_VCS_CMD="$( which_vcs ):"
+        PS_VCS_CMD="$(which_vcs):"
         PS_VCS_L="[ " PS_VCS_R=" ]"
-        PS_VCS_STATUS="$( get_vcs_branch_status )"
-        PS_VCS_AHEAD_BEHIND="$( get_vcs_ahead_behind )"
+        PS_VCS_STATUS="$(get_vcs_branch_status)"
+        PS_VCS_AHEAD_BEHIND="$(get_vcs_ahead_behind)"
         [[ ! -z $PS_VCS_AHEAD_BEHIND ]] && PS_VCS_AHEAD_BEHIND=" ( ${PS_VCS_AHEAD_BEHIND} )"
         update_user_badge
     }
@@ -219,24 +219,23 @@ if [ "$color_prompt" = yes ]; then
     PS_TIME="\[\033[\$((COLUMNS-10))G\] $RED[\t]"
     PS_TIME='\t'
     PS_DATE='\d'
-#    export PS1="\${PS_FILL}\[\033[0G\]${PS_INFO} ${PS_VCS_INFO}${PS_TIME}\n${RESET}\$ "
-#
+    #    export PS1="\${PS_FILL}\[\033[0G\]${PS_INFO} ${PS_VCS_INFO}${PS_TIME}\n${RESET}\$ "
+    #
 
-## Left and Right sides of the path string
-  #L="ÃÂ«" R="ÃÂ»"
-  #L="«" R="»"
-  #L="<<" R=">>"
-  #R= L=
-  #L="[" R="]"
-  L="[ " R=" ]"
+    ## Left and Right sides of the path string
+    #L="ÃÂ«" R="ÃÂ»"
+    #L="«" R="»"
+    #L="<<" R=">>"
+    #R= L=
+    #L="[" R="]"
+    L="[ " R=" ]"
 
+    #export PS1="\n${UID_COLOR}\342\226\210\342\226\210 \u${WHITE} (\h) ${ORANGE}${L}${PS_VCS_INFO}${ORANGE} \w ${R}\n${CYAN}\342\226\210\342\226\210 [\!] ${P}${RESET}${WHITE} "
+    #  export PS1="\n${UID_COLOR}\342\226\210\342\226\210 ${GREEN}[\@] ${ORANGE}${L}${PS_VCS_INFO}${ORANGE}\w${R}\n${CYAN}\342\226\210\342\226\210 [\!] ${P}${RESET}${WHITE} "
+    export PS1="\n${GREEN}${L}${PS_DATE} ${PS_TIME}${R} ${ORANGE}${PS_VCS_INFO}${ORANGE}${L}\w${R}\n${CYAN}[\!] ${P}${RESET}${WHITE} "
 
-  #export PS1="\n${UID_COLOR}\342\226\210\342\226\210 \u${WHITE} (\h) ${ORANGE}${L}${PS_VCS_INFO}${ORANGE} \w ${R}\n${CYAN}\342\226\210\342\226\210 [\!] ${P}${RESET}${WHITE} "
-#  export PS1="\n${UID_COLOR}\342\226\210\342\226\210 ${GREEN}[\@] ${ORANGE}${L}${PS_VCS_INFO}${ORANGE}\w${R}\n${CYAN}\342\226\210\342\226\210 [\!] ${P}${RESET}${WHITE} "
-  export PS1="\n${GREEN}${L}${PS_DATE} ${PS_TIME}${R} ${ORANGE}${PS_VCS_INFO}${ORANGE}${L}\w${R}\n${CYAN}[\!] ${P}${RESET}${WHITE} "
-
-  unset P L R UID_COLOR B_UID_COLOR RESET BOLD RED GREEN ORANGE BLUE MAGENTA CYAN WHITE
-  unset PS_VCS_BRANCH PS_FILL ref PS_INFO PS_VCS_INFO PS_TIME
+    unset P L R UID_COLOR B_UID_COLOR RESET BOLD RED GREEN ORANGE BLUE MAGENTA CYAN WHITE
+    unset PS_VCS_BRANCH PS_FILL ref PS_INFO PS_VCS_INFO PS_TIME
 else
     # no color prompt, just plain
     PS1='${debian_chroot:+($debian_chroot)}\u@\h[\w]\$ '
@@ -245,22 +244,21 @@ unset color_prompt force_color_prompt
 
 # If this is an xterm set the title to user@host:dir
 case "$TERM" in
-xterm*|rxvt*)
+xterm* | rxvt*)
     PS1="\[\e]0;${debian_chroot:+($debian_chroot)}\u@\h: \w\a\]$PS1"
     ;;
-*)
-    ;;
+*) ;;
 esac
 
 pathlist=""
 for path in \
-  "$HOME/bin" \
-  "/usr/local/bin" \
-  "/opt/homebrew/bin" \
-  "/use/local/homebrew/bin" \
-  "/opt/homebrew/opt/openjdk/bin" \
-  "$HOME/google-cloud-sdk/bin"
-do
+    "$HOME/.local/bin" \
+    "$HOME/bin" \
+    "/usr/local/bin" \
+    "/opt/homebrew/bin" \
+    "/use/local/homebrew/bin" \
+    "/opt/homebrew/opt/openjdk/bin" \
+    "$HOME/google-cloud-sdk/bin"; do
     [[ -d "$path" ]] && pathlist=${pathlist}:${path}
 done
 export PATH="${pathlist}:$PATH"
@@ -287,11 +285,11 @@ export GOPATH=
 #[ -r "$EPCTL_PROFILE" ] && source $EPCTL_PROFILE
 
 if [ -r ~/.git-completion.bash ]; then
-  . ~/.git-completion.bash
+    . ~/.git-completion.bash
 fi
 
 if [ -r ~/.kubie-completion.bash ]; then
-  . ~/.kubie-completion.bash
+    . ~/.kubie-completion.bash
 fi
 
 # Golang Version Manager
@@ -305,8 +303,8 @@ export PATH="$GOBIN:$PATH"
 
 # Node version manager
 export NVM_DIR="$HOME/.nvm"
-[[ -r "$NVM_DIR/nvm.sh" ]] && source "$NVM_DIR/nvm.sh"  # This loads nvm
-[[ -r "$NVM_DIR/bash_completion" ]] && source "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
+[[ -r "$NVM_DIR/nvm.sh" ]] && source "$NVM_DIR/nvm.sh"                   # This loads nvm
+[[ -r "$NVM_DIR/bash_completion" ]] && source "$NVM_DIR/bash_completion" # This loads nvm bash_completion
 
 # added by travis gem
 [[ -r $HOME/.travis/travis.sh ]] && source $HOME/.travis/travis.sh
@@ -326,7 +324,7 @@ for i in ${HOME}/.mlocate/*.db; do
     LOCATE_PATH="$LOCATE_PATH:$i"
 done
 export LOCATE_PATH
-findroms() {  mlocate -i --regex "roms.*$1"; }
+findroms() { mlocate -i --regex "roms.*$1"; }
 
 # 8 colors for jq(1)
 # null:false:true:numbers:strings:arrays:objects:keys
@@ -336,7 +334,10 @@ export JQ_COLORS="1;36:0;36:0;36:0;33:0;32:0;37:0;37:0;37"
 [[ -r "$HOME/.ghcup/env" ]] && source "$HOME/.ghcup/env"
 
 # bun
-[[ -d $HOME/.bun ]] && { export BUN_INSTALL="$HOME/.bun"; export PATH=$BUN_INSTALL/bin:$PATH; }
+[[ -d $HOME/.bun ]] && {
+    export BUN_INSTALL="$HOME/.bun"
+    export PATH=$BUN_INSTALL/bin:$PATH
+}
 
 export GPG_TTY=$(tty)
 type bat 2>/dev/null >/dev/null && export BAT_THEME='Catppuccin Mocha'
@@ -357,7 +358,7 @@ GCLOUD="/Users/bonn/google-cloud-sdk"
 # The next line updates PATH for the Google Cloud SDK.
 if [ -r "$GCLOUD/path.bash.inc" ]; then . "$GCLOUD/path.bash.inc"; fi
 # The next line enables shell command completion for gcloud.
-if [ -r "$GCLOUD/completion.bash.inc" ]; then . "$GCLOUD/completion.bash.inc" ; fi
+if [ -r "$GCLOUD/completion.bash.inc" ]; then . "$GCLOUD/completion.bash.inc"; fi
 export PS1="$ "
 
 #eval "$(starship init bash)"
@@ -378,3 +379,4 @@ complete -o default -F __start_kubectl k
 ## keep this line near the end
 [[ -r $HOME/.secrets/env ]] && source $HOME/.secrets/env
 [[ -r $HOME/.bash_secrets ]] && source $HOME/.bash_secrets
+export LIBVIRT_DEFAULT_URI='qemu:///system' 

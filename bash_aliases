@@ -7,6 +7,7 @@
 
 # read the sensitive aliases, that might contain inline passwords.
 # This file should never be pushed up to a public server in the dotfiles.
+[[ -r ~/.bash_functions ]] && source ~/.bash_functions
 [[ -r ~/.secrets/bash_aliases ]] && source ~/.secrets/bash_aliases
 
 function real() {
@@ -202,8 +203,6 @@ alias ff='firefox'
 alias v='vi'
 alias ge='gedit'
 alias ze='zile'
-alias phpstorm='/opt/phpstorm/bin/phpstorm.sh'
-alias p='phpstorm'
 
 # Git aliases for bash
 alias gs='git status'
@@ -423,7 +422,12 @@ fi
 # ARCH pkg management
 alias yay='paru'
 alias yeet='paru -Rcs'
+
+# PS aliases
 alias pso='ps -o user,pid,ppid,cpu,pmem,vsz,rss,c,pri,nice,stat,start,time,command'
+alias psk='LIBPROC_HIDE_KERNEL=1 ps uxf'
+alias psme='LIBPROC_HIDE_KERNEL=1 ps -U brian -u brian  uf'
+alias psroot='LIBPROC_HIDE_KERNEL=1 ps -U root -u root uf'
 
 # fcd - cd with fuzzy finder using fzf
 # Usage: fcd [path]
@@ -466,7 +470,9 @@ alias jqtopkeys="jq -r 'to_entries[] | [.key] | @tsv'"
 
 alias tf=terraform
 alias tp=telepresence
-#alias gimme-aws-creds='source $HOME/bin/getaws'
+alias gimme-aws-creds='source $HOME/bin/getaws'
+alias neofetch=fastfetch
+
 
 type bat 2>/dev/null >/dev/null && {
     alias cat=bat
@@ -498,3 +504,29 @@ function bt() {
         ;;
     esac
 }
+
+function feh-index() {
+    local filelist="$@"
+    local output="/tmp/index.png"
+    local format='--index-info  "%n\n%S\n%wx%h"'
+
+    rm -f "${output}"
+
+    feh -q -S size --reverse -I --preload \
+        --stretch \
+        --limit-width 5600 \
+        --thumb-height 250 \
+        --thumb-width 250 \
+        -O "${output}" \
+        ${format} \
+        ${filelist}
+
+    if test $? -eq 0; then
+        echo "wrote image index to ${output}"
+        echo "use: 'feh $output' to view the index"
+    else
+        rm -f "{$output}"
+    fi
+}
+alias vsearch="fzf --multi --height=50% --margin=5%,2%,2%,5% --border=double --info=inline --prompt='$>' --pointer='→' --marker='♡' --header='CTRL-c or ESC to quit' --color='dark,fg:magenta' --prompt 'Search: '  --walker-root='/Volumes/Video/Movies/English/' '/Volumes/Brian/tmp/Incoming/' '/Volumes/Incoming'"
+alias cppboot='[ ! -e Makefile ] && curl -sSL https://gist.githubusercontent.com/brianonn/f10eaf000a4358478afb5b3cc8925b1d/raw/d28af7a7053f207bb6f12c1aa9e88890ad200a6b/Makefile > Makefile || echo "Makefile already exists in the current directory"'
