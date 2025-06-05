@@ -359,7 +359,6 @@ GCLOUD="/Users/bonn/google-cloud-sdk"
 if [ -r "$GCLOUD/path.bash.inc" ]; then . "$GCLOUD/path.bash.inc"; fi
 # The next line enables shell command completion for gcloud.
 if [ -r "$GCLOUD/completion.bash.inc" ]; then . "$GCLOUD/completion.bash.inc"; fi
-export PS1="$ "
 
 #eval "$(starship init bash)"
 
@@ -379,4 +378,4 @@ complete -o default -F __start_kubectl k
 ## keep this line near the end
 [[ -r $HOME/.secrets/env ]] && source $HOME/.secrets/env
 [[ -r $HOME/.bash_secrets ]] && source $HOME/.bash_secrets
-export LIBVIRT_DEFAULT_URI='qemu:///system' 
+export LIBVIRT_DEFAULT_URI='qemu:///system'
