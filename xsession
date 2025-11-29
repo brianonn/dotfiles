@@ -19,7 +19,8 @@ xset s 0 0 s noblank s noexpose dpms 3600 3600 3600
 
 case $1 in
   xmonad-session)
-    xmonad --recompile 2>&1 >> ${log}
+    ## TODO: recompile only if $HOME/.config/xmonad/xmonad.hs is newer than $(which xmonad) binary
+    ## monad --recompile 2>&1 >> ${log}
     ## start some apps for xmonad
     $HOME/.config/xmonad/startup.sh 2>&1 >> ${log}
     echo "$(date) : $0: ending $1" >> ${log}
