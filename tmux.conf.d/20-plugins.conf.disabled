@@ -1,0 +1,7 @@
+set -g @plugin 'tmux-plugins/tmux-resurrect'    # persist tmux sessions
+set -g @plugin 'tmux-plugins/tmux-continuum'    # automatically save sessions
+set -g @plugin 'brianonn/tmux-cpu-mem-monitor'  # CPU and memory info
+set -g @plugin 'brianonn/tmux-get-ssh-host'     # capture the real ssh user and hostname
+
+# initialiaze the tmux plugin manager
+run '~/.tmux.conf.d/plugins/tpm/tpm'
