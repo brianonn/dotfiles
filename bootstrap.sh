@@ -1,6 +1,7 @@
 #!/bin/bash
 
 # bootstrap your dotfiles
+# TODO: make sure this script can be run multiple times without causing damage
 
 SAVEDIR="$HOME/.dotfiles_orig"
 SYMLINK_EXCLUDES="local | *.template | bootstrap.sh | TODO | *.md"
@@ -44,11 +45,9 @@ install_git() {
     esac
 }
 
-# get the users password credentials reset for later sudo
-N="
-"
+# cache the sudo password credentials for later
 sudo -k
-sudo -v -p "We need your password for later sudo$N[sudo %U] password for %u@%H: "
+sudo -v -p "$(printf "Elevated permissions are needed\n[sudo %%U] password for %%u@%%H: ")"
 
 RM="$(find_on_path rm)"
 GIT="$(find_on_path git)"
@@ -77,6 +76,7 @@ read ans
 case "$ans" in [yY]*) ;; *) exit 1 ;; esac
 
 LOCALDIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
+
 # templates
 for infile in $LOCALDIR/*.template; do
     [ ! -e "$infile" ] && continue
@@ -121,6 +121,7 @@ fi
 ## setup eslint
 
 ## setup vim modules
+## TODO: verify vim and fix this
 #
 VIMBUNDLEDIR="$HOME/.vim/bundle"
 [ ! -d "$VIMBUNDLEDIR" ] && mkdir "$VIMBUNDLEDIR"
@@ -128,9 +129,19 @@ git submodule init
 git submodule update
 
 ## setup nvim
+## TODO: I use nvchad now, so verify this nvim setup and correct any issues
+##
 if [[ ! -e $HOME/.config/nvim ]]; then
     ln -snf $LOCALDIR/nvim $HOME/.config/nvim
 fi
+
+## TODO:
+## The rest of this bootstrap.sh file is not strictly dotfile setup anymore
+## but more akin to configuration of the environment.
+## it MIGHT fall under dotfiles, but it might also fall under configuration
+## and should maybe be done via ansible modules ?
+## maybe have this bootstrap call out to ansible for a final installer/provisioner/updater, etc.
+## TODO
 
 ## set up yasnippets for emacs
 #
@@ -148,8 +159,8 @@ if test $machine = Linux; then
     fi
     ##
     ## TODO
-    ## setup tiling window manager
-    ## awesome? xmonad? whatever I stick with
+    ## setup my xmonad tiling window manager.
+    ## maybe not needed if it's part of $XDG_CONFIG_HOME that we install from a repo
     ##
 
     # set up screenshot savedir
@@ -160,7 +171,7 @@ if test $machine = Linux; then
     ##
     ## set up FIDO U2F key support
     ## see also: https://developers.yubico.com/libfido2/
-    ## TODO: is this still necessary in 2023?
+    ## TODO: is this still necessary in 2025?
     ##
     UDEV_VERSION="$(sudo udevadm --version)"
     if test $UDEV_VERSION -lt 188; then
