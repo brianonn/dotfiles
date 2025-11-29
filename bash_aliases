@@ -438,7 +438,7 @@ function fcd() {
         --hidden
     )
 
-    type bat 2>/dev/null >/dev/null && cat='bat --style=numbers --color=always' || cat='less'
+    type bat 2>/dev/null >/dev/null && cat='bat --style=numbers --color=always --line-range :500' || cat='less'
     fzf_options=(
         --preview="test -d {} && tree -L 1 {} || ${cat} {}"
         --bind=ctrl-space:toggle-preview
@@ -528,5 +528,9 @@ function feh-index() {
         rm -f "{$output}"
     fi
 }
-alias vsearch="fzf --multi --height=50% --margin=5%,2%,2%,5% --border=double --info=inline --prompt='$>' --pointer='→' --marker='♡' --header='CTRL-c or ESC to quit' --color='dark,fg:magenta' --prompt 'Search: '  --walker-root='/Volumes/Video/Movies/English/' '/Volumes/Brian/tmp/Incoming/' '/Volumes/Incoming'"
+
+alias vsearch="fzf --scheme=path --keep-right --exact --multi --height=50% --margin=5%,2%,2%,5% --border=double --info=inline --prompt='$>' --pointer='→' --marker='♡' --header='CTRL-c or ESC to quit' --color='dark,fg:magenta' --prompt 'Search: ' --walker=file --walker-root='/Volumes/Video/Movies/English/' '/Volumes/Brian/tmp/Incoming/' '/Volumes/Incoming' '/data01/Video' '/data01/Downloads'"
+
 alias cppboot='[ ! -e Makefile ] && curl -sSL https://gist.githubusercontent.com/brianonn/f10eaf000a4358478afb5b3cc8925b1d/raw/d28af7a7053f207bb6f12c1aa9e88890ad200a6b/Makefile > Makefile || echo "Makefile already exists in the current directory"'
+
+alias ncdu='TERM=screen \ncdu --group-directories-first --color=dark --no-follow-symlinks --enable-delete --confirm-delete'

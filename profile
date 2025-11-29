@@ -1,8 +1,9 @@
 # -*- mode: sh; c-basic-offset: 4; tab-width: 4; indent-tabs-mode: nil -*-
+# vi: set ft=sh shiftwidth=4 tabstop=4 expandtab :
 #
 # ~/.profile: executed by the command interpreter for login shells.
-# This file is not read by bash(1), if ~/.bash_profile or ~/.bash_login
-# exists.
+# This file is not automaticall read by bash(1) if ~/.bash_profile or ~/.bash_login
+# exists. So we must source this file from inside ~/.bash_profile
 #
 # see /usr/share/doc/bash/examples/startup-files for examples.
 # the files are located in the bash-doc package.
@@ -82,12 +83,6 @@ if prepend_path "${DART_SDK}/bin"; then export DART_SDK; fi
 
 LESS="-f -S -X -R -F" && export LESS
 LESSOPEN="||$HOME/.lessfilter.sh %s" && export LESSOPEN
-
-export FZF_DEFAULT_OPTS="--multi --height=80% --layout=reverse --info=inline --preview 'if [ -d {} ]; then (tree -C {}) else (bat --style=numbers -- olor=always --line-range :500 {}) fi' --preview-label='[ Preview ]' --border --margin=1 --padding=1 --preview-window=60%,border-double,top --bind 'ctrl-d:abort'"
-
-#DOCKER_HOST="0.0.0.0:4243"  # this depends on DOCKER_OPTS set in /etc/default/docker
-DOCKER_HOST="unix:///run/user/$UID/podman/podman.sock"
-#export DOCKER_HOST
 
 export PATH
 prepend_path $HOME/.nimble/bin

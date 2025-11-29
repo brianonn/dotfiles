@@ -31,6 +31,8 @@ if [ -r "$_histfile" ]; then
 fi
 
 # are we interactive, source .bashrc
-case $- in *i*) source $HOME/.bashrc;; esac
+case $- in *i*)
+    [[ -r $HOME/.bashrc ]] && source $HOME/.bashrc ;;
+esac
 
 ## End

@@ -279,7 +279,6 @@ fi
 [[ $(command -v starship 2>/dev/null) ]] && eval "$(starship init bash)"
 [[ $(command -v zoxide 2>/dev/null) ]] && eval "$(zoxide init --cmd cd bash)"
 
-export DOCKER_HOST=
 export GOPATH=
 # EPCTL_PROFILE=${HOME}/go/src/github.com/etherparty/epctl/scripts/bash_profile
 #[ -r "$EPCTL_PROFILE" ] && source $EPCTL_PROFILE
@@ -375,7 +374,12 @@ source <(kubectl completion bash)
 alias k=kubectl
 complete -o default -F __start_kubectl k
 
+export FZF_DEFAULT_OPTS="--multi --height=80% --layout=reverse --info=inline --preview 'if [ -d {} ]; then (tree -C {}) else (bat --style=numbers --color=always --line-range :500 {}) fi' --preview-label='[ Preview ]' --border --margin=1 --padding=1 --preview-window=60%,border-double,top --bind 'ctrl-d:abort'"
+
+#DOCKER_HOST="0.0.0.0:4243"  # this depends on DOCKER_OPTS set in /etc/default/docker
+export DOCKER_HOST="unix:///run/user/$UID/podman/podman.sock"
+export LIBVIRT_DEFAULT_URI='qemu:///system'
+
 ## keep this line near the end
 [[ -r $HOME/.secrets/env ]] && source $HOME/.secrets/env
 [[ -r $HOME/.bash_secrets ]] && source $HOME/.bash_secrets
-export LIBVIRT_DEFAULT_URI='qemu:///system'
