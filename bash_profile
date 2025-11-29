@@ -16,12 +16,12 @@
 
 # echo running the bash_profile
 
-profile="$HOME/.profile"
-if [[ -r "$profile" ]]; then
-      source "$profile"
-fi
+##
+## Put bash specific first login commands and settings here
+##
 
-# at login, remove dangerous rm and del from old history
+# at first login, remove any dangerous rm and del commands from the history file
+# I probably don't want to run them again
 #
 _histfile="$HOME/.bash_history"
 if [ -r "$_histfile" ]; then
@@ -30,7 +30,14 @@ if [ -r "$_histfile" ]; then
     mv "$_temphist" "$_histfile"
 fi
 
-# are we interactive, source .bashrc
+
+# always source the .profile here to load all POSIX shell compatible settings
+profile="$HOME/.profile"
+if [[ -r "$profile" ]]; then
+      source "$profile"
+fi
+
+# source .bashrc only for interactive shells
 case $- in *i*)
     [[ -r $HOME/.bashrc ]] && source $HOME/.bashrc ;;
 esac
