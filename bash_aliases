@@ -285,7 +285,7 @@ alias more=less
 [ -x $(real colortail 2>/dev/null) ] && alias tail=colortail
 
 type lsd 2>/dev/null >/dev/null &&
-    function __ls() { lsd --group-dirs=none --total-size --color=always --hyperlink=always "$@" | $ls_pager; } ||
+    function __ls() { lsd --group-dirs=first --total-size --color=always --hyperlink=always "$@" | $ls_pager; } ||
         function __ls() { $ls_bin "$@" | $ls_pager; }
 function lt() { __ls -1 -t "$@" | ${real_tail} -20 | $ls_pager; }  # time ordered list
 function lr() { __ls -1 -rt "$@" | ${real_tail} -20 | $ls_pager; } # reverse time ordered list
