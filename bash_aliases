@@ -362,6 +362,16 @@ alias utctime='date -u "+%F %T %Z"'
 alias utc=utctime
 alias unixtime='date "+%s"'
 
+# a julian timestamp like this: YYYY-JJJ-SSSSS.mmm
+#  YYYY : year
+#   JJJ : day of the year: 001, 002, ... 366
+# SSSSS : seconds since midnight of the current day
+#   mmm : milliseconds of the current second
+alias juliantime='python3 -c "from datetime import datetime, timezone; now = datetime.now(timezone.utc); midnight = now.replace(hour=0, minute=0, second=0, microsecond=0); delta = (now - midnight).total_seconds(); print(f\"{now.strftime(\"%Y-%j\")}-{delta:09.3f}\")"'
+alias jtime='juliantime'
+alias julian='juliantime'
+alias julianclean='juliantime | tr -d ".-"'
+
 alias qpdfview='qpdfview --unique'
 alias qp='qpdfview --unique'
 
