@@ -5,29 +5,27 @@
 ## or the main xsession will exit and never start.
 ##
 ## This xsession script is sourced by the XDM display manager
+## see also the .xprofile file
 ##
 
-log="$HOME/.xsession.startup.log"
+set -x
+exec > "$HOME/.xsession.debug.log" 2>&1
 
-echo "$(date) : $0: starting $1" >> ${log}
+echo "$(date) : $0: starting $1"
 
-## two screens, with laptop screen to the left and HDMI screen to the right
-xrandr --output eDP1 --primary --left-of HDMI1 --output HDMI1 --auto
-
-# disable X server screen blanking and set DPMS stanby timers to 3600s (1 hr)
-xset s 0 0 s noblank s noexpose dpms 3600 3600 3600
-
+# switch based on session chosen from the Display Manager (SDDM, GDM, LightDM, etc)
+#
 case $1 in
   xmonad-session)
     ## TODO: recompile only if $HOME/.config/xmonad/xmonad.hs is newer than $(which xmonad) binary
-    ## monad --recompile 2>&1 >> ${log}
+    xmonad --recompile
     ## start some apps for xmonad
-    $HOME/.config/xmonad/startup.sh 2>&1 >> ${log}
-    echo "$(date) : $0: ending $1" >> ${log}
-    echo "$(date) : $0: starting xmonad window manager..." >> ${log}
+    echo "$(date) : $0: startup.sh: xmonad window manager..."
+    [ -x $HOME/.config/xmonad/startup.sh ] && $HOME/.config/xmonad/startup.sh
+    echo "$(date) : $0: startup.sh: completed"
     ;;
   openbox-session)
-     ## do nothing special here, openbox has it's own startup in ~/.config/openbox/autostart.sh
+     ## do nothing special here, openbox runs it's own startup in ~/.config/openbox/autostart.sh
      ;;
   *) ;;
 esac

@@ -1,0 +1,20 @@
+# this file is sourced by XDM (SDDM, GDM, LightDM, etc) at xsession startup
+# before loading any .xsession, .xsessionrc and .Xsession files
+#
+# it's a good place for:
+#   - X11 specific environment variables
+#   - running xrandr
+#   - exporting vars to X11 Apps
+
+set -x
+exec > $HOME/.xprofile.debug.log 2>&1
+
+## two screens, with laptop screen to the left and HDMI screen to the right
+xrandr --output eDP1 --primary --left-of HDMI1 --output HDMI1 --auto
+
+# disable X server screen blanking and set DPMS stanby timers to 3600s (1 hr)
+xset s 0 0 s noblank s noexpose dpms 3600 3600 3600
+
+# give the entire session access to the SSH Agent
+. $HOME/bin/start-ssh-agent.sh  -v
+
