@@ -547,6 +547,8 @@ function feh-index() {
 
 alias vsearch="fzf --scheme=path --keep-right --exact --multi --height=50% --margin=5%,2%,2%,5% --border=double --info=inline --prompt='$>' --pointer='→' --marker='♡' --header='CTRL-c or ESC to quit' --color='dark,fg:magenta' --prompt 'Search: ' --walker=file --walker-root='/Volumes/Video/Movies/English/' '/Volumes/Brian/tmp/Incoming/' '/Volumes/Incoming' '/data01/Video' '/data01/Downloads'"
 
+alias dsearch="fzf --scheme=path --keep-right --exact --multi --height=50% --margin=5%,2%,2%,5% --border=double --info=inline --prompt='$>' --pointer='→' --marker='♡' --header='CTRL-c or ESC to quit' --color='dark,fg:magenta' --prompt 'Search: ' --layout=default --walker=file --walker-root='/Volumes/Documents/' '/Volumes/Brian/Documents/' '/home/brian/Documents/' '/Volumes/Education/'"
+
 alias cppboot='[ ! -e Makefile ] && curl -sSL https://gist.githubusercontent.com/brianonn/f10eaf000a4358478afb5b3cc8925b1d/raw/d28af7a7053f207bb6f12c1aa9e88890ad200a6b/Makefile > Makefile || echo "Makefile already exists in the current directory"'
 
 alias ncdu='TERM=screen \ncdu --group-directories-first --color=dark --no-follow-symlinks --enable-delete --confirm-delete'
