@@ -402,3 +402,5 @@ export LIBVIRT_DEFAULT_URI='qemu:///system'
 ## keep this line near the end
 [[ -r $HOME/.secrets/env ]] && source $HOME/.secrets/env
 [[ -r $HOME/.bash_secrets ]] && source $HOME/.bash_secrets
+
+true
