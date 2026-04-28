@@ -4,7 +4,7 @@
 # TODO: make sure this script can be run multiple times without causing damage
 
 SAVEDIR="$HOME/.dotfiles_orig"
-SYMLINK_EXCLUDES="local | *.template | bootstrap.sh | TODO | *.md"
+SYMLINK_EXCLUDES="local | *.template | bootstrap.sh | TODO | *.md | config"
 
 machine="UNKNOWN:$(uname -s)"
 case "$machine" in
@@ -95,7 +95,7 @@ done
 for path in $LOCALDIR/*; do
     filename=`basename "$path"`
     case "$filename" in
-    *~|*.tmp|local|TODO|*.md|bootstrap.sh)
+    *~|*.tmp|local|TODO|*.md|bootstrap.sh|config)
         echo "Skipping excluded file or directory: $filename"
         continue
         ;;

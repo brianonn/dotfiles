@@ -1,0 +1,60 @@
+# .gitignore to prevent checking in large blobs, env or secret keys ... etc. 
+
+# --- General Noise ---
+.DS_Store
+.Thumbs.db
+*.tmp
+*.bak
+*~
+
+# --- Heavy App Blobs & Caches ---
+# These folders in .config usually contain massive binary data
+**/cache/
+**/Cache/
+**/GPUCache/
+**/IndexedDB/
+**/Local Storage/
+**/Session Storage/
+**/logs/
+**/Logs/
+
+# --- Browser & Electron Junk ---
+# Specific to the Chrome/Chromium/VSCode folders already installed
+Code/
+code-oss/
+google-chrome/
+chromium/
+Postman/
+ThoriumReader/
+Electron/
+
+# --- Virtualization & Containers ---
+VirtualBox/
+libvirt/
+containers/
+# Ryujinx stores massive shader caches and firmware
+Ryujinx/
+
+# --- System/Hardware Specifics ---
+# Don't sync these; they vary by monitor and machine
+monitors.xml
+*monitors.xml
+brightness.conf
+pavucontrol.ini
+
+# --- Secrets & Private Data ---
+# Never sync these even if they are in .config
+age/
+Yubico/
+Keybase/
+keybase/
+*.key
+*.pem
+credentials
+secrets
+*.secret*
+env
+.env
+*.env
+*.env.*
+
