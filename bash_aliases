@@ -10,6 +10,12 @@
 [[ -r ~/.bash_functions ]] && source ~/.bash_functions
 [[ -r ~/.secrets/bash_aliases ]] && source ~/.secrets/bash_aliases
 
+# alias 'e' to the Fresh editor if it's installed , else nano
+# see: https://sinelaw.github.io/fresh/
+type fresh 2>/dev/null >/dev/null && alias e=fresh || alias e=nano
+type zeditor 2>/dev/null > /dev/null && alias z=zeditor ; alias zed=zeditor || alias z=vim
+type nvim 2>/dev/null >/dev/null && alias v=nvim || alias v=vim
+
 function real() {
     f=$(type -a "$1" 2>/dev/null) || return 1
     declare -a words
