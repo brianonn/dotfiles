@@ -89,4 +89,39 @@ dist/
 # VSCODE history
 .history/
 
+# debug stuff
 **/__debug_bin
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+.pnpm-store/
+
+# never send env vars to a git repo
+.env
+.env.local
+.env.*.local
+
+# private keys and credentials
+secrets.json
+secrets.yaml
+credentials.json
+credentials.yaml
+key.json
+key.yaml
+service-account-key.json
+service.account.key.json
+
+# X.509 keys
+*.key
+*.pem
+*.crt
+
+# libraries, object code and executables
+*.exe
+*.bin
+*.obj
+*.o
+*.a
+*.ar
+
