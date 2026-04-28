@@ -552,3 +552,9 @@ alias dsearch="fzf --scheme=path --keep-right --exact --multi --height=50% --mar
 alias cppboot='[ ! -e Makefile ] && curl -sSL https://gist.githubusercontent.com/brianonn/f10eaf000a4358478afb5b3cc8925b1d/raw/d28af7a7053f207bb6f12c1aa9e88890ad200a6b/Makefile > Makefile || echo "Makefile already exists in the current directory"'
 
 alias ncdu='TERM=screen \ncdu --group-directories-first --color=dark --no-follow-symlinks --enable-delete --confirm-delete'
+# mpv as an image viewer
+alias mvi='mpv --config-dir=$HOME/.config/mvi'
+
+alias btraceopens="sudo bpftrace -e 'tracepoint:syscalls:sys_enter_openat { printf(\"%s %s\\n\", comm, str(args.filename)); }'"
+
+alias lastfile="python -c 'import os, glob; newest_file = max(glob.glob(\"./*\"), key=os.path.getmtime); print(newest_file)'"
