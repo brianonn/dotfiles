@@ -381,7 +381,19 @@ source <(kubectl completion bash)
 alias k=kubectl
 complete -o default -F __start_kubectl k
 
-export FZF_DEFAULT_OPTS="--multi --height=80% --layout=reverse --info=inline --preview 'if [ -d {} ]; then (tree -C {}) else (bat --style=numbers --color=always --line-range :500 {}) fi' --preview-label='[ Preview ]' --border --margin=1 --padding=1 --preview-window=60%,border-double,top --bind 'ctrl-d:abort'"
+export FZF_DEFAULT_OPTS="--multi --height=80% --layout=reverse --info=inline \
+    --preview 'mime=\"\$(file --mime-type -b {})\" ; \
+    case {} in *.md) head -200 {} | glow - ;; esac ; \
+    case \"\$mime\" in \
+        inode/directory)  tree -C {} | head -200 ;; \
+        image/*)          chafa -f iterm {} ;; \
+        application/zip)  unzip -v {} ;; \
+        video/x-matroska) mkvinfo {} ;; \
+        application/pdf)  pdftotext -q -f 1 -l 4 {} - | head -200 ;; \
+        *)                bat --style=numbers --color=always --line-range :500 {} ;; \
+    esac' \
+--preview-label='[ Preview ]' --border --margin=1 --padding=1 \
+--preview-window=60%,border-double,top --bind 'ctrl-d:abort'"
 
 #DOCKER_HOST="0.0.0.0:4243"  # this depends on DOCKER_OPTS set in /etc/default/docker
 export DOCKER_HOST="unix:///run/user/$UID/podman/podman.sock"
