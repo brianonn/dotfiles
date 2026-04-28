@@ -17,28 +17,6 @@
 # what's my IP addr
 #IPADDR=$(ip -j a|jq -r '.[]|select(.ifname|test("^wl"))|.addr_info[].local')
 
-# Start an ssh agent for the login session
-ssh_env="$HOME/.ssh/environment"
-start_agent() {
-    echo "Initialising new SSH agent..."
-    /bin/rm -rf "${ssh_env}"
-    /usr/bin/ssh-agent | sed 's/^echo/#echo/' >"${ssh_env}"
-    echo succeeded
-    /bin/chmod 600 "${ssh_env}"
-    . "${ssh_env}" >/dev/null
-    /usr/bin/ssh-add
-}
-
-# Source SSH settings, if applicable
-if [ -f "${ssh_env}" ]; then
-    . "${ssh_env}" >/dev/null # sets SSH_AGENT_PID
-    /bin/ps -p ${SSH_AGENT_PID} | grep ssh-agent$ >/dev/null || {
-        start_agent
-    }
-else
-    start_agent
-fi
-
 prepend_path() {
     [ -d "$1" ] && PATH="$1:$PATH" && return 0
     return 1

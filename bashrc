@@ -269,6 +269,13 @@ export PATH="${pathlist}:$PATH"
 
 [[ -r ~/.bash_aliases ]] && source ~/.bash_aliases
 
+## start an ssh agent (if needed)
+[[ -r ~/bin/start-ssh-agent.sh ]] && source ~/bin/start-ssh-agent.sh
+if [ ! ssh-add -L >/dev/null 2>&1 ]; then
+    ssh-add ~/.ssh/id_rsa ~/.ssh/id_ed25519 ~/.ssh/onedev.lan
+fi
+#ssh-add -L | cut -d' ' -f1,3 | column --color=always -t -N TYPE,COMMENT -o '      '
+
 # enable programmable completion features (you don't need to enable
 # this, if it's already enabled in /etc/bash.bashrc and /etc/profile
 # sources /etc/bash.bashrc).
