@@ -143,6 +143,16 @@ fi
 ## maybe have this bootstrap call out to ansible for a final installer/provisioner/updater, etc.
 ## TODO
 
+##
+## Setup MPV as image viewer with alias 'mvi'
+MVICONFIG="$HOME/.config/mvi"
+mkdir -p "$MVICONFIG"
+(
+    cd "$MVICONFIG/.."
+    git clone "https://github.com/brianonn/mpv-image-viewer" mvi
+    git checkout master
+)
+
 ## set up yasnippets for emacs
 #
 GITHUB="https://github.com/brianonn/yasnippet-snippets.git"
