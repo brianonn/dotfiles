@@ -11,75 +11,29 @@
 # If not running interactively, just exit.
 [[ $- != *i* ]] && return
 
-# [[ $TERM = alacritty ]] && exec wezterm start -e /bin/bash
+## Below here is useful stuff only when sitting at an interactive
+## terminal shell.  Don't put stuff here that you need in a remote shell
+## started non-interactively, or shell scripts.  These should go in the
+## .bash_profile file
 
-# echo interactive, so continuing bashrc
+#
+# modularize the .bashrc into modules found in .bashrc.d
+#
 
-##
-## Below here is useful stuff only when sitting at an
-## interactive terminal shell.  Don't put stuff here that you need in
-## a remote shell started non-interactively, or shell scripts.
-## These should go in the .bash_profile file
-##
-set -o noclobber
+# 1. Load universal modules first (OS agnostic)
+if [ -d "$HOME/.bashrc.d/all" ]; then
+    for file in "$HOME"/.bashrc.d/all/*.sh; do
+        [ -r "$file" ] && source "$file"
+    done
+fi
 
-# this function provides me with some local help information for my customized environment
-# TODO: extract this to a .localhelp.txt file
-function _local_help() {
-    echo
-    echo "############# LOCAL HELP ############"
-    echo
-    if type tldr 2>/dev/null >/dev/null; then
-        echo "  Use tldr <command> "
-        echo "  See also 'tldr tldr'"
-        echo
-    fi
-    echo "  You can also see the output from 'help man'"
-    echo "  and try just 'man <command>'"
-    echo
-    if type info 2>/dev/null >/dev/null; then
-        echo "  The 'info' command is useful for getting help with GNU commands"
-        echo "  Try 'info' by itself, or 'info <command>'."
-        echo
-    fi
-    echo "  For looking up commands that might do what you want,"
-    echo "  use 'apropos <thing>' where <thing> is something about"
-    echo "  what you want the command to do for you"
-    echo
-    echo "  Ex: "
-    echo "    'apropos audio'  -- will return a list of commands that work with audio."
-    echo
-    echo "########################################"
-    echo
-}
-
-# update the bash help command to be more useful
-function help() {
-    # run the built-in bash help first
-    \command \help
-
-    # then show the local help text
-    _local_help
-}
-
-# don't put duplicate lines in the history. See bash(1) for more options
-# don't overwrite GNU Midnight Commander's setting of `ignorespace'.
-export HISTCONTROL=$HISTCONTROL${HISTCONTROL+:}ignoredups
-# ... or force ignoredups and ignorespace
-export HISTCONTROL=ignoreboth:erasedups
-export HISTIGNORE="??"
-
-# append to the history file, don't overwrite it
-shopt -s histappend
-
-# always verify history expansion by putting the new command line in the terminal input buffer before execution
-shopt -s histverify
-
-# for setting history length see HISTSIZE and HISTFILESIZE in bash(1)
-
-# check the window size after each command and, if necessary,
-# update the values of LINES and COLUMNS.
-shopt -s checkwinsize
+# 2. Load platform specific modules next.
+# $PLATFORM comes from all/00-platform.sh
+if [ -d "$HOME/.bashrc.d/$PLATFORM" ]; then
+    for file in "$HOME/.bashrc.d/$PLATFORM"/*.sh; do
+        [ -r "$file" ] && source "$file"
+    done
+fi
 
 # make less more friendly for non-text input files, see lesspipe(1)
 #[ -x /usr/bin/lesspipe ] && eval "$(SHELL=/bin/sh lesspipe)"
