@@ -358,3 +358,6 @@ export LIBVIRT_DEFAULT_URI='qemu:///system'
 [[ -r $HOME/.bash_secrets ]] && source $HOME/.bash_secrets
 
 true
+
+# runpodctl cli completion
+source <(runpodctl completion generate bash)

@@ -548,7 +548,7 @@ function feh-index() {
 
 alias vsearch="fzf --scheme=path --keep-right --exact --multi --height=50% --margin=5%,2%,2%,5% --border=double --info=inline --prompt='$>' --pointer='→' --marker='♡' --header='CTRL-c or ESC to quit' --color='dark,fg:magenta' --prompt 'Search: ' --walker=file --walker-root='/Volumes/Video/Movies/English/' '/Volumes/Brian/tmp/Incoming/' '/Volumes/Incoming' '/data01/Video' '/data01/Downloads'"
 
-alias dsearch="fzf --scheme=path --keep-right --exact --multi --height=50% --margin=5%,2%,2%,5% --border=double --info=inline --prompt='$>' --pointer='→' --marker='♡' --header='CTRL-c or ESC to quit' --color='dark,fg:magenta' --prompt 'Search: ' --layout=default --walker=file --walker-root='/Volumes/Documents/' '/Volumes/Brian/Documents/' '/home/brian/Documents/' '/Volumes/Education/'"
+alias dsearch="fzf --scheme=path --keep-right --exact --multi --height=50% --margin=5%,2%,2%,5% --border=double --info=inline --prompt='$>' --pointer='→' --marker='♡' --header='CTRL-c or ESC to quit' --color='dark,fg:magenta' --prompt 'Search: ' --layout=default --walker=file --walker-root='/home/brian/Documents' /Volumes/Documents/' '/Volumes/Brian/Documents/' '/Volumes/Education/'"
 
 alias cppboot='[ ! -e Makefile ] && curl -sSL https://gist.githubusercontent.com/brianonn/f10eaf000a4358478afb5b3cc8925b1d/raw/d28af7a7053f207bb6f12c1aa9e88890ad200a6b/Makefile > Makefile || echo "Makefile already exists in the current directory"'
 
@@ -559,3 +559,13 @@ alias mvi='mpv --config-dir=$HOME/.config/mvi'
 alias btraceopens="sudo bpftrace -e 'tracepoint:syscalls:sys_enter_openat { printf(\"%s %s\\n\", comm, str(args.filename)); }'"
 
 alias lastfile="python -c 'import os, glob; newest_file = max(glob.glob(\"./*\"), key=os.path.getmtime); print(newest_file)'"
+
+alias ping='ping -c 5'
+alias mkdir='mkdir -p'
+alias rm='rm -I --preserve-root'
+
+# restic aliases
+#
+# diff the last 2 restic backups
+alias resticdiff="restic diff \$(journalctl --user -u restic-backup.service | grep --color=no -E 'snapshot\s\w+\ssaved' | /usr/bin/tail -2 | awk '{print \$(NF-1)}'|tr -d '/n') | less"
+
