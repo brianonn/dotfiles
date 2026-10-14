@@ -1,0 +1,117 @@
+#!/usr/bin/env bash
+
+set -ep
+
+# for notify-send
+URGENCY=low  # low, normal, critical
+
+# first turn long args into short args for getopts to use
+args=()
+while [ $# -gt 0 ]; do
+    case "$1" in
+        --gui)      args+=(-g)   ;;
+        --tui)      args+=(-t)   ;;
+        --query)    args+=(-q)   ;;
+        --verbose)  args+=(-v)   ;;
+        --help)     args+=(-h)   ;;
+        --)         args+=("$@") ;;
+        *)          args+=("$1") ;;
+    esac
+    shift
+done
+
+# set the new args
+set -- "${args[@]}"
+
+# now use getopts which doesn't support long args
+gui=""
+tui=""
+query=""
+verbose=""
+while getopts "hvgtq" OPT; do
+    case "$OPT" in
+        g) gui=1
+           if [[ -z $DISPLAY ]]; then
+               echo '$DISPLAY is required for GUI mode. Please set $DISPLAY and try again'
+               exit 1
+            fi
+            ;;
+        t) tui=1 ;;
+        q) query=1
+           DEFAULT_SINK="$(pactl get-default-sink)"
+           DESCRIPTION="$(pactl -f json list sinks | jq -r '.[] | select(.name == "'$DEFAULT_SINK'") | .description')"
+           echo $DESCRIPTION
+           exit 0
+           ;;
+        v) verbose="-v" ;;
+        h) echo "Usage: $myname [-h | --help] [-v | --verbose] [-t | --tui] [-g | --gui]"
+           exit 0
+           ;;
+        \?) exit 1 ;;
+    esac
+done
+
+# Define your sink names (Get these by running: pactl list short sinks)
+SINK=("null")
+SINK+=("alsa_output.pci-0000_00_1f.3.analog-stereo")  # built-in laptop speakers
+SINK+=("bluez_sink.F4_2B_7D_61_BE_3A.a2dp_sink")      # bluetooth desktop Soundcore
+SINK+=("bluez_sink.64_68_76_3B_09_83.a2dp_sink")      # bluetooth edifier headphones
+
+# Friendly names for the menu and notifier
+NAME=(
+    "null"
+    "🔊 Laptop - Built-in Speakers"
+    "🎧 Desktop - Anker Soundcore 2"
+    "🎧 Headphones - Edifier Bluetooth"
+)
+
+# notifier icons - index starts at 1
+# all these icons are placed in ~/.local/share/icons
+ICON=(
+    "null"
+    "computer-notebook-45-degree"  # could also use "audio-speakers" - basic bookshelf looking
+    "anker-soundcore"
+    "edifier-sand-headphones"
+)
+
+# 1 less than the true count since we are skipping index 0
+SINK_COUNT=$(( ${#NAME[@]} - 1 ))
+
+# Present choices
+if [[ -n $gui ]]; then
+    # for GUI
+    index=$(printf '%s\n' "${NAME[@]}" | command tail -n +2 | rofi -dmenu -format i -i -p "Select Audio Output:")
+    status="$?"
+    if [[ -z $index ]] || [[ $status != 0 ]]; then
+        exit $status
+    fi
+    index=$((index + 1))
+elif [[ -n $tui ]]; then
+    # for TUI
+    echo "TUI coming soon!"
+    exit 1
+else
+    # for terminal
+    for ((i=1; i <= $SINK_COUNT; i++)); do
+        printf "%d) %s\n" "$i" "${NAME[i]}"
+    done
+    echo
+    echo "0) Exit. No change."
+    printf "\nChoose the audio output sink device: "
+    read index
+    if [[ $index -le 0 ]] || [[ $index -gt $SINK_COUNT ]]; then
+        exit 1;
+    fi
+fi
+
+# Apply the pactl commands based on selected index
+pactl set-default-sink "${SINK[$index]}"
+pactl list short sink-inputs | awk '{print $1}' | xargs -I {} pactl move-sink-input {} "${SINK[$index]}"
+
+if [[ -n $gui ]]; then
+    notify-send "Audio Output" "Switched to ${NAME[$index]}" -i "${ICON[index]}" -u $URGENCY
+else
+    printf "Audio output switched to: ${NAME[$index]}"
+fi
+
+exit 0
