@@ -20,7 +20,18 @@ PANDOC="$(which pandock)"
 function __die() {
     trap - INT QUIT TERM ABRT EXIT
     rm -rf "$HTMLFILE" "$PROFILEDIR"
-    kill -- -${MYPID} ${CHROMEPID}
+
+    # start a background check to kill CHROMEPID after 15 seconds if it's still running
+    {   sleep 15
+        if [[ -n ${CHROMEPID} ]] && kill -0 ${CHROMEPID} >/dev/null 2>/dev/null ; then
+           logger -t webview "force kill chromium[${CHROMEPID}]"
+           kill -9 ${CHROMEPID}
+        fi
+    } >/dev/null 2>/dev/null & >/dev/null 2>/dev/null
+
+    # kill the process group except the current shell
+    kill -TERM -${MYPID}
+
     exit $1
 }
 trap '__die 0 2>&1 > /dev/null' INT QUIT TERM ABRT EXIT
@@ -106,7 +117,6 @@ $CHROME --app $ZOOM --kiosk \
     --disable-dinosaur-easter-egg \
     --disable-extensions \
     --disable-virtual-keyboard \
-    --single-process \
     --no-first-run \
     --no-default-browser-check \
     --disable-features=Translate \
