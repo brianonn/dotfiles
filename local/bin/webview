@@ -13,13 +13,13 @@ DEBUG=${WEBVIEW_DEBUG}
 #CHROME=google-chrome
 CHROME=chromium
 ZOOM="--force-device-scale-factor=1.0"
-PROFILEDIR=$(mktemp -u -d -t htmlview-XXXXXX)
+PROFILEDIR=$(mktemp -u -d --tmpdir webview-profile-XXXXXX)
 MYPID="$$"
-PANDOC="$HOME/bin/pandock"
+PANDOC="$(which pandock)"
 
 function __die() {
     trap - INT QUIT TERM ABRT EXIT
-    rm -rf "$TMPFILE" "$PROFILEDIR"
+    rm -rf "$HTMLFILE" "$PROFILEDIR"
     kill -- -${MYPID} ${CHROMEPID}
     exit $1
 }
@@ -58,24 +58,24 @@ function inject_exit_button() {
 
 
 # inject the exit button into the temp file
-TMPFILE=$(mktemp -u -t htmlview-stdin-XXXXXX).html
-inject_exit_button > $TMPFILE
+HTMLFILE=$(mktemp -u --tmpdir webview-out-XXXXXX).html
+inject_exit_button > $HTMLFILE
 
 # if the input was piped in, copy it to the tempfile
 if test "$#" -eq 0; then
-    cat >> $TMPFILE
+    cat >> $HTMLFILE
 elif ! [[ "$1" =~ ^(.*)+\.(htm|html|HTM|HTML)$ ]]; then
     # pandoc the inputfile if it is not html already and append it to the tempfile
-    ${PANDOC} "$1" >> ${TMPFILE}
+    ${PANDOC} "$1" >> ${HTMLFILE}
 
     # maybe save a copy for debugging
-    [[ -n $DEBUG ]] && cp $TMPFILE out.html
+    [[ -n $DEBUG ]] && cp $HTMLFILE out.html
 else
-    cat "$1" >> ${TMPFILE}
+    cat "$1" >> ${HTMLFILE}
 fi
 
 # set the tempfile name as arg1
-set $TMPFILE
+set $HTMLFILE
 
 # start a uniq profile for chrome browser and view the file
 mkdir -p "$PROFILEDIR"/Default
