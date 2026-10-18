@@ -23,18 +23,18 @@ function __die() {
 
     # start a background check to kill CHROMEPID after 15 seconds if it's still running
     {   sleep 15
-        if [[ -n ${CHROMEPID} ]] && kill -0 ${CHROMEPID} >/dev/null 2>/dev/null ; then
+        if [[ -n ${CHROMEPID} ]] && kill -0 ${CHROMEPID} > /dev/null 2>&1 ; then
            logger -t webview "force kill chromium[${CHROMEPID}]"
            kill -9 ${CHROMEPID}
         fi
-    } >/dev/null 2>/dev/null & >/dev/null 2>/dev/null
+    } > /dev/null 2>&1 &
 
     # kill the process group except the current shell
     kill -TERM -${MYPID}
 
     exit $1
 }
-trap '__die 0 2>&1 > /dev/null' INT QUIT TERM ABRT EXIT
+trap '__die 0 > /dev/null 2>&1' INT QUIT TERM ABRT EXIT
 
 # inject code for an exit button to the top right
 # corner of the otherwise blank kiosk page
@@ -105,6 +105,8 @@ cat <<EOF > "$PROFILEDIR/Default/Preferences"
 EOF
 
 $CHROME --app $ZOOM --kiosk \
+    --log-level=3 \
+    --password-store=basic \
     --disable-file-system \
     --disable-dev-shm-usage \
     --disable-extensions \
@@ -117,11 +119,15 @@ $CHROME --app $ZOOM --kiosk \
     --disable-dinosaur-easter-egg \
     --disable-extensions \
     --disable-virtual-keyboard \
+    --disable-component-update \
+    --dbus-stub \
     --no-first-run \
     --no-default-browser-check \
+    --no-sandbox \
     --disable-features=Translate \
-    --user-data-dir="$PROFILEDIR" "$@" >/dev/null 2>/dev/null
+    --user-data-dir="$PROFILEDIR" "$@" > /dev/null 2>&1 &
 
-# CHROMEPID="$!"
+CHROMEPID="$!"
+wait ${CHROMEPID}
 
 __die 0
