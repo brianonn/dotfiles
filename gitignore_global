@@ -124,4 +124,6 @@ service.account.key.json
 *.o
 *.a
 *.ar
+*.so
+*.so.*
 
