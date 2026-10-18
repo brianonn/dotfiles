@@ -78,7 +78,21 @@ fi
 set $TMPFILE
 
 # start a uniq profile for chrome browser and view the file
-mkdir -p "$PROFILEDIR"
+mkdir -p "$PROFILEDIR"/Default
+
+# Pre-seed the Preferences file to prevent any pop-up at chromium
+# startup needed for accepting TOS
+cat <<EOF > "$PROFILEDIR/Default/Preferences"
+{
+  "browser": {
+    "has_seen_welcome_page": true
+  },
+  "signin": {
+    "allowed": false
+  }
+}
+EOF
+
 $CHROME --app $ZOOM --kiosk \
     --disable-file-system \
     --disable-dev-shm-usage \
@@ -93,6 +107,9 @@ $CHROME --app $ZOOM --kiosk \
     --disable-extensions \
     --disable-virtual-keyboard \
     --single-process \
+    --no-first-run \
+    --no-default-browser-check \
+    --disable-features=Translate \
     --user-data-dir="$PROFILEDIR" "$@" >/dev/null 2>/dev/null
 
 # CHROMEPID="$!"
