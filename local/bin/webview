@@ -1,0 +1,100 @@
+#!/bin/bash
+
+# webview
+#
+# A viewer for local HTML files in a
+# separate browser session
+#
+# I use this with pandoc
+# to render markdown files to html for viewing
+
+DEBUG=${WEBVIEW_DEBUG}
+
+#CHROME=google-chrome
+CHROME=chromium
+ZOOM="--force-device-scale-factor=1.0"
+PROFILEDIR=$(mktemp -u -d -t htmlview-XXXXXX)
+MYPID="$$"
+PANDOC="$HOME/bin/pandock"
+
+function __die() {
+    trap - INT QUIT TERM ABRT EXIT
+    rm -rf "$TMPFILE" "$PROFILEDIR"
+    kill -- -${MYPID} ${CHROMEPID}
+    exit $1
+}
+trap '__die 0 2>&1 > /dev/null' INT QUIT TERM ABRT EXIT
+
+# inject code for an exit button to the top right
+# corner of the otherwise blank kiosk page
+function inject_exit_button() {
+    cat <<!EOF!
+<div id="kioskexit" onclick="window.close()">
+  <svg>
+    <circle
+      cx="12"
+      cy="12"
+      r="11"
+      stroke="black"
+      stroke-width="2"
+      fill="white"
+    />
+    <path
+      stroke="black"
+      stroke-width="4"
+      fill="none"
+      d="M6.25,6.25,17.75,17.75"
+    />
+    <path
+      stroke="black"
+      stroke-width="4"
+      fill="none"
+      d="M6.25,17.75,17.75,6.25"
+    />
+  </svg>
+</div>
+!EOF!
+}
+
+
+# inject the exit button into the temp file
+TMPFILE=$(mktemp -u -t htmlview-stdin-XXXXXX).html
+inject_exit_button > $TMPFILE
+
+# if the input was piped in, copy it to the tempfile
+if test "$#" -eq 0; then
+    cat >> $TMPFILE
+elif ! [[ "$1" =~ ^(.*)+\.(htm|html|HTM|HTML)$ ]]; then
+    # pandoc the inputfile if it is not html already and append it to the tempfile
+    ${PANDOC} "$1" >> ${TMPFILE}
+
+    # maybe save a copy for debugging
+    [[ -n $DEBUG ]] && cp $TMPFILE out.html
+else
+    cat "$1" >> ${TMPFILE}
+fi
+
+# set the tempfile name as arg1
+set $TMPFILE
+
+# start a uniq profile for chrome browser and view the file
+mkdir -p "$PROFILEDIR"
+$CHROME --app $ZOOM --kiosk \
+    --disable-file-system \
+    --disable-dev-shm-usage \
+    --disable-extensions \
+    --disable-local-storage \
+    --disable-logging \
+    --disable-notifications \
+    --disable-crash-reporter \
+    --disable-in-process-stack-traces \
+    --disable-breakpad \
+    --disable-dinosaur-easter-egg \
+    --disable-extensions \
+    --disable-virtual-keyboard \
+    --single-process \
+    --user-data-dir="$PROFILEDIR" "$@" >/dev/null 2>/dev/null
+
+# CHROMEPID="$!"
+
+__die 0
