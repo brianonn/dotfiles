@@ -1,0 +1,46 @@
+#!/usr/bin/env bash
+
+export NEWT_COLORS='
+root=white,black
+border=blue,black
+window=white,black
+shadow=black,black
+title=white,black
+textbox=white,black
+button=white,blue
+actbutton=white,blue
+compactbutton=white,black
+listbox=white,black
+actlistbox=white,blue
+entry=white,black
+disentry=gray,black
+checkbox=white,black
+actcheckbox=white,blue
+helpline=gray,black
+roottext=white,black
+emptyscale=blue,black
+fullscale=white,blue
+'
+
+# TODO: dynamic list of installed terminal windows
+
+choice=$(whiptail --title "Choose a Terminal" \
+    --menu "Which terminal would you like to launch?" \
+    15 60 6 \
+    "ghostty"   "Ghostty" \
+    "wezterm"   "WezTerm" \
+    "alacritty" "Alacritty" \
+    "contour"   "Contour" \
+    "xterm"     "XTerm" \
+    "urxvt"     "rxvt-unicode" \
+    2>&1 >/dev/tty)
+
+case "$choice" in
+    ghostty|wezterm|alacritty|contour|xterm|urxvt)
+        "$choice" &
+        ;;
+    *)
+        echo "Cancelled."
+        ;;
+esac
+
