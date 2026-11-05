@@ -91,18 +91,19 @@ function serve() {
 # mogrify -path ./tmp  -level 35%,100%,0.70 -resize x1024\> -quality 87 -format jpg *.png
 #
 
-## mkpw is now a function in my ~/bin
-alias pw=mkpw
-
-# random 16 lowercase letters
+# make random password strings using a script of define a local function if the script is not available
 if [ -x $HOME/bin/mkpw ]; then
     alias mkpw='$HOME/bin/mkpw'
+elif [ -x $HOME/.local/bin/mkpw ]; then
+    alias mkpw='$HOME/.local/bin/mkpw'
 else
-    mkpw() {
+    unalias mkpw
+    function mkpw() {
         local len="$1"
         cat /dev/urandom | LC_ALL=C tr -dc 'a-hjkmnpr-zA-JJKMNPR-Z35-9' | fold -w "$len" | head -n 1
     }
 fi
+alias pw=mkpw
 
 function fc() {
     old="$1"
