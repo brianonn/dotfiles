@@ -23,26 +23,116 @@ fullscale=white,blue
 '
 
 # TODO: generate a dynamic list of installed terminal windows
-# TODO: gum choose  --header "Choose a terminal" Wezterm alacrity cool-retro-term
-# TODO: --gui : use rofi , --tui use current whiptail, none, use gum if it's present or just a list with readline
 
-choice=$(whiptail --title "Choose a Terminal" \
-    --menu "Which terminal would you like to launch?" \
-    15 60 6 \
-    "ghostty"   "Ghostty" \
-    "wezterm"   "WezTerm" \
-    "alacritty" "Alacritty" \
-    "contour"   "Contour" \
-    "xterm"     "XTerm" \
-    "urxvt"     "rxvt-unicode" \
-    2>&1 >/dev/tty)
+# default to cli
+flag="--cli"
+if [[ $# > 1 ]]; then
+    echo "Usage: $(basename "$0"): [ --auto ] | [ -c | --cli ] | [-g | -gui ] | [ -t | --tui ]"
+    exit 1
+fi
 
-case "$choice" in
-    ghostty|wezterm|alacritty|contour|xterm|urxvt)
-        "$choice" &
+if [[ $# == 1 ]]; then
+    flag="$1"
+fi
+
+# Executable names
+TERMINALS=(
+    ghostty
+    wezterm
+    alacritty
+    contour
+    cool-retro-term
+    xterm
+    urxvt
+)
+
+# Human-readable display names
+LABELS=(
+    "Ghostty"
+    "WezTerm"
+    "Alacritty"
+    "Contour"
+    "Cool Retro Term"
+    "XTerm"
+    "rxvt-unicode"
+)
+
+# map an entry from $LABLES to $TERMINALS
+function mapchoice () {
+    local choice="$1"
+    local selected=""
+    for i in "${!LABELS[@]}"; do
+        if [[ "${LABELS[$i]}" == "$choice" ]]; then
+            selected="${TERMINALS[$i]}"
+            break
+        fi
+    done
+    echo "$selected"
+}
+
+case "$flag" in
+    --cli | -c)
+        if command -v gum >/dev/null 2>&1; then
+            choice=$( gum choose "${LABELS[@]}" --limit=1 --header "Choose a terminal")
+            selected=$(mapchoice "$choice")
+        else
+            # Basic numbered-list fallback.
+            for i in "${!LABELS[@]}"; do
+                printf "%d) %s\n" "$((i + 1))" "${LABELS[$i]}"
+            done
+
+            printf "\nSelect terminal [1-%d]: " "${#TERMINALS[@]}"
+            read -r choice
+
+            if [[ "$choice" =~ ^[0-9]+$ ]] &&
+               (( choice >= 1 && choice <= ${#TERMINALS[@]} )); then
+                selected="${TERMINALS[$((choice - 1))]}"
+            else
+                exit 1
+            fi
+        fi
         ;;
-    *)
-        echo "Cancelled."
+
+    --tui | -t)
+        type dialog >/dev/null 2>&1 && TUICHOOSER='dialog --no-tags'
+        type whiptail >/dev/null 2>&1 && TUICHOOSER='whiptail --notags'
+
+        if [[ -z $TUICHOOSER ]]; then
+            echo "TUI requires 'dialog' or 'whiptail' installed." >&2
+            exit 1
+        fi
+
+        MENU=()
+        for i in "${!TERMINALS[@]}"; do
+            MENU+=("${TERMINALS[$i]}" "${LABELS[$i]}")
+        done
+
+        selected=$( $TUICHOOSER \
+            --title "Choose a Terminal" \
+            --menu "Which terminal would you like to launch?" \
+            15 60 6 \
+            "${MENU[@]}" \
+            2>&1 >/dev/tty)
+        ;;
+
+    --gui | -g)
+        # use Rofi
+        if command -v rofi >/dev/null 2>&1 ; then
+            choice=$(printf "%s\n" "${LABELS[@]}" | \
+                rofi -dmenu -i -p 'Choose a terminal' -l 8)
+            selected=$(mapchoice "$choice")
+        fi
         ;;
 esac
 
+## common execution
+echo Selected: $selected
+
+# start the selected terminal in the background
+if [[ -n "$selected" ]] && command -v "$selected" >/dev/null 2>&1; then
+    "$selected" &
+    exit 0
+else
+    echo "Invalid or unavailable terminal: $selected" >&2
+    exit 1
+fi
