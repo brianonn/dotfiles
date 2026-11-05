@@ -10,19 +10,12 @@
 [[ -r ~/.bash_functions ]] && source ~/.bash_functions
 [[ -r ~/.secrets/bash_aliases ]] && source ~/.secrets/bash_aliases
 
-# alias 'e' to the Fresh editor if it's installed , else nano
-# see: https://sinelaw.github.io/fresh/
-type fresh 2>/dev/null >/dev/null && alias e=fresh || alias e=nano
-type zeditor 2>/dev/null > /dev/null && alias z=zeditor ; alias zed=zeditor || alias z=vim
-type nvim 2>/dev/null >/dev/null && alias v=nvim || alias v=vim
-
 function real() {
     f=$(type -a "$1" 2>/dev/null) || return 1
     declare -a words
     local words=($f)
     echo ${words[${#words[@]} - 1]} | tr -d '[\140\047\042]' # backtick,single and double quote
 }
-export -f real
 
 # alias which according to how it says to do it in the which man page
 function which() {
@@ -31,7 +24,6 @@ function which() {
         declare -f
     ) | /usr/bin/which --tty-only --read-alias --read-functions --show-tilde --show-dot $@
 }
-export -f which
 
 real_less=$(real less)
 real_tail=$(real tail)
@@ -176,6 +168,20 @@ function mdtohtml() {
         "$1" -o "${1%.md}.html"
 }
 
+alias v=vim
+if [[ -x $(real nvim)  ]]; then
+    alias v=nvim
+    alias vi=nvim
+    alias vim=nvim
+    alias uvim='nvim -u NORC'  # skip user config, no plugins, no defaults
+    alias cvim='nvim --clean'  # skip user config, factory plugins, factory defaults
+fi
+
+# alias 'e' to the Fresh editor if it's installed , else nano
+# see: https://sinelaw.github.io/fresh/
+type fresh 2>/dev/null >/dev/null && alias e=fresh || alias e=nano
+type zeditor 2>/dev/null > /dev/null && alias z=zeditor ; alias zed=zeditor || alias z=vim
+
 alias backup='rsync -av --progress --exclude='\''*/Downloads/In-Progress/'\'' --exclude='\''*/Downloads/Torrents/'\'' --exclude='\''*/Downloads/Completed/'\'' --exclude='\''*/.cache/'\'' --exclude='\''*/.thumb*/'\'' $HOME /zpool0/downloads/'
 alias book=$HOME/bin/findebook.sh
 alias b=book
@@ -285,7 +291,7 @@ alias more=less
 [ -x $(real colortail 2>/dev/null) ] && alias tail=colortail
 
 type lsd 2>/dev/null >/dev/null &&
-    function __ls() { lsd --group-dirs=first --total-size --color=always --hyperlink=always "$@" | $ls_pager; } ||
+    function __ls() { lsd --group-dirs=first --total-size --color=always --hyperlink=auto "$@" | $ls_pager; } ||
         function __ls() { $ls_bin "$@" | $ls_pager; }
 function lt() { __ls -1 -t "$@" | ${real_tail} -20 | $ls_pager; }  # time ordered list
 function lr() { __ls -1 -rt "$@" | ${real_tail} -20 | $ls_pager; } # reverse time ordered list
@@ -356,7 +362,7 @@ alias digg='dig +all'
 alias mpb='/bin/nc paste.linuxmint.com 9999 <<< "${*:-`cat`}"'
 
 alias iso8601='date -u +%FT%TZ'
-alias local8601='date +%FT%T'
+alias local8601='date +%FT%T%z'
 alias localtime='date "+%F %T %Z"'
 alias utctime='date -u "+%F %T %Z"'
 alias utc=utctime
@@ -408,10 +414,6 @@ alias tbc='tb | tee >(xclip -selection c && echo "^^^^^^^ this is now in the cli
 
 alias path='echo -e ${PATH//:/\\n}'
 alias tree='tree -I ".git|node_modules|.history"'
-if [[ -x $(real nvim)  ]]; then
-    alias vi=nvim
-    alias vim=nvim
-fi
 
 function lfcd() {
     tmp="$(mktemp)"
@@ -550,7 +552,7 @@ alias vsearch="fzf --scheme=path --keep-right --exact --multi --height=50% --mar
 
 alias dsearch="fzf --scheme=path --keep-right --exact --multi --height=50% --margin=5%,2%,2%,5% --border=double --info=inline --prompt='$>' --pointer='→' --marker='♡' --header='CTRL-c or ESC to quit' --color='dark,fg:magenta' --prompt 'Search: ' --layout=default --walker=file --walker-root='/home/brian/Documents' /Volumes/Documents/' '/Volumes/Brian/Documents/' '/Volumes/Education/'"
 
-alias cppboot='[ ! -e Makefile ] && curl -sSL https://gist.githubusercontent.com/brianonn/f10eaf000a4358478afb5b3cc8925b1d/raw/d28af7a7053f207bb6f12c1aa9e88890ad200a6b/Makefile > Makefile || echo "Makefile already exists in the current directory"'
+alias cppboot='[ ! -e Makefile ] && { curl -sSL https://gist.githubusercontent.com/brianonn/f10eaf000a4358478afb5b3cc8925b1d/raw/d28af7a7053f207bb6f12c1aa9e88890ad200a6b/Makefile > Makefile && make run; } || echo "Makefile already exists in the current directory"'
 
 alias ncdu='TERM=screen \ncdu --group-directories-first --color=dark --no-follow-symlinks --enable-delete --confirm-delete'
 # mpv as an image viewer
@@ -564,8 +566,28 @@ alias ping='ping -c 5'
 alias mkdir='mkdir -p'
 alias rm='rm -I --preserve-root'
 
+# y shell wrapper that provides the ability to change the current working directory when exiting Yazi.
+# press q to quit, you'll see the CWD changed. Sometimes, you don't want to change, press Q to quit
+function y() {
+	local tmp cwd; tmp="$(mktemp -t "yazi-cwd.XXXXXX")"
+	command yazi "$@" --cwd-file="$tmp"
+	IFS= read -r -d '' cwd < "$tmp"
+	[ "$cwd" != "$PWD" ] && [ -d "$cwd" ] && builtin cd -- "$cwd" || builtin true
+	command rm -f -- "$tmp"
+}
+
+# midnight commander to yazi [ could also try nnn , ranger , doublecmd alternative file managers ]
+alias mc='y'
+
+
 # restic aliases
 #
 # diff the last 2 restic backups
 alias resticdiff="restic diff \$(journalctl --user -u restic-backup.service | grep --color=no -E 'snapshot\s\w+\ssaved' | /usr/bin/tail -2 | awk '{print \$(NF-1)}'|tr -d '/n') | less"
+
+# local AI quick answers with a small model
+alias ask='chatgpt --url http://ollama.local:11434 --model qwen2.5:7b'
+alias llm=ask
+
+alias alsatest='speaker-test -c 2 -l 1 -t wav'
 
