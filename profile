@@ -17,14 +17,23 @@
 # what's my IP addr
 #IPADDR=$(ip -j a|jq -r '.[]|select(.ifname|test("^wl"))|.addr_info[].local')
 
+# POSIX safe prepend_path and append_path in preparation for zsh compatibility
+# success return 0 means the path was added or already in the PATH
+# failure return 1 means the path doesn't exist and was not added to PATH
 prepend_path() {
-    [ -d "$1" ] && PATH="$1:$PATH" && return 0
-    return 1
+    [ -d "$1" ] || return 1
+    case ":$PATH:" in
+        *":$1:"*) return 0 ;;
+        *) PATH="$1:$PATH"; return 0 ;;
+    esac
 }
 
 append_path() {
-    [ -d "$1" ] && PATH="$PATH:$1" && return 0
-    return 1
+    [ -d "$1" ] || return 1
+    case ":$PATH:" in
+        *":$1:"*) return 0 ;;
+        *) PATH="$PATH:$1"; return 0 ;;
+    esac
 }
 
 # set PATH so it includes user's private bin if it exists
