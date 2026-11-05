@@ -22,7 +22,9 @@ emptyscale=blue,black
 fullscale=white,blue
 '
 
-# TODO: dynamic list of installed terminal windows
+# TODO: generate a dynamic list of installed terminal windows
+# TODO: gum choose  --header "Choose a terminal" Wezterm alacrity cool-retro-term
+# TODO: --gui : use rofi , --tui use current whiptail, none, use gum if it's present or just a list with readline
 
 choice=$(whiptail --title "Choose a Terminal" \
     --menu "Which terminal would you like to launch?" \
