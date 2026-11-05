@@ -1,23 +1,22 @@
 # -*- mode: sh; c-basic-offset: 4; tab-width: 4; indent-tabs-mode: nil -*-
 # vi: set ft=sh shiftwidth=4 tabstop=4 expandtab :
-
+#
 # File: ~/.bash_profile
-
-# When: this file is sourced for all login shells.  If it exists,
-#      then .profile is not run, so we must source .profile here to
-#      get the shell environment variables
-
+#
+# When: a bash login shell is started, it will search in order for
+#       .bash_profile, then .bash_login and finally .profile.
+#       A bash login shell will NEVER source .bashrc on it's own.
+#       This .bash_profile is a good place to put bash specific login startup.
+#       Then we must source .profile and .bashrc directly here.
+#       .bashrc will be skipped for non-interactive shells, such as 'ssh host git status'
+#
 # ATTENTION:
-#      put all environment variables in $HOME/.profile so
-#      a /bin/sh (even a remote /bin/sh) will get it too
-
-# source $HOME/.profile, if available, to get all the environment
-# variables that can be used across all shells
-
-# echo running the bash_profile
-
-##
-## Put bash specific first login commands and settings here
+#       put all PATH setup and environment variables in $HOME/.profile so
+#       a /bin/sh (even a remote /bin/sh) will get it too
+#
+#       We source $HOME/.profile, if available, to get all the environment
+#       variables that can be used across all shells
+#
 ##
 
 # at first login, remove any dangerous rm and del commands from the history file
