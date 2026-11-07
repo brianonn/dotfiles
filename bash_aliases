@@ -587,7 +587,7 @@ alias mc='y'
 alias resticdiff="restic diff \$(journalctl --user -u restic-backup.service | grep --color=no -E 'snapshot\s\w+\ssaved' | /usr/bin/tail -2 | awk '{print \$(NF-1)}'|tr -d '/n') | less"
 
 # local AI quick answers with a small model
-alias ask='chatgpt --url http://ollama.local:11434 --model qwen2.5:7b'
+alias ask='chatgpt --url http://ollama.local:11434 --model qwen3-nothinking:8b'
 alias llm=ask
 
 alias alsatest='speaker-test -c 2 -l 1 -t wav'
