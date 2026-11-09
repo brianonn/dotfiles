@@ -1,0 +1,19 @@
+#!/usr/bin/env bash
+
+EXTRA_ARGS=(
+  "--ozone-platform=x11"
+  "--use-gl=angle"
+  "--use-angle=gl"
+  "--enable-features=AcceleratedVideoDecodeLinuxGL"
+  )
+
+# Launch a local Chromium with my args
+exec /usr/bin/chromium "${EXTRA_ARGS[@]}" "$@"
+
+# fallback to flatpak
+exec flatpak run org.chromium.Chromium "${EXTRA_ARGS[@]}" "$@"
+
+# failed
+echo "Chromium does not appear to be installed on this host" >&2
+exit 1
+
