@@ -27,6 +27,9 @@
 #     makeup gain 6dB -> 2dB (loudnorm restores the level anyway).
 #   - Surround downmix: lower summed gain for headroom (FL/FR = 0.35 front + 0.70 FC
 #     + 0.25 back + 0.25 side) and 0.20 LFE mixed into both channels.
+#   - AC-3 creation is skipped when the file already has a suitable surround track
+#     (AC-3 6ch, or E-AC-3 6ch/8ch, in eng/en/und, excluding commentary/VI/description).
+#     Track count verification then expects +1 (AAC only).
 
 set -euo pipefail
 
@@ -116,12 +119,35 @@ ALL_AUDIO_IDS=$(echo "$MKV_JSON" | jq -r '.tracks[] | select(.type == "audio") |
 # Source channel count for the selected track (6 = 5.1, 8 = 7.1)
 CHANNELS=$(echo "$MKV_JSON" | jq -r --argjson id "$TRACK_ID" '.tracks[] | select(.id == $id) | .properties.audio_channels // 2')
 
-# Also create an AC-3 5.1 track when the source is 5.1 or 7.1
+# Also create an AC-3 5.1 track when the source is 5.1 or 7.1, unless the file
+# already has a suitable surround track (AC-3 6ch, or E-AC-3 6ch/8ch). Same
+# language and commentary/VI/description filters as the selection above.
 CREATE_AC3=false
 TRACKS_ADDED=1
 if [ "$CHANNELS" -eq 6 ] || [ "$CHANNELS" -eq 8 ]; then
-    CREATE_AC3=true
-    TRACKS_ADDED=2
+    EXISTING_SURROUND=$(echo "$MKV_JSON" | jq -r '
+      [
+        .tracks[]
+        | select(.type == "audio")
+        | select(.properties.language == "eng" or .properties.language == "en" or .properties.language == "und")
+        | select((.properties.flag_commentary // false) == false)
+        | select((.properties.flag_visual_impaired // false) == false)
+        | select(((.properties.track_name // "") | test("commentary|director|descriptive|description"; "i")) | not)
+        | select(
+            ((.codec // "") == "AC-3" and .properties.audio_channels == 6)
+            or (((.codec // "") | test("E-AC-3|EAC3"; "i")) and (.properties.audio_channels == 6 or .properties.audio_channels == 8))
+          )
+      ]
+      | first // empty
+      | "\(.id) \(.codec) \(.properties.audio_channels)"
+    ')
+    if [ -n "$EXISTING_SURROUND" ]; then
+        read -r EXISTING_ID EXISTING_CODEC EXISTING_CH <<< "$EXISTING_SURROUND"
+        echo "Skipping AC-3 5.1 creation: existing surround track { ID: $EXISTING_ID, Codec: $EXISTING_CODEC, Channels: $EXISTING_CH } already present."
+    else
+        CREATE_AC3=true
+        TRACKS_ADDED=2
+    fi
 fi
 
 # Build dynamic track order:
