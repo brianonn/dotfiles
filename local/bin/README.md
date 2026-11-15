@@ -18,8 +18,9 @@ Adds a stereo AAC track to an MKV file and, when the source audio is 5.1 or 7.1,
 640kbps. The new tracks are merged into the file and set as default and non-default as described below. The original
 audio tracks are kept.
 
-- **Stereo AAC (160kbps, 48kHz):** downmixed from surround with the center channel boosted, then run through a
-  compressor and `loudnorm` (-16 LUFS). This track is the default.
+- **Stereo AAC (160kbps, 48kHz):** downmixed from surround with the center channel boosted (0.70, about +6 dB of
+  dialogue lift over the front level) and 0.20 LFE mixed in, then run through a compressor (4:1 above -20 dB, 10ms
+  attack, 300ms release, 3 dB knee, 2 dB makeup) and `loudnorm` (-16 LUFS). This track is the default.
 - **AC-3 5.1 (640kbps, 48kHz):** tagged `eng`, named "English 5.1 AC-3", not default. For 7.1 sources the side channels
   are folded into the back pair at 0.707 each. No loudness processing is applied.
 
@@ -46,8 +47,8 @@ Requires `mkvmerge`, `mkvextract`, `ffmpeg`, and `jq`.
 6. Build the track order: video, new AAC (`1:0`), optional AC-3 (`2:0`), original audio, then other tracks.
 7. Clear the default flag on all original audio tracks.
 8. Extract the selected track with `mkvextract`.
-9. Encode the stereo AAC. Multichannel sources use a pan matrix (center at 1.4x) followed by the compressor and
-   `loudnorm` chain. Stereo and mono sources are encoded directly with the same chain.
+9. Encode the stereo AAC. Multichannel sources use a pan matrix (fronts 0.35, center 0.70, backs and sides 0.25, LFE
+   0.20) followed by the compressor and `loudnorm` chain. Stereo and mono sources are encoded directly with the same chain.
 10. If needed, encode the AC-3 5.1 track. 7.1 sources are downmixed to 5.1 first.
 11. Merge everything with `mkvmerge`, using the track order and flags above.
 12. Verify the output:
@@ -61,8 +62,8 @@ Requires `mkvmerge`, `mkvextract`, `ffmpeg`, and `jq`.
 ### Observations and Caveats
 
 - **Channel layout assumption:** any source with more than 2 channels takes the surround pan path, which references
-  FC, BL, SL, BR, and SR. Layouts such as 3, 4, or 5 channels may pan incorrectly or fail. Only 6 and 8 channels get
-  an AC-3 track.
+  FC, LFE, BL, SL, BR, and SR. Layouts such as 3, 4, or 5 channels may pan incorrectly or fail, since the pan filter
+  now also references LFE. Only 6 and 8 channels get an AC-3 track.
 - **Overwrite is not atomic with respect to the source:** the output is verified before `mv`, but if the input changes
   while the script runs, that change is lost when the output replaces it.
 - **Tracks are picked by score, not by language preference:** an `und` track can outrank a labelled English track if

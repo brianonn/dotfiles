@@ -21,6 +21,13 @@
 #     remains the default track.
 #   - Track count verification expects +1 or +2 new tracks; when AC-3 is
 #     created, the output is also checked for an AC-3 track with 6 channels.
+#
+# 2026-11-15
+#   - Compressor: attack 20ms -> 10ms, release 250ms -> 300ms, knee 2.83dB -> 3dB,
+#     makeup gain 6dB -> 2dB (loudnorm restores the level anyway).
+#   - Surround downmix: lower summed gain for headroom (FL/FR = 0.35 front + 0.70 FC
+#     + 0.25 back + 0.25 side) and 0.20 LFE mixed into both channels.
+
 set -euo pipefail
 
 OVERWRITE=false
@@ -165,16 +172,15 @@ mkvextract "$INPUT" tracks "${TRACK_ID}:${RAW_AUDIO}"
 echo "Converting to 160kbps 48kHz stereo AAC with dynamic range compression..."
 
 # Compression & loudness normalization chain:
-# - acompressor: tames loud peaks above -20dB with a 4:1 ratio and gentle 6dB makeup gain
+# - acompressor: tames loud peaks above -20dB with a 4:1 ratio and a 2dB makeup gain
+#   (loudnorm restores the level anyway)
 # - loudnorm: brings overall loudness to a consistent -16 LUFS (standard for stereo/mobile playback)
-DRC_FILTER="acompressor=threshold=-20dB:ratio=4:attack=20:release=250:makeup=6dB,loudnorm=I=-16:TP=-1.5:LRA=11"
+DRC_FILTER="acompressor=threshold=-20dB:ratio=4:attack=10:release=300:knee=3:makeup=2dB,loudnorm=I=-16:TP=-1.5:LRA=11"
 
 if [ "$CHANNELS" -gt 2 ]; then
-    # Downmix surround to stereo with center channel (FC) boosted to 1.4x (approx +3dB)
-    # Adjustable Gain: If dialogue is still too quiet, raise 1.4*FC to 1.6*FC (roughly +4 dB)
-    #    if it distorts on loud scenes, lower it to 1.2*FC or add loudnorm to the filter string
-    # Also applies the Dynamic Range and Compression Filter from  above.
-    PAN_FILTER="pan=stereo|FL=0.5*FL+1.4*FC+0.5*BL+0.5*SL|FR=0.5*FR+1.4*FC+0.5*BR+0.5*SR"
+    # Downmix surround to stereo: center (FC) at 0.70 (2x the 0.35 front level, ~+6dB of dialogue lift),
+    # and a 0.20 LFE contribution to both channels. Lower summed gain leaves headroom before loudnorm.
+    PAN_FILTER="pan=stereo|FL=0.35*FL+0.70*FC+0.25*BL+0.25*SL+0.20*LFE|FR=0.35*FR+0.70*FC+0.25*BR+0.25*SR+0.20*LFE"
     ffmpeg -y -v error -i "$RAW_AUDIO" -af "${PAN_FILTER},${DRC_FILTER}" -ar 48000 -c:a aac -b:a 160k "$AAC_AUDIO"
 else
     # Already stereo or mono: encode directly without surround pan mapping
