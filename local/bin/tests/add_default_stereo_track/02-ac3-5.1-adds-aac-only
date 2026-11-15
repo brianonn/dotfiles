@@ -1,0 +1,14 @@
+#!/usr/bin/env bash
+# AC-3 5.1 source: a suitable surround track already exists, so only the stereo AAC is added (+1).
+SCRIPT="$1"
+source "$(dirname "$0")/_common.sh"
+tmp_setup
+
+make_source src.mkv 6 ac3 -b:a 640k
+orig=$(track_count src.mkv)
+run_script src.mkv || fail "script exited non-zero: $LAST_OUTPUT"
+assert_output_contains "Skipping AC-3 5.1 creation"
+assert_file src_stereo.mkv
+assert_eq "track count" "$(track_count src_stereo.mkv)" "$((orig + 1))"
+assert_eq "AC-3 tracks (no new one)" "$(codec_count src_stereo.mkv AC-3)" "1"
+assert_eq "default stereo AAC" "$(default_stereo_aac_count src_stereo.mkv)" "1"

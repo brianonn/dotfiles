@@ -1,0 +1,13 @@
+#!/usr/bin/env bash
+# Stereo FLAC source with no AAC: only the stereo AAC is created (+1), no AC-3.
+SCRIPT="$1"
+source "$(dirname "$0")/_common.sh"
+tmp_setup
+
+make_source src.mkv 2 flac
+orig=$(track_count src.mkv)
+run_script src.mkv || fail "script exited non-zero: $LAST_OUTPUT"
+assert_file src_stereo.mkv
+assert_eq "track count" "$(track_count src_stereo.mkv)" "$((orig + 1))"
+assert_eq "AC-3 tracks" "$(codec_count src_stereo.mkv AC-3)" "0"
+assert_eq "default stereo AAC" "$(default_stereo_aac_count src_stereo.mkv)" "1"

@@ -1,0 +1,14 @@
+#!/usr/bin/env bash
+# 5.1 FLAC source, no stereo or surround track yet: expect a stereo AAC and an AC-3 5.1 track (+2), AAC default.
+SCRIPT="$1"
+source "$(dirname "$0")/_common.sh"
+tmp_setup
+
+make_source src.mkv 6 flac
+orig=$(track_count src.mkv)
+run_script src.mkv || fail "script exited non-zero: $LAST_OUTPUT"
+assert_file src_stereo.mkv
+assert_eq "track count" "$(track_count src_stereo.mkv)" "$((orig + 2))"
+assert_eq "AC-3 tracks" "$(codec_count src_stereo.mkv AC-3)" "1"
+assert_eq "default stereo AAC" "$(default_stereo_aac_count src_stereo.mkv)" "1"
+assert_eq "default audio tracks" "$(default_audio_count src_stereo.mkv)" "1"

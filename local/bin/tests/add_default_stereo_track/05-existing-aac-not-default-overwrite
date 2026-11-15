@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+# Same as 04 but with -o: the input is replaced, the AAC becomes default, and no temp files are left behind.
+SCRIPT="$1"
+source "$(dirname "$0")/_common.sh"
+tmp_setup
+
+make_source aac.mkv 2 aac
+cp aac.mkv overwrite.mkv
+run_script -o overwrite.mkv || fail "script exited non-zero: $LAST_OUTPUT"
+assert_eq "default stereo AAC after -o" "$(default_stereo_aac_count overwrite.mkv)" "1"
+assert_eq "leftover temp files" "$(ls -A | grep -c '^\.overwrite\.mkv\.' || true)" "0"

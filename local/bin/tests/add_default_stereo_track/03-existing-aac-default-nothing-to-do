@@ -1,0 +1,17 @@
+#!/usr/bin/env bash
+# Stereo AAC already present and already default, 2-channel source: "Nothing to do", no output, input untouched (even with -o).
+SCRIPT="$1"
+source "$(dirname "$0")/_common.sh"
+tmp_setup
+
+make_source aac.mkv 2 aac
+retag aac.mkv aac_def.mkv --default-track-flag 1:1
+
+run_script aac_def.mkv || fail "script exited non-zero: $LAST_OUTPUT"
+assert_output_contains "Nothing to do"
+assert_no_file aac_def_stereo.mkv
+
+cp aac_def.mkv overwrite.mkv
+before=$(md5sum < overwrite.mkv)
+run_script -o overwrite.mkv || fail "script exited non-zero with -o: $LAST_OUTPUT"
+assert_eq "input unchanged with -o" "$(md5sum < overwrite.mkv)" "$before"

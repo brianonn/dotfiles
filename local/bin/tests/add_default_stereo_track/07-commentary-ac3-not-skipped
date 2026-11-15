@@ -1,0 +1,14 @@
+#!/usr/bin/env bash
+# The only AC-3 5.1 track is commentary, so it must not count as the existing surround track: a new AC-3 is still created (+2).
+SCRIPT="$1"
+source "$(dirname "$0")/_common.sh"
+tmp_setup
+
+make_source main.mkv 6 flac
+make_source com.mkv 6 ac3 -b:a 640k
+# Track 1 of com.mkv is its audio track; mark it commentary and add it to a new file alongside main.mkv.
+mkvmerge -q -o both.mkv main.mkv --no-video --track-name 1:Commentary --commentary-flag 1:1 com.mkv >/dev/null || fail "could not build fixture"
+orig=$(track_count both.mkv)
+run_script both.mkv || fail "script exited non-zero: $LAST_OUTPUT"
+assert_file both_stereo.mkv
+assert_eq "track count" "$(track_count both_stereo.mkv)" "$((orig + 2))"

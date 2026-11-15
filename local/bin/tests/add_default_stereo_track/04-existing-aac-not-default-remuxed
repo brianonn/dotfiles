@@ -1,0 +1,13 @@
+#!/usr/bin/env bash
+# Stereo AAC already present but not default, nothing else to add: remux so the AAC becomes the only default audio track.
+SCRIPT="$1"
+source "$(dirname "$0")/_common.sh"
+tmp_setup
+
+make_source aac.mkv 2 aac
+orig=$(track_count aac.mkv)
+run_script aac.mkv || fail "script exited non-zero: $LAST_OUTPUT"
+assert_file aac_stereo.mkv
+assert_eq "track count (nothing added)" "$(track_count aac_stereo.mkv)" "$orig"
+assert_eq "default stereo AAC" "$(default_stereo_aac_count aac_stereo.mkv)" "1"
+assert_eq "default audio tracks" "$(default_audio_count aac_stereo.mkv)" "1"

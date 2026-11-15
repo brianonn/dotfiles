@@ -1,0 +1,13 @@
+#!/usr/bin/env bash
+# Only a French audio track: the script must refuse with a clear error and write nothing.
+SCRIPT="$1"
+source "$(dirname "$0")/_common.sh"
+tmp_setup
+
+make_source src.mkv 2 aac
+retag src.mkv fre.mkv --language 1:fre
+if run_script fre.mkv; then
+    fail "script succeeded but should have refused a file with no English track"
+fi
+assert_output_contains "No suitable English audio track"
+assert_no_file fre_stereo.mkv

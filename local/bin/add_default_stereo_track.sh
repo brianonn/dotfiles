@@ -30,6 +30,8 @@
 #   - The reused AAC stereo track is always made the default track. If it was not default
 #     and nothing else needs adding, the file is remuxed to set the flag. If it is already
 #     default, the script exits with "Nothing to do" and writes no output.
+#   - Added --run-tests, which runs the numbered tests in tests/add_default_stereo_track/.
+#   - --run-tests prints a development-only message when tests/add_default_stereo_track/ is absent.
 #   - Source extraction is skipped when no new track is built. The size-grows check applies
 #     only when tracks are added, and the output must contain a default 2-channel AAC track.
 #   - AC-3 creation is skipped when the file already has a suitable surround track
@@ -48,13 +50,55 @@ OVERWRITE=false
 
 usage() {
     echo "Usage: $0 [-o] <input.mkv>"
-    echo "  -o    Safely overwrite the original file after verification"
+    echo "       $0 --run-tests"
+    echo "  -o             Safely overwrite the original file after verification"
+    echo "  --run-tests    Run the tests in tests/$(basename "$(readlink -f "$0" 2>/dev/null || echo "$0")" | sed 's/\.[^.]*$//')/"
     exit 1
 }
 
+# Run every numbered test (NN-*) in tests/<script name without extension>/ next to this
+# script. Each test is an executable; exit 0 = pass, non-zero = fail.
+run_tests() {
+    local self name test_dir t out passed=0 failed=0
+    local tests=()
+    self=$(readlink -f "$0")
+    name=$(basename "$self")
+    name=${name%.*}
+    test_dir="$(dirname "$self")/tests/$name"
+
+    if [ ! -d "$test_dir" ]; then
+        echo "--run-tests is a development feature only. It is not available outside the dotfiles development repository." >&2
+        exit 1
+    fi
+    for t in "$test_dir"/[0-9][0-9]-*; do
+        [ -e "$t" ] && tests+=("$t")
+    done
+    if [ ${#tests[@]} -eq 0 ]; then
+        echo "Error: no tests (NN-*) found in '$test_dir'." >&2
+        exit 1
+    fi
+
+    for t in "${tests[@]}"; do
+        if out=$("$t" "$self" 2>&1); then
+            echo "PASS $(basename "$t")"
+            passed=$((passed + 1))
+        else
+            echo "FAIL $(basename "$t")"
+            [ -n "$out" ] && printf '%s\n' "$out" | sed 's/^/    /'
+            failed=$((failed + 1))
+        fi
+    done
+    echo "Passed: $passed  Failed: $failed"
+    [ "$failed" -eq 0 ]
+}
+
+if [ "${1:-}" = "--run-tests" ]; then
+    run_tests
+    exit 0
+fi
+
 if [ $# -lt 1 ]; then
-    echo "Usage: $0 <input.mkv>"
-    exit 1
+    usage
 fi
 
 # Parse optional -o flag

@@ -51,6 +51,32 @@ add_default_stereo_track.sh [-o] <input.mkv>
 
 Requires `mkvmerge`, `mkvextract`, `ffmpeg`, and `jq`.
 
+### Tests
+
+`add_default_stereo_track.sh --run-tests` runs the tests in `tests/add_default_stereo_track/`, next to the script. The
+directory is named after the script without its extension. Each test is an executable named `NN-description` (for
+example `01-flac-5.1-adds-aac-and-ac3`). The runner calls each test with the script path as its argument. Exit 0 means
+pass; any other exit status means fail. The runner prints PASS or FAIL for each test, prints the failure message for
+failed tests, and exits 1 if any test failed.
+
+Tests build their own synthetic MKVs with `ffmpeg` and `mkvmerge` in a temporary directory, so they need the same tools
+as the script. `_common.sh` in that directory holds shared helpers and is not run as a test.
+
+`--run-tests` is a development feature. The `tests/` directory is not deployed to `~/.local/bin`, so outside the dotfiles
+repository the option prints that it is development-only and exits 1.
+
+| Test | What it checks |
+|---|---|
+| 01-flac-5.1-adds-aac-and-ac3 | 5.1 FLAC source adds stereo AAC and AC-3 5.1 (+2), AAC default |
+| 02-ac3-5.1-adds-aac-only | Existing AC-3 5.1 skips AC-3 creation; only AAC is added (+1) |
+| 03-existing-aac-default-nothing-to-do | Default stereo AAC already present: "Nothing to do", no output, input unchanged with `-o` |
+| 04-existing-aac-not-default-remuxed | Non-default stereo AAC is reused and remuxed to become default |
+| 05-existing-aac-not-default-overwrite | Same with `-o`: input replaced, no temp files left behind |
+| 06-no-english-tracks-fails | Only a French track: refuses with an error and writes no output |
+| 07-commentary-ac3-not-skipped | A commentary AC-3 5.1 does not count as existing surround; AC-3 is still created (+2) |
+| 08-stereo-flac-adds-aac-only | Stereo source with no AAC: only AAC is added (+1), no AC-3 |
+| 09-existing-eac3-51-skips-ac3 | Existing E-AC-3 5.1 skips AC-3 creation; only AAC is added (+1) |
+
 ### Flow
 
 1. Parse the optional `-o` flag and check the input file and dependencies.
