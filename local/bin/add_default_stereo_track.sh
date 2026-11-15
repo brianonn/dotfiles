@@ -27,14 +27,19 @@
 #     makeup gain 6dB -> 2dB (loudnorm restores the level anyway).
 #   - Surround downmix: lower summed gain for headroom (FL/FR = 0.35 front + 0.70 FC
 #     + 0.25 back + 0.25 side) and 0.20 LFE mixed into both channels.
+#   - The reused AAC stereo track is always made the default track. If it was not default
+#     and nothing else needs adding, the file is remuxed to set the flag. If it is already
+#     default, the script exits with "Nothing to do" and writes no output.
+#   - Source extraction is skipped when no new track is built. The size-grows check applies
+#     only when tracks are added, and the output must contain a default 2-channel AAC track.
 #   - AC-3 creation is skipped when the file already has a suitable surround track
 #     (AC-3 6ch, or E-AC-3 6ch/8ch, in eng/en/und, excluding commentary/VI/description).
 #     Track count verification then expects +1 (AAC only).
 #   - Existing AAC stereo detection: if the file already has a suitable AAC 2-channel
 #     track (eng/en/und, not commentary/visually-impaired/description), it is reused
 #     and made the default instead of adding another one. Its AAC encode is skipped.
-#   - If no new track is needed at all, exits 0 with "Nothing to do" and writes no
-#     output. The input is not touched in overwrite mode.
+#   - If no new track is needed and the reused AAC track is already default, exits 0 with
+#     "Nothing to do" and writes no output. The input is not touched in overwrite mode.
 #   - Track count verification expects +0, +1 or +2 depending on what was added.
 
 set -euo pipefail
@@ -193,14 +198,15 @@ if [ "$CREATE_AC3" = true ]; then
     TRACKS_ADDED=$((TRACKS_ADDED + 1))
 fi
 
-# Nothing new to add: exit before any temp files or output are created, so the input
-# is not touched in overwrite mode.
-if [ "$TRACKS_ADDED" -eq 0 ]; then
-    echo "Nothing to do: '$INPUT' already has a suitable AAC 2-channel track (ID $REUSE_AAC_ID) and no AC-3 5.1 track is needed. No output written."
-    if [ "$REUSE_AAC_DEFAULT" != true ]; then
-        echo "Note: track $REUSE_AAC_ID is not flagged default. The file was left unchanged."
-    fi
+# Nothing new to add. If the reused AAC track is already default, exit before any temp
+# files or output are created, so the input is not touched in overwrite mode. If it is not
+# default, fall through and remux so it becomes the default track (the merge below).
+if [ "$TRACKS_ADDED" -eq 0 ] && [ "$REUSE_AAC_DEFAULT" = true ]; then
+    echo "Nothing to do: '$INPUT' already has a default suitable AAC 2-channel track (ID $REUSE_AAC_ID) and no AC-3 5.1 track is needed. No output written."
     exit 0
+fi
+if [ "$TRACKS_ADDED" -eq 0 ]; then
+    echo "Existing AAC 2-channel track (ID $REUSE_AAC_ID) is not default; remuxing to mark it as default."
 fi
 
 # Build dynamic track order. Input file indexes follow the order the inputs are passed to
@@ -251,8 +257,10 @@ AAC_AUDIO="$TMP_DIR/stereo.m4a"
 # Extract codec string and channel count for the selected track from MKV_JSON
 CODEC=$(echo "$MKV_JSON" | jq -r --argjson id "$TRACK_ID" '.tracks[] | select(.id == $id) | .codec // "Unknown"')
 
-echo "Extracting best English audio track { ID: $TRACK_ID, Codec: $CODEC, Channels: $CHANNELS }..."
-mkvextract "$INPUT" tracks "${TRACK_ID}:${RAW_AUDIO}"
+if [ "$CREATE_AAC" = true ] || [ "$CREATE_AC3" = true ]; then
+    echo "Extracting best English audio track { ID: $TRACK_ID, Codec: $CODEC, Channels: $CHANNELS }..."
+    mkvextract "$INPUT" tracks "${TRACK_ID}:${RAW_AUDIO}"
+fi
 
 # Compression & loudness normalization chain:
 # - acompressor: tames loud peaks above -20dB with a 4:1 ratio and a 2dB makeup gain
@@ -358,6 +366,12 @@ if [ "$NEW_DEFAULT_AUDIO" -lt 1 ]; then
     exit 1
 fi
 
+NEW_DEFAULT_STEREO_AAC=$(echo "$NEW_MKV_JSON" | jq '[.tracks[] | select(.type == "audio" and ((.codec // "") | test("^AAC"; "i")) and .properties.audio_channels == 2 and (.properties.default_track // false))] | length')
+if [ "$NEW_DEFAULT_STEREO_AAC" -lt 1 ]; then
+    echo "Error: No default 2-channel AAC track in '$TARGET_OUTPUT'." >&2
+    exit 1
+fi
+
 if [ "$CREATE_AC3" = true ]; then
     AC3_OK=$(echo "$NEW_MKV_JSON" | jq -r '[.tracks[] | select(.type == "audio" and .codec == "AC-3" and .properties.audio_channels == 6)] | length')
     if [ "$AC3_OK" -lt 1 ]; then
@@ -366,7 +380,7 @@ if [ "$CREATE_AC3" = true ]; then
     fi
 fi
 
-if [ "$NEW_SIZE" -le "$ORIG_SIZE" ]; then
+if [ "$TRACKS_ADDED" -gt 0 ] && [ "$NEW_SIZE" -le "$ORIG_SIZE" ]; then
     echo "Error: File size verification failed (new size ${NEW_SIZE}B is not greater than original ${ORIG_SIZE}B)." >&2
     exit 1
 fi

@@ -15,8 +15,8 @@ Instead, the setup script at the root of this dotfiles repo will symlink all fil
 ### Description
 
 Adds a stereo AAC track to an MKV file and, when the source audio is 5.1 or 7.1, also adds an AC-3 5.1 track at
-640kbps (skipped if the file already has a suitable AC-3 or E-AC-3 surround track). The new tracks are merged into the file and set as default and non-default as described below. The original
-audio tracks are kept.
+640kbps (skipped if the file already has a suitable AC-3 or E-AC-3 surround track). The new tracks are merged into the
+file and set as default and non-default as described below. The original audio tracks are kept.
 
 If the file already has a suitable stereo AAC track, that track is reused and no new AAC track is created. Suitable
 means: codec AAC, 2 channels, language `eng`, `en`, or `und`, and not commentary, visually-impaired, or description
@@ -33,10 +33,12 @@ then the lowest track ID.
 - **Default flag:** exactly one stereo AAC track is default, and no other audio track is. When a new AAC track is
   created it is the default. When an existing one is reused, that track is set as default and the other original audio
   tracks are cleared.
-- **Nothing to do:** if a suitable AAC track exists and no AC-3 track is needed, the script logs the reused track ID,
-  prints "Nothing to do", and exits 0. It writes no output and does not touch the input, even with `-o`. In this case the
-  file is not rewritten, so an existing AAC track that is not flagged default stays that way. The script prints a note
-  when this happens.
+- **Nothing to do:** if a suitable AAC track exists, no AC-3 track is needed, and the AAC track is already flagged
+  default, the script logs the reused track ID, prints "Nothing to do", and exits 0. It writes no output and does not
+  touch the input, even with `-o`.
+- **Reused but not default:** if a suitable AAC track exists, no AC-3 track is needed, and the AAC track is not
+  flagged default, the file is remuxed (writing `<name>_stereo.mkv`, or replacing the input with `-o`) so that the AAC
+  track becomes the default.
 
 Usage:
 
@@ -63,8 +65,9 @@ Requires `mkvmerge`, `mkvextract`, `ffmpeg`, and `jq`.
    visually-impaired, and description tracks as step 4.
 6. Look for an existing suitable AAC track (AAC, 2 channels, `eng`/`en`/`und`, not commentary, visually-impaired, or
    description). If one is found, log its ID and skip creating a new AAC track. Otherwise create one.
-7. If no new track is needed (no AAC and no AC-3), print "Nothing to do" and exit 0 before any temp files or output
-   are created.
+7. If no new track is needed (no AAC and no AC-3) and the reused AAC track is already default, print "Nothing to do"
+   and exit 0 before any temp files or output are created. If the reused AAC track is not default, remux the file to set
+   it as the default track.
 8. Build the track order. New inputs are numbered in the order they are passed to `mkvmerge`: video, new AAC (`1:0`,
    only if created), optional AC-3 (next index), original audio, then other tracks. A reused AAC track stays in the
    original audio order.
@@ -81,11 +84,10 @@ Requires `mkvmerge`, `mkvextract`, `ffmpeg`, and `jq`.
     - it is non-empty;
     - the track count is the original plus the number of tracks added (+1 for AAC only or AC-3 only, +2 for AAC and
       AC-3);
-    - it has at least one default audio track;
+    - it has at least one default audio track, and that includes a default 2-channel AAC track;
     - when AC-3 was created, a 6-channel AC-3 track exists (the check is skipped when AC-3 was skipped, so pre-existing
       AC-3 tracks do not cause a failure);
-    - the file is larger than the original.
-    - the file is larger than the original.
+    - when tracks were added, the file is larger than the original.
 15. With `-o`, copy the original permissions onto the output, `mv` it over the input, and restore the saved atime and
     mtime. Otherwise print the output path. A trap removes temporary files on exit.
 
@@ -103,9 +105,8 @@ Requires `mkvmerge`, `mkvextract`, `ffmpeg`, and `jq`.
 - **Existing AAC is reused as-is:** a suitable AAC 2-channel track is not re-encoded or checked for quality. Its codec
   and bitrate are kept, so a low-bitrate or `und` track is reused over a better source that the script would not
   otherwise pick.
-- **Re-running the script** on its own output does not add another stereo AAC track. For 2-channel sources the script
-  exits with "Nothing to do". For 5.1 or 7.1 sources that already have a suitable surround track, only the AAC step is
-  checked and nothing is added once AAC exists.
+- **Re-running the script** on its own output does not add another stereo AAC track, and an AC-3 track is not added a
+  second time either. For 2-channel sources the second run exits with "Nothing to do" once the AAC track is default.
 - **AC-3 skip check covers only eng/en/und tracks:** a 5.1 AC-3 track in another language (for example `fre`) does not
   prevent the English AC-3 track from being created. Commentary, visually-impaired, and description tracks are ignored
   by this check too.
