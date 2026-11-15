@@ -1,4 +1,12 @@
 #!/usr/bin/env bash
+#
+# add_default_stereo_track.sh
+#
+# Change log:
+# 2026-11-13
+#   - when overwriting the source file, it now retains the original source file
+#     mtime and atime values.
+#
 set -euo pipefail
 
 OVERWRITE=false
@@ -40,6 +48,12 @@ for cmd in mkvmerge mkvextract ffmpeg jq; do
         exit 1
     fi
 done
+
+# Capture the original access and modify times
+if [ "$OVERWRITE" = true ]; then
+    ORIG_ATIME=$(stat -c '%x' "$INPUT")
+    ORIG_MTIME=$(stat -c '%y' "$INPUT")
+fi
 
 # Inspect container metadata once
 MKV_JSON=$(mkvmerge -J "$INPUT")
@@ -180,6 +194,8 @@ fi
 if [ "$OVERWRITE" = true ]; then
     chmod --reference="$INPUT" "$TARGET_OUTPUT" 2>/dev/null || true
     mv -f "$TARGET_OUTPUT" "$INPUT"
+    touch -a -d "$ORIG_ATIME" "$INPUT"
+    touch -m -d "$ORIG_MTIME" "$INPUT"
     echo "Done! Verified and safely overwritten: $INPUT"
 else
     echo "Done! Verified and saved to: $TARGET_OUTPUT"
