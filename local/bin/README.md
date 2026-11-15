@@ -1,4 +1,4 @@
-## local/bin
+# Local Scripts Documentation
 
 This file contains source for simple shell scripts, python scripts or even go scripts :)
 
@@ -9,3 +9,65 @@ Since other 3rd partys, and github installers, etc often install directly into ~
 entire directory over or symlink at the top-level (i.e. ~/.local/bin -> this/path/bin )
 
 Instead, the setup script at the root of this dotfiles repo will symlink all files from there to here.
+
+## add_default_stereo_track.sh
+
+### Description
+
+Adds a stereo AAC track to an MKV file and, when the source audio is 5.1 or 7.1, also adds an AC-3 5.1 track at
+640kbps. The new tracks are merged into the file and set as default and non-default as described below. The original
+audio tracks are kept.
+
+- **Stereo AAC (160kbps, 48kHz):** downmixed from surround with the center channel boosted, then run through a
+  compressor and `loudnorm` (-16 LUFS). This track is the default.
+- **AC-3 5.1 (640kbps, 48kHz):** tagged `eng`, named "English 5.1 AC-3", not default. For 7.1 sources the side channels
+  are folded into the back pair at 0.707 each. No loudness processing is applied.
+
+Usage:
+
+```sh
+add_default_stereo_track.sh [-o] <input.mkv>
+```
+
+- Without `-o`, writes `<name>_stereo.mkv` next to the input.
+- With `-o`, replaces the input after verification and restores its original atime and mtime.
+
+Requires `mkvmerge`, `mkvextract`, `ffmpeg`, and `jq`.
+
+### Flow
+
+1. Parse the optional `-o` flag and check the input file and dependencies.
+2. If overwriting, save the input's atime and mtime.
+3. Run `mkvmerge -J` once to read the container metadata.
+4. Select the best audio track: English, `en`, or `und`, excluding commentary, visually-impaired, and description
+   tracks. Score by codec (TrueHD/FLAC/PCM 100, DTS-HD 90, DTS 75, E-AC-3 65, AC-3 50, other 25), then add
+   2 points per channel. Ties go to the lower track ID. Exit if none is found.
+5. Read the source channel count. Create the AC-3 track only if it is 6 (5.1) or 8 (7.1) channels.
+6. Build the track order: video, new AAC (`1:0`), optional AC-3 (`2:0`), original audio, then other tracks.
+7. Clear the default flag on all original audio tracks.
+8. Extract the selected track with `mkvextract`.
+9. Encode the stereo AAC. Multichannel sources use a pan matrix (center at 1.4x) followed by the compressor and
+   `loudnorm` chain. Stereo and mono sources are encoded directly with the same chain.
+10. If needed, encode the AC-3 5.1 track. 7.1 sources are downmixed to 5.1 first.
+11. Merge everything with `mkvmerge`, using the track order and flags above.
+12. Verify the output:
+    - it is non-empty;
+    - the track count is the original plus 1 (AAC only) or plus 2 (AAC and AC-3);
+    - when AC-3 was requested, a 6-channel AC-3 track exists;
+    - the file is larger than the original.
+13. With `-o`, copy the original permissions onto the output, `mv` it over the input, and restore the saved atime and
+    mtime. Otherwise print the output path. A trap removes temporary files on exit.
+
+### Observations and Caveats
+
+- **Channel layout assumption:** any source with more than 2 channels takes the surround pan path, which references
+  FC, BL, SL, BR, and SR. Layouts such as 3, 4, or 5 channels may pan incorrectly or fail. Only 6 and 8 channels get
+  an AC-3 track.
+- **Overwrite is not atomic with respect to the source:** the output is verified before `mv`, but if the input changes
+  while the script runs, that change is lost when the output replaces it.
+- **Tracks are picked by score, not by language preference:** an `und` track can outrank a labelled English track if
+  its codec or channel count scores higher.
+- **Size check:** the output must be larger than the input. Adding tracks normally satisfies this, but the check is
+  only a rough sanity test and does not confirm that the new audio decodes correctly.
+- **Re-running the script** on a file that already has an added stereo track adds another one. It does not detect
+  existing tracks.
