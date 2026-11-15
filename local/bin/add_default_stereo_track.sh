@@ -7,6 +7,20 @@
 #   - when overwriting the source file, it now retains the original source file
 #     mtime and atime values.
 #
+# 2026-11-14
+#   - Detects 5.1 (6ch) or 7.1 (8ch) source tracks and, in addition to the
+#     AAC 2-channel stereo track, creates an AC-3 5.1 track at 640kbps, 48kHz.
+#   - 5.1 source: encoded directly to AC-3 5.1.
+#   - 7.1 source: downmixed to 5.1 (side channels folded into back pair at
+#     0.707 each), then encoded to AC-3 5.1.
+#   - AC-3 track is not run through the compressor/loudnorm chain, so the
+#     surround mix keeps its original dynamics.
+#   - Both new tracks are merged into the output; original audio tracks shift
+#     down by 2 (or by 1 when no AC-3 track is created). Video stays first.
+#   - AC-3 track: tagged eng, named "English 5.1 AC-3", not default. AAC stereo
+#     remains the default track.
+#   - Track count verification expects +1 or +2 new tracks; when AC-3 is
+#     created, the output is also checked for an AC-3 track with 6 channels.
 set -euo pipefail
 
 OVERWRITE=false
@@ -92,11 +106,23 @@ fi
 # Get all existing audio track IDs to remove their default flags later
 ALL_AUDIO_IDS=$(echo "$MKV_JSON" | jq -r '.tracks[] | select(.type == "audio") | .id')
 
+# Source channel count for the selected track (6 = 5.1, 8 = 7.1)
+CHANNELS=$(echo "$MKV_JSON" | jq -r --argjson id "$TRACK_ID" '.tracks[] | select(.id == $id) | .properties.audio_channels // 2')
+
+# Also create an AC-3 5.1 track when the source is 5.1 or 7.1
+CREATE_AC3=false
+TRACKS_ADDED=1
+if [ "$CHANNELS" -eq 6 ] || [ "$CHANNELS" -eq 8 ]; then
+    CREATE_AC3=true
+    TRACKS_ADDED=2
+fi
+
 # Build dynamic track order:
 # 1. Video track(s) from original file (0:<id>)
 # 2. New stereo AAC track from second input file (1:0) -> becomes Audio Track #1
-# 3. All original audio tracks (0:<id>) -> shifted down by 1 slot
-# 4. Subtitles and any other tracks (0:<id>)
+# 3. Optional new AC-3 5.1 track from third input file (2:0) -> becomes Audio Track #2
+# 4. All original audio tracks (0:<id>) -> shifted down by 1 or 2 slots
+# 5. Subtitles and any other tracks (0:<id>)
 VIDEO_ORDER=$(echo "$MKV_JSON" | jq -r '[.tracks[] | select(.type == "video") | "0:\(.id)"] | join(",")')
 AUDIO_ORDER=$(echo "$MKV_JSON" | jq -r '[.tracks[] | select(.type == "audio") | "0:\(.id)"] | join(",")')
 OTHER_ORDER=$(echo "$MKV_JSON" | jq -r '[.tracks[] | select(.type != "video" and .type != "audio") | "0:\(.id)"] | join(",")')
@@ -104,6 +130,9 @@ OTHER_ORDER=$(echo "$MKV_JSON" | jq -r '[.tracks[] | select(.type != "video" and
 TRACK_ORDER_LIST=()
 [ -n "$VIDEO_ORDER" ] && TRACK_ORDER_LIST+=("$VIDEO_ORDER")
 TRACK_ORDER_LIST+=("1:0")
+if [ "$CREATE_AC3" = true ]; then
+    TRACK_ORDER_LIST+=("2:0")
+fi
 [ -n "$AUDIO_ORDER" ] && TRACK_ORDER_LIST+=("$AUDIO_ORDER")
 [ -n "$OTHER_ORDER" ] && TRACK_ORDER_LIST+=("$OTHER_ORDER")
 TRACK_ORDER=$(IFS=,; echo "${TRACK_ORDER_LIST[*]}")
@@ -129,7 +158,6 @@ AAC_AUDIO="$TMP_DIR/stereo.m4a"
 
 # Extract codec string and channel count for the selected track from MKV_JSON
 CODEC=$(echo "$MKV_JSON" | jq -r --argjson id "$TRACK_ID" '.tracks[] | select(.id == $id) | .codec // "Unknown"')
-CHANNELS=$(echo "$MKV_JSON" | jq -r --argjson id "$TRACK_ID" '.tracks[] | select(.id == $id) | .properties.audio_channels // 2')
 
 echo "Extracting best English audio track { ID: $TRACK_ID, Codec: $CODEC, Channels: $CHANNELS }..."
 mkvextract "$INPUT" tracks "${TRACK_ID}:${RAW_AUDIO}"
@@ -153,13 +181,39 @@ else
     ffmpeg -y -v error -i "$RAW_AUDIO" -ac 2 -af "${DRC_FILTER}" -ar 48000 -c:a aac -b:a 160k "$AAC_AUDIO"
 fi
 
+# AC-3 5.1 track (640kbps, 48kHz). No loudness/DRC processing is applied so the
+# surround mix keeps its original dynamics. 7.1 sources are downmixed to 5.1 by
+# folding the side channels into the back pair at -3dB each.
+AC3_AUDIO="$TMP_DIR/surround.ac3"
+if [ "$CREATE_AC3" = true ]; then
+    if [ "$CHANNELS" -eq 8 ]; then
+        echo "Encoding 640kbps 48kHz AC-3 5.1 (downmixed from 7.1)..."
+        AC3_PAN_FILTER="pan=5.1|FL=FL|FR=FR|FC=FC|LFE=LFE|BL=0.707*BL+0.707*SL|BR=0.707*BR+0.707*SR"
+        ffmpeg -y -v error -i "$RAW_AUDIO" -af "$AC3_PAN_FILTER" -ac 6 -ar 48000 -c:a ac3 -b:a 640k "$AC3_AUDIO"
+    else
+        echo "Encoding 640kbps 48kHz AC-3 5.1..."
+        ffmpeg -y -v error -i "$RAW_AUDIO" -ac 6 -ar 48000 -c:a ac3 -b:a 640k "$AC3_AUDIO"
+    fi
+fi
+
 # Build flags to turn off 'default-track' on all existing audio tracks
 DEFAULT_OFF_FLAGS=()
 for id in $ALL_AUDIO_IDS; do
     DEFAULT_OFF_FLAGS+=(--default-track-flag "${id}:0")
 done
 
-echo "Merging stereo AAC back into MKV and reordering tracks..."
+# Options for the optional AC-3 input (kept non-default; AAC stereo stays default)
+AC3_ARGS=()
+if [ "$CREATE_AC3" = true ]; then
+    AC3_ARGS=(
+        --language 0:eng
+        --track-name "0:English 5.1 AC-3"
+        --default-track-flag 0:0
+        "$AC3_AUDIO"
+    )
+fi
+
+echo "Merging new audio track(s) back into MKV and reordering tracks..."
 mkvmerge -o "$TARGET_OUTPUT" \
     --track-order "$TRACK_ORDER" \
     "${DEFAULT_OFF_FLAGS[@]}" \
@@ -167,12 +221,14 @@ mkvmerge -o "$TARGET_OUTPUT" \
     --language 0:eng \
     --track-name "0:English 2-ch stereo" \
     --default-track-flag 0:1 \
-    "$AAC_AUDIO"
+    "$AAC_AUDIO" \
+    ${AC3_ARGS[@]+"${AC3_ARGS[@]}"}
 
 # Verify the new MKV is valid and contains the expected number of
 # tracks, and the newer filesize is larger than the original filesize
 ORIG_TRACK_COUNT=$(echo "$MKV_JSON" | jq '.tracks | length')
-NEW_TRACK_COUNT=$(mkvmerge -J "$TARGET_OUTPUT" | jq '.tracks | length')
+NEW_MKV_JSON=$(mkvmerge -J "$TARGET_OUTPUT")
+NEW_TRACK_COUNT=$(echo "$NEW_MKV_JSON" | jq '.tracks | length')
 ORIG_SIZE=$(wc -c < "$INPUT" | tr -d ' ')
 NEW_SIZE=$(wc -c < "$TARGET_OUTPUT" | tr -d ' ')
 
@@ -181,9 +237,17 @@ if [ ! -s "$TARGET_OUTPUT" ]; then
     exit 1
 fi
 
-if [ "$NEW_TRACK_COUNT" -ne $((ORIG_TRACK_COUNT + 1)) ]; then
-    echo "Error: Track count verification failed (expected $((ORIG_TRACK_COUNT + 1)), got $NEW_TRACK_COUNT)." >&2
+if [ "$NEW_TRACK_COUNT" -ne $((ORIG_TRACK_COUNT + TRACKS_ADDED)) ]; then
+    echo "Error: Track count verification failed (expected $((ORIG_TRACK_COUNT + TRACKS_ADDED)), got $NEW_TRACK_COUNT)." >&2
     exit 1
+fi
+
+if [ "$CREATE_AC3" = true ]; then
+    AC3_OK=$(echo "$NEW_MKV_JSON" | jq -r '[.tracks[] | select(.type == "audio" and .codec == "AC-3" and .properties.audio_channels == 6)] | length')
+    if [ "$AC3_OK" -lt 1 ]; then
+        echo "Error: AC-3 5.1 track verification failed in '$TARGET_OUTPUT'." >&2
+        exit 1
+    fi
 fi
 
 if [ "$NEW_SIZE" -le "$ORIG_SIZE" ]; then
