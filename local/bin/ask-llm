@@ -6,7 +6,7 @@ shopt -s checkwinsize
 URL="http://ollama.local:11434"
 MODEL="qwen3-nothinking:8b"
 SYSTEM_PROMPT="You are a helpful, concise assistant. Answer the user clearly without extra fill-in words or extraneous information that was not asked for.  Try to keep answers short and no more than 2 to 3 paragraphs."
-TEMPERATURE="0.8"
+TEMPERATURE="0.6"
 
 SAVEDIR="$HOME/Documents/ask-llm-saved-sessions"
 
