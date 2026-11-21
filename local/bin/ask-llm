@@ -1,0 +1,169 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+shopt -s checkwinsize
+set +vx
+
+URL="http://ollama.local:11434"
+MODEL="qwen3-nothinking:8b"
+SYSTEM_PROMPT="You are a helpful, concise assistant. Answer the user clearly without extra fill-in words or extraneous information that was not asked for.  Try to keep answers short and no more than 2 to 3 paragraphs."
+TEMPERATURE="0.8"
+
+## set MANAGE_CONTEXT to true if the chat CLI does not maintain context through a thread-id or context-id
+## it will force this script to build up a local context and send the entire context chat with each call to the LLM
+MANAGE_CONTEXT=false
+
+# test for chatgpt installed
+if ! command -v chatgpt >/dev/null 2>&1 ; then
+    echo "This tool requires 'chatgpt-cli' command installed. See github.com/kardolus/chatgpt-cli"
+    exit 1
+fi
+
+has_cmd() {
+    local cmd="$1"
+    command -v "$cmd" >/dev/null 2>&1
+}
+
+# check for color support
+has_color() {
+    [ -n "${NO_COLOR:-}" ] && return 1
+    [ -t 1 ] || return 1
+    if has_cmd tput ; then
+        colors=$(tput colors 2>/dev/null)
+        [ -n "$colors" ] && [ "$colors" -ge 8 ] && return 0
+    fi
+    return 1
+}
+
+width() {
+    [ -n "${COLUMNS:-}" ] && echo $COLUMNS && return 0
+    has_cmd tput && echo $(tput cols) && return 0
+    has_cmd stty && echo $(stty size | cut -d' ' -f2) && return 0
+    echo 80 # default
+}
+
+FORMATTER=()
+get_formatter() {
+    local width=$(width)
+    has_cmd mdformat && FORMATTER=(mdformat --wrap "$width" -) && return 0
+    has_cmd pandoc   && FORMATTER=(pandoc -f gfm -t gfm --wrap=auto --columns="$width") && return 0
+    has_cmd prettier && FORMATTER=(prettier --parser markdown --prose-wrap always --print-width "$width") && return 0
+
+    # Optional fallback if none of the Markdown formatters exist
+    has_cmd fmt      && FORMATTER=(fmt -w "$width") && return 0
+    return 1
+}
+
+randhex() {
+    local count="$1"
+    local blksize=1024
+    dd if=/dev/urandom bs=$blksize count=1 2>/dev/null | tr -dc 'a-f0-9' | fold -b -w $count | head -1
+}
+
+# get a random thread id for the conversation session
+get_tid() {
+    echo "ask_$(randhex 8)"
+}
+
+# delete chat  context
+chat_delete_thread() {
+    chatgpt --delete-thread "$TID" >/dev/null 2>&1 &
+    return 0
+}
+
+# send a user prompt to the chat session based on thread-id
+chat_send_prompt() {
+    local tid="$1"
+    local prompt="$2"
+    chatgpt --thread "$tid" \
+            --url "$URL" \
+            --model "$MODEL" \
+            --role-file <(cat <<< "$SYSTEM_PROMPT") \
+            --temperature "$TEMPERATURE" \
+        "$prompt"
+}
+
+chat_save() {
+    local tid="$1"
+    chatgpt --show-history "$tid" >> "${tid}.md"
+    return 0
+}
+
+if has_color; then
+    RED=$'\e[0;31m'
+    GREEN=$'\e[1;32m'
+    RESET=$'\e[0m'
+else
+    RED='' GREEN='' RESET=''
+fi
+
+# get the formatter command and reset it on window change events
+trap 'get_formatter' WINCH
+get_formatter
+
+printf "Enter ${RED}/new${RESET} or ${RED}/session${RESET} to start a new session.\n"
+printf "Enter ${RED}/save${RESET} to save this session to a file.\n"
+printf "Enter ${RED}/quit${RESET} or ${RED}/exit${RESET} or ${RED}/bye${RESET} to exit.\n\n"
+
+TURNCOUNT=1         # counter for USER/ASSISTANT turns
+TID="$(get_tid)"    # Thread ID
+context=""          # the running chat session context
+resp=""             # the chat llm response
+
+# main loop.
+# Ask for input, send it to the chatgpt session.
+# TID tracks the context, or we build it and track it locally.
+#
+while : ; do
+    # ask the user
+    read -e -p "${RED}Ask>${RESET} " line
+    case "$line" in
+        "/exit" | "/quit" | "/bye")  break ;;
+        "/save")
+            chat_save "$TID"
+            echo "Chat saved to file '${TID}.md' in the current directory (${PWD})"
+            continue
+            ;;
+        "/new" | "/session")
+            chat_delete_thread "$TID"
+            TID="$(get_tid)"
+            echo
+            echo "============ Started new session: ID: $TID"
+            echo
+            TURNCOUNT=1
+            resp=""
+            context=""
+            continue
+            ;;
+    esac
+
+    # set or append the user's turn to the convo so far, and strip trailing newlines
+    if [[ $MANAGE_CONTEXT = true ]]; then
+        convo+=$'\n'"USER: $line"
+    else
+        convo="$line"
+    fi
+
+    # get the assistant's reply
+    resp=$(chat_send_prompt "$TID" "$convo")
+    resp="${resp%_}"
+
+    # display the assistant response
+    printf "\n${GREEN}%2.2d> ${RESET}%s\n\n" $TURNCOUNT "$( ${FORMATTER[@]} <<< "$resp")"
+    TURNCOUNT=$(( TURNCOUNT + 1 ))
+
+    # if necessary, append the assistant response to the running convo
+    [[ $MANAGE_CONTEXT = true ]] && convo+=$'\n'"ASSISTANT: $resp"
+done
+
+# before exiting, ask the user if they want to
+# put the last response into the clipboard.
+# Allow a 10 second timeout
+
+echo
+SECONDS="10"
+printf "You have ${RED}${SECONDS}${RESET} seconds\n"
+read -t${SECONDS} -n1 -s -r -p "Press 'c' to copy the last response into the clipboard, any other key to exit..." key
+[[ "$key" = "c" ]] &&  xsel -p <<< "$resp"
+exit 0
+
