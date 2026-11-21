@@ -2,12 +2,13 @@
 
 set -euo pipefail
 shopt -s checkwinsize
-set +vx
 
 URL="http://ollama.local:11434"
 MODEL="qwen3-nothinking:8b"
 SYSTEM_PROMPT="You are a helpful, concise assistant. Answer the user clearly without extra fill-in words or extraneous information that was not asked for.  Try to keep answers short and no more than 2 to 3 paragraphs."
 TEMPERATURE="0.8"
+
+SAVEDIR="$HOME/Documents/ask-llm-saved-sessions"
 
 ## set MANAGE_CONTEXT to true if the chat CLI does not maintain context through a thread-id or context-id
 ## it will force this script to build up a local context and send the entire context chat with each call to the LLM
@@ -34,6 +35,19 @@ has_color() {
     fi
     return 1
 }
+
+if has_color; then
+    RED=$'\e[0;31m'
+    BOLD_RED=$'\e[1;31m'
+    GREEN=$'\e[0;32m'
+    BOLD_GREEN=$'\e[1;32m'
+    YELLOW=$'\e[0;33m'
+    BLUE=$'\e[1;34m'
+    RESET=$'\e[0m'
+else
+    RED='' BOLD_RED='' GREEN='' BOLD_GREEN='' YELLOW='' BLUE='' RESET=''
+fi
+
 
 width() {
     [ -n "${COLUMNS:-}" ] && echo $COLUMNS && return 0
@@ -85,17 +99,29 @@ chat_send_prompt() {
 
 chat_save() {
     local tid="$1"
-    chatgpt --show-history "$tid" >> "${tid}.md"
-    return 0
-}
+    local savefile="$2"
+    local savedir=$(dirname "$savefile")
 
-if has_color; then
-    RED=$'\e[0;31m'
-    GREEN=$'\e[1;32m'
-    RESET=$'\e[0m'
-else
-    RED='' GREEN='' RESET=''
-fi
+    if ! [[ -d "$savedir" ]] ; then
+        if ! mkdir -p "$savedir" >/dev/null 2>&1; then \
+            echo "${BOLD_RED}ERROR${RESET}: Cannot create the save directory at ${YELLOW}${savedir}${RESET}"
+        fi
+    fi
+    if [[ -d "${savedir}" ]] ; then
+        # yaml frontmatter
+        {
+            printf "%s\n" "---"
+            printf "%s\n" "title: Chat session ${tid} from ask-llm shell script"
+            printf "%s\n" "date: $(date '+%Y-%m-%d')"
+            printf "%s\n" "description: chat session output from kardolus/chatgpt-cli --show-history"
+            printf "%s\n\n" "---"
+        } > ${savefile}
+        # save the session, transform 3 dashes to 3 underscores, otherwise it often gets confused for yaml by parsers
+        # and 4 dashes gets confused for start of a table by dumb parsers like pandoc
+        chatgpt --show-history "${tid}" | sed -e 's/^---$/___/' >> "${savefile}" && return 0
+    fi
+    return 1
+}
 
 # get the formatter command and reset it on window change events
 trap 'get_formatter' WINCH
@@ -120,8 +146,13 @@ while : ; do
     case "$line" in
         "/exit" | "/quit" | "/bye")  break ;;
         "/save")
-            chat_save "$TID"
-            echo "Chat saved to file '${TID}.md' in the current directory (${PWD})"
+            # save errors won't crash the program, just continue
+            savefile="${SAVEDIR}/${TID}.md"
+            if chat_save "$TID" "${savefile}" ; then
+                echo "${GREEN}OK${RESET}: Chat saved to ${YELLOW}'${savefile}'${RESET}"
+            else
+                echo "${BOLD_RED}FAIL${RESET}: Could not save your session!"
+            fi
             continue
             ;;
         "/new" | "/session")
