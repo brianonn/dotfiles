@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
 
-set -ep
+set -eo pipefail
+
+myname="$(basename "$0")"
 
 # for notify-send
 URGENCY=low  # low, normal, critical
@@ -39,7 +41,7 @@ while getopts "hvgtq" OPT; do
         t) tui=1 ;;
         q) query=1
            DEFAULT_SINK="$(pactl get-default-sink)"
-           DESCRIPTION="$(pactl -f json list sinks | jq -r '.[] | select(.name == "'$DEFAULT_SINK'") | .description')"
+           DESCRIPTION="$(pactl -f json list sinks | jq -r --arg sink "$DEFAULT_SINK" '.[] | select(.name == $sink) | .description')"
            echo $DESCRIPTION
            exit 0
            ;;
@@ -61,7 +63,7 @@ SINK+=("bluez_output.64_68_76_3B_09_83.1")            # bluetooth edifier headph
 NAME=(
     "null"
     "🔊 Laptop - Built-in Speakers"
-    "🎧 Desktop - Anker Soundcore 2"
+    "📻 Desktop - Anker Soundcore 2"
     "🎧 Headphones - Edifier Bluetooth"
 )
 
