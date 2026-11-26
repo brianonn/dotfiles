@@ -54,8 +54,8 @@ done
 # Define your sink names (Get these by running: pactl list short sinks)
 SINK=("null")
 SINK+=("alsa_output.pci-0000_00_1f.3.analog-stereo")  # built-in laptop speakers
-SINK+=("bluez_sink.F4_2B_7D_61_BE_3A.a2dp_sink")      # bluetooth desktop Soundcore
-SINK+=("bluez_sink.64_68_76_3B_09_83.a2dp_sink")      # bluetooth edifier headphones
+SINK+=("bluez_output.F4_2B_7D_61_BE_3A.1")            # bluetooth desktop Soundcore
+SINK+=("bluez_output.64_68_76_3B_09_83.1")            # bluetooth edifier headphones
 
 # Friendly names for the menu and notifier
 NAME=(
