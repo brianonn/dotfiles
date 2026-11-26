@@ -417,21 +417,6 @@ alias tbc='tb | tee >(xclip -selection c && echo "^^^^^^^ this is now in the cli
 alias path='echo -e ${PATH//:/\\n}'
 alias tree='tree -I ".git|node_modules|.history"'
 
-function lfcd() {
-    tmp="$(mktemp)"
-    # `command` is needed in case `lfcd` is aliased to `lf`
-    command lf -last-dir-path="$tmp" "$@"
-    if [ -f "$tmp" ]; then
-        dir="$(cat "$tmp")"
-        command rm -f "$tmp"
-        if [ -d "$dir" ]; then
-            if [ "$dir" != "$(pwd)" ]; then
-                cd "$dir"
-            fi
-        fi
-    fi
-}
-
 if command -v kubeselect >/dev/null; then
     # kubeselect and kubectl
     # go install gitlab.com/zerok/kubeselect/cmd/kubeselect
@@ -568,12 +553,14 @@ alias ping='ping -c 5'
 alias mkdir='mkdir -p'
 alias rm='rm -I --preserve-root'
 
-# y shell wrapper that provides the ability to change the current working directory when exiting Yazi.
+# y is yazi
+# ycd shell wrapper that provides the ability to change the current working directory when exiting Yazi.
 # press q to quit, you'll see the CWD changed. Sometimes, you don't want to change, press Q to quit
-function y() {
+alias y='yazi' yy='ycd'
+function ycd() {
 	local tmp cwd; tmp="$(mktemp -t "yazi-cwd.XXXXXX")"
 	command yazi "$@" --cwd-file="$tmp"
-	IFS= read -r -d '' cwd < "$tmp"
+	IFS= read -r -d '' cwd < "$tmp" || builtin true
 	[ "$cwd" != "$PWD" ] && [ -d "$cwd" ] && builtin cd -- "$cwd" || builtin true
 	command rm -f -- "$tmp"
 }
