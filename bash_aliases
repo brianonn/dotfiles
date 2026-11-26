@@ -17,6 +17,18 @@ function real() {
     echo ${words[${#words[@]} - 1]} | tr -d '[\140\047\042]' # backtick,single and double quote
 }
 
+# use bat or cat for output of the string at "$1". Only uses bat if output is a terminal
+# also it doesn't actually use cat, but printf to stdout
+batorcat()
+{
+    local in="$1"
+    if [ -t 1 ] && command -v bat >/dev/null 2>&1; then
+        printf '%s\n' "$in" | bat -l sh --paging=never --style=plain
+    else
+        printf '%s\n' "$in"
+    fi
+}
+
 # alias which according to how it says to do it in the which man page with changes for zsh and alias -[gs]
 which ()
 {
@@ -33,11 +45,7 @@ which ()
     )
     local ret=$?
 
-    if [ -t 1 ] && command -v bat >/dev/null 2>&1; then
-        printf '%s\n' "$out" | bat -l sh --paging=never --style=plain
-    else
-        printf '%s\n' "$out"
-    fi
+    batorcat "$out"
 
     return $ret
 }
@@ -606,3 +614,68 @@ function mm() {
       fzf ${query[@]} --preview 'man {}|col -bx|head -100' --preview-window=right:70% | \
       xargs -r man
   }
+
+# recursively expand a shell alias or a function
+expand() {
+    local out=$(__expand "$1")
+    batorcat "$out"
+}
+
+__expand() {
+  local cmd="$1"
+  local seen=""
+
+  [ -z "$cmd" ] && return 1
+
+  while [ -n "$cmd" ]; do
+    case " $seen " in
+      *" $cmd "*) break ;;
+    esac
+    seen="$seen $cmd"
+
+    if alias "$cmd" >/dev/null 2>&1; then
+      local val
+      alias "$cmd"
+
+      if [ -n "$ZSH_VERSION" ]; then
+        # Zsh stores raw, unquoted alias values in the $aliases associative array
+        val="${aliases[$cmd]}"
+        # Split into words using Zsh's ${=val} flag
+        for word in ${=val}; do
+          case "$word" in
+            *=*) continue ;;
+            *) cmd="$word"; break ;;
+          esac
+        done
+      else
+        # Bash parsing
+        val=$(alias "$cmd")
+        val="${val#*=}"
+        val="${val#\'}"
+        val="${val%\'}"
+        val="${val#\"}"
+        val="${val%\"}"
+        for word in $val; do
+          case "$word" in
+            *=*) continue ;;
+            *) cmd="$word"; break ;;
+          esac
+        done
+      fi
+
+    elif declare -f "$cmd" >/dev/null 2>&1; then
+      if [ -n "$ZSH_VERSION" ]; then
+        type "$cmd"
+        # If the function is autoloaded (not yet executed), load it so its body prints
+        autoload +X "$cmd" 2>/dev/null
+      fi
+      declare -f "$cmd"
+      break
+
+    else
+      type "$cmd"
+      break
+    fi
+  done
+}
+
