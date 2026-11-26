@@ -17,12 +17,29 @@ function real() {
     echo ${words[${#words[@]} - 1]} | tr -d '[\140\047\042]' # backtick,single and double quote
 }
 
-# alias which according to how it says to do it in the which man page
-function which() {
-    (
-        alias
-        declare -f
-    ) | /usr/bin/which --tty-only --read-alias --read-functions --show-tilde --show-dot $@
+# alias which according to how it says to do it in the which man page with changes for zsh and alias -[gs]
+which ()
+{
+    local out
+    out=$(
+        (
+            if [ -n "$ZSH_VERSION" ]; then
+                { alias -sL ; alias -L; } | sed -e 's/alias\( -[gs-]*\)\+/alias/' -e "/'/"!"s/=\(.*\)/='\1'/"
+            else
+                alias
+            fi
+            declare -f
+        ) | /usr/bin/which --tty-only --read-alias --read-functions --show-tilde --show-dot "$@"
+    )
+    local ret=$?
+
+    if [ -t 1 ] && command -v bat >/dev/null 2>&1; then
+        printf '%s\n' "$out" | bat -l sh --paging=never --style=plain
+    else
+        printf '%s\n' "$out"
+    fi
+
+    return $ret
 }
 
 real_less=$(real less)
