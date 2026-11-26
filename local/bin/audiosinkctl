@@ -46,7 +46,9 @@ while getopts "hvgtq" OPT; do
            exit 0
            ;;
         v) verbose="-v" ;;
-        h) echo "Usage: $myname [-h | --help] [-v | --verbose] [-t | --tui] [-g | --gui]"
+        h) echo "Usage: $myname [-h | --help]"
+           echo "   or: $myname [-v | --verbose] [-t | --tui | -g | --gui]"
+           echo "   or: $myname [-v | --verbose] [list | NUMBER]"
            exit 0
            ;;
         \?) exit 1 ;;
@@ -125,8 +127,35 @@ discover_sinks() {
 
 discover_sinks
 
+# Non-interactive CLI: "list" prints the numbered outputs, "[n]" selects output n
+index=""
+shift $((OPTIND - 1))
+if [[ $# -gt 1 ]]; then
+    echo "Usage: $myname [list | NUMBER]" >&2
+    exit 1
+elif [[ $# -eq 1 ]]; then
+    if [[ -n $gui || -n $tui ]]; then
+        echo "$myname: 'list' and NUMBER cannot be combined with -g/--gui or -t/--tui" >&2
+        exit 1
+    fi
+    if [[ $1 == list ]]; then
+        for ((i=1; i <= $SINK_COUNT; i++)); do
+            printf "%d) %s\n" "$i" "${NAME[i]}"
+        done
+        exit 0
+    fi
+    if [[ ! $1 =~ ^[1-9][0-9]*$ ]] || (( $1 > SINK_COUNT )); then
+        echo "$myname: invalid output number '$1' (choose 1-$SINK_COUNT, or 'list')" >&2
+        exit 1
+    fi
+    index=$1
+fi
+
 # Present choices
-if [[ -n $gui ]]; then
+if [[ -n $index ]]; then
+    # chosen on the command line, no menu
+    :
+elif [[ -n $gui ]]; then
     # for GUI
     index=$(printf '%s\n' "${NAME[@]}" | command tail -n +2 | rofi -dmenu -format i -i -p "Select Audio Output:")
     status="$?"
