@@ -13,8 +13,13 @@
 function real() {
     f=$(type -a "$1" 2>/dev/null) || return 1
     declare -a words
-    local words=($f)
-    echo ${words[${#words[@]} - 1]} | tr -d '[\140\047\042]' # backtick,single and double quote
+    if [ -n "$ZSH_VERSION" ]; then
+        local words=($=f)  # force ZSH to use word-splitting here, we need it
+    else
+        local words=($f)
+    fi
+    # send the last word to tr, and remove backtick,single and double quote. ZSH/BASH portable
+    tr -d '\140\047\042' <<< "${words[@]: -1}"
 }
 
 # use bat or cat for output of the string at "$1". Only uses bat if output is a terminal
@@ -297,6 +302,7 @@ alias gld-solo-grid="./cgminer -c ~/.bfgminer/goldcoin.conf --gridseed-options='
 pushd() { builtin pushd "$@" >/dev/null; }
 popd() { builtin popd "$@" >/dev/null; }
 
+# color options
 color_opt=''
 if [[ $(tput colors) > 0 ]]; then
     color_opt='--color=always'
@@ -305,51 +311,51 @@ if [[ $(tput colors) > 0 ]]; then
     fi
 fi
 
-alias grep="grep $color_opt"
-alias fgrep="fgrep $color_opt"
-alias egrep="egrep $color_opt"
+alias grep="grep ${color_opt[@]}"
+alias fgrep="fgrep ${color_opt[@]}"
+alias egrep="egrep ${color_opt[@]}"
 
 #ls_pager="perl -lpe 's/(\S+)\//[\1]/g' | ${real_less} -S -R -X -F"
-ls_pager="${real_less} -S -R -X -F"
-ls_bin="${real_ls} -C -F --group-directories-first $color_opt"
+ls_pager() { ${real_less} -S -R -X -F ; }
+ls_bin() { ${real_ls} -C -F --group-directories-first ${color_opt[@]} ; }
 
 alias more=less
 [ -x $(real colortail 2>/dev/null) ] && alias tail=colortail
 
 type lsd 2>/dev/null >/dev/null &&
-    function __ls() { lsd --group-dirs=first --total-size --color=always --hyperlink=auto "$@" | $ls_pager; } ||
-        function __ls() { $ls_bin "$@" | $ls_pager; }
-function lt() { __ls -1 -t "$@" | ${real_tail} -20 | $ls_pager; }  # time ordered list
-function lr() { __ls -1 -rt "$@" | ${real_tail} -20 | $ls_pager; } # reverse time ordered list
-function lx() { __ls -1 -X "$@" | $ls_pager; }                     # extension ordered list
-function lw() { $ls_bin -w $(tput cols) "$@"; }                    # list wide
-function ll() { __ls -1 -l "$@" | $ls_pager; }                     # long list
-function llt() { __ls -lt "$@" | ${real_tail} -20 | $ls_pager; }   # time ordered long list
-function llr() { __ls -lrt "$@" | ${real_tail} -20 | $ls_pager; }  # reverse time ordered long list
-function llx() { __ls -lX "$@" | $ls_pager; }                      # extension ordered long list
+    function __ls() { lsd --group-dirs=first --total-size --color=always --hyperlink=auto "$@" | ls_pager; } ||
+        function __ls() { ls_bin "$@" | ls_pager; }
+function lt() { __ls -1 -t "$@" | ${real_tail} -20 | ls_pager; }  # time ordered list
+function lr() { __ls -1 -rt "$@" | ${real_tail} -20 | ls_pager; } # reverse time ordered list
+function lx() { __ls -1 -X "$@" | ls_pager; }                     # extension ordered list
+function lw() { ls_bin -w $(tput cols) "$@"; }                    # list wide
+function ll() { __ls -1 -l "$@" | ls_pager; }                     # long list
+function llt() { __ls -lt "$@" | ${real_tail} -20 | ls_pager; }   # time ordered long list
+function llr() { __ls -lrt "$@" | ${real_tail} -20 | ls_pager; }  # reverse time ordered long list
+function llx() { __ls -lX "$@" | ls_pager; }                      # extension ordered long list
 type lsd 2>/dev/null >/dev/null &&
-    function lR() { __ls --tree -Inode_modules -I.git "$@" | $ls_pager; } ||
+    function lR() { __ls --tree -Inode_modules -I.git "$@" | ls_pager; } ||
         function lR() {
             if test "1$1" -eq "1"; then
                 dir=.
             else
                 dir="$1"
             fi
-            $ls_bin -1 -RU -I node_modules -I .git --time-style="+%Y-%m-%d,%H:%M:%S" "$dir" | awk '  \
+            ls_bin -1 -RU -I node_modules -I .git --time-style="+%Y-%m-%d,%H:%M:%S" "$dir" | awk '  \
         /:$/&&f{s=$0;f=0}                       \
         /:$/&&!f{sub(/:$/,"");s=$0;f=1;next}    \
         NF&&f{ print s"/"$1}                \
         ' | sort -u
         }
 type lsd 2>/dev/null >/dev/null &&
-    function llR() { __ls -l --tree -Inode_modules -I.git "$@" | $ls_pager; } ||
+    function llR() { __ls -l --tree -Inode_modules -I.git "$@" | ls_pager; } ||
         function llR() {
             if test "1$1" -eq "1"; then
                 dir=.
             else
                 dir="$1"
             fi
-            $ls_bin -1 -RU -I node_modules -I .git --time-style="+%Y-%m-%d,%H:%M:%S" "$dir" | awk '  \
+            ls_bin -1 -RU -I node_modules -I .git --time-style="+%Y-%m-%d,%H:%M:%S" "$dir" | awk '  \
         /:$/&&f{s=$0;f=0}                       \
         /:$/&&!f{sub(/:$/,"");s=$0;f=1;next}    \
         /^total/ {next}                         \
