@@ -53,31 +53,77 @@ while getopts "hvgtq" OPT; do
     esac
 done
 
-# Define your sink names (Get these by running: pactl list short sinks)
-SINK=("null")
-SINK+=("alsa_output.pci-0000_00_1f.3.analog-stereo")  # built-in laptop speakers
-SINK+=("bluez_output.F4_2B_7D_61_BE_3A.1")            # bluetooth desktop Soundcore
-SINK+=("bluez_output.64_68_76_3B_09_83.1")            # bluetooth edifier headphones
+# User alias file, one entry per line: "match|Friendly name[|icon]"
+# match is a sink name (see: pactl list short sinks) or a Bluetooth device name.
+# Blank lines and lines starting with # are ignored. Icons are notifier icon
+# names, typically placed in ~/.local/share/icons.
+ALIAS_FILE="${AUDIOSINKCTL_ALIASES:-${XDG_CONFIG_HOME:-$HOME/.config}/audiosinkctl/aliases}"
 
-# Friendly names for the menu and notifier
-NAME=(
-    "null"
-    "🔊 Laptop - Built-in Speakers"
-    "📻 Desktop - Anker Soundcore 2"
-    "🎧 Headphones - Edifier Bluetooth"
-)
+# Populates SINK, NAME, ICON and SINK_COUNT from the live sinks so that every
+# mode (CLI, GUI, TUI) shares one discovery and naming path. Index 0 is a
+# placeholder so menu numbers start at 1.
+#
+# Name precedence, highest to lowest:
+#   1. Custom alias, matched by sink name or Bluetooth device name
+#   2. Discovered friendly name (Bluetooth device name, else sink description)
+#   3. Raw sink name
+discover_sinks() {
+    local json
+    if ! json="$(pactl -f json list sinks)"; then
+        echo "$myname: unable to list audio sinks (is pactl running?)" >&2
+        exit 1
+    fi
 
-# notifier icons - index starts at 1
-# all these icons are placed in ~/.local/share/icons
-ICON=(
-    "null"
-    "computer-notebook-45-degree"  # could also use "audio-speakers" - basic bookshelf looking
-    "anker-soundcore"
-    "edifier-sand-headphones"
-)
+    local -A alias_name=() alias_icon=()
+    if [[ -r $ALIAS_FILE ]]; then
+        local key a_name a_icon
+        while IFS='|' read -r key a_name a_icon || [[ -n $key ]]; do
+            if [[ -z $key || $key == \#* ]]; then
+                continue
+            fi
+            alias_name["$key"]="$a_name"
+            alias_icon["$key"]="$a_icon"
+        done < "$ALIAS_FILE"
+    fi
 
-# 1 less than the true count since we are skipping index 0
-SINK_COUNT=$(( ${#NAME[@]} - 1 ))
+    SINK=("null")
+    NAME=("null")
+    ICON=("null")
+
+    # unit separator keeps empty fields intact (tab would be collapsed by read)
+    local sink_name sink_desc bt_name bt_addr sink_icon label icon
+    while IFS=$'\x1f' read -r sink_name sink_desc bt_name bt_addr sink_icon; do
+        label="${bt_name:-$sink_desc}"
+        icon="${sink_icon:-audio-card}"
+
+        if [[ -n ${alias_name[$sink_name]} ]]; then
+            label="${alias_name[$sink_name]}"
+            [[ -n ${alias_icon[$sink_name]} ]] && icon="${alias_icon[$sink_name]}"
+        elif [[ -n $bt_name && -n ${alias_name[$bt_name]} ]]; then
+            label="${alias_name[$bt_name]}"
+            [[ -n ${alias_icon[$bt_name]} ]] && icon="${alias_icon[$bt_name]}"
+        fi
+
+        SINK+=("$sink_name")
+        NAME+=("$label")
+        ICON+=("$icon")
+    done < <(jq -r '.[] | [
+                .name,
+                (.description // .name),
+                (.properties["device.alias"] // ""),
+                (.properties["api.bluez5.address"] // ""),
+                (.properties["api.bluez5.icon"] // .properties["device.icon_name"] // "")
+            ] | join("\u001f")' <<< "$json")
+
+    # 1 less than the true count since we are skipping index 0
+    SINK_COUNT=$(( ${#NAME[@]} - 1 ))
+    if (( SINK_COUNT == 0 )); then
+        echo "$myname: no audio sinks found" >&2
+        exit 1
+    fi
+}
+
+discover_sinks
 
 # Present choices
 if [[ -n $gui ]]; then
