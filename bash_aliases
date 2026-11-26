@@ -178,9 +178,9 @@ if [[ -x $(real nvim)  ]]; then
     alias cvim='nvim --clean'  # skip user config, factory plugins, factory defaults
 fi
 
-# alias 'e' to the Fresh editor if it's installed , else nano
+# alias 'e' to the helix editor if it's installed, then Fresh editor if it's installed , else nano
 # see: https://sinelaw.github.io/fresh/
-type fresh 2>/dev/null >/dev/null && alias e=fresh || alias e=nano
+type helix >/dev/null 2>&1 && { alias e=helix ; alias hx=helix ;} || { type fresh >/dev/null 2>&1 && alias e=fresh || alias e=nano ; }
 type zeditor 2>/dev/null > /dev/null && alias z=zeditor ; alias zed=zeditor || alias z=vim
 
 alias backup='rsync -av --progress --exclude='\''*/Downloads/In-Progress/'\'' --exclude='\''*/Downloads/Torrents/'\'' --exclude='\''*/Downloads/Completed/'\'' --exclude='\''*/.cache/'\'' --exclude='\''*/.thumb*/'\'' $HOME /zpool0/downloads/'
@@ -366,6 +366,7 @@ alias iso8601='date -u +%FT%TZ'
 alias local8601='date +%FT%T%z'
 alias localtime='date "+%F %T %Z"'
 alias utctime='date -u "+%F %T %Z"'
+alias utcfilename='date -u +%Y%m%dT%H%M%SZ' # for use in a log filename : data.log.20261123T134423Z.txt
 alias utc=utctime
 alias unixtime='date "+%s"'
 
@@ -422,7 +423,7 @@ function lfcd() {
     command lf -last-dir-path="$tmp" "$@"
     if [ -f "$tmp" ]; then
         dir="$(cat "$tmp")"
-        rm -f "$tmp"
+        command rm -f "$tmp"
         if [ -d "$dir" ]; then
             if [ "$dir" != "$(pwd)" ]; then
                 cd "$dir"
@@ -592,3 +593,12 @@ alias llm=ask
 
 alias alsatest='speaker-test -c 2 -l 1 -t wav'
 
+function mm() {
+    local q="$1"
+    local query=()
+    [[ -n $q ]] && query=(--query "$q")
+    compgen -c | \
+      sort -u | \
+      fzf ${query[@]} --preview 'man {}|col -bx|head -100' --preview-window=right:70% | \
+      xargs -r man
+  }
