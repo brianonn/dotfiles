@@ -165,8 +165,26 @@ elif [[ -n $gui ]]; then
     index=$((index + 1))
 elif [[ -n $tui ]]; then
     # for TUI
-    echo "TUI coming soon!"
-    exit 1
+    type dialog >/dev/null 2>&1 && TUICHOOSER='dialog --no-tags'
+    type whiptail >/dev/null 2>&1 && TUICHOOSER='whiptail --notags'
+
+    if [[ -z $TUICHOOSER ]]; then
+        echo "TUI requires 'dialog' or 'whiptail' installed." >&2
+        exit 1
+    fi
+
+    MENU=()
+    for ((i=1; i <= $SINK_COUNT; i++)); do
+        MENU+=("$i" "${NAME[i]}")
+    done
+
+    # Cancel (Esc or Cancel button) exits without changing the output
+    index=$( $TUICHOOSER \
+        --title "Select Audio Output" \
+        --menu "Which audio output would you like to use?" \
+        15 60 "$SINK_COUNT" \
+        "${MENU[@]}" \
+        2>&1 >/dev/tty) || exit 0
 else
     # for terminal
     for ((i=1; i <= $SINK_COUNT; i++)); do
