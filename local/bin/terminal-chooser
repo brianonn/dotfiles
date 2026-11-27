@@ -58,7 +58,7 @@ LABELS=(
 )
 
 # map an entry from $LABLES to $TERMINALS
-function mapchoice () {
+mapchoice () {
     local choice="$1"
     local selected=""
     for i in "${!LABELS[@]}"; do
