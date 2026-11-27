@@ -2,27 +2,25 @@
 # vi: set ft=sh shiftwidth=4 tabstop=4 expandtab :
 
 # File: ~/.bash_aliases
+#       create aliases for bash. Tries to be compatible with zsh, less so with dash.
+#       both shell aliases and functions are used here for aliases
 
 # echo running bash_aliases
+[[ -r ~/.bash_functions ]] && source ~/.bash_functions
 
 # read the sensitive aliases, that might contain inline passwords.
 # This file should never be pushed up to a public server in the dotfiles.
-[[ -r ~/.bash_functions ]] && source ~/.bash_functions
 [[ -r ~/.secrets/bash_aliases ]] && source ~/.secrets/bash_aliases
 
-function real() {
-    f=$(type -a "$1" 2>/dev/null) || return 1
-    declare -a words
-    if [ -n "$ZSH_VERSION" ]; then
-        local words=($=f)  # force ZSH to use word-splitting here, we need it
+real() {
+    if [ -n "$BASH_VERSION" ]; then
+        type -P "$1"        # for bash only
     else
-        local words=($f)
+        command -p -v "$1"  # works in sh / zsh / dash
     fi
-    # send the last word to tr, and remove backtick,single and double quote. ZSH/BASH portable
-    tr -d '\140\047\042' <<< "${words[@]: -1}"
 }
 
-# use bat or cat for output of the string at "$1". Only uses bat if output is a terminal
+# use bat or cat to output of the string at "$1". Only uses bat if output is a terminal
 # also it doesn't actually use cat, but printf to stdout
 batorcat()
 {
@@ -34,12 +32,15 @@ batorcat()
     fi
 }
 
-# alias which according to how it says to do it in the which man page with changes for zsh and alias -[gs]
+# an alias for the 'which(1)' command, according to how it says to do it in
+# the 'which(1)' man page ( with additional changes for zsh and alias -[gs] )
 which ()
 {
     local out
     out=$(
         (
+            # how it works: it feeds all the aliases and functions into which on stdin
+            # which(1) then sorts through it all to discover aliases mapped to functions mapped to executables
             if [ -n "$ZSH_VERSION" ]; then
                 { alias -sL ; alias -L; } | sed -e 's/alias\( -[gs-]*\)\+/alias/' -e "/'/"!"s/=\(.*\)/='\1'/"
             else
@@ -49,16 +50,16 @@ which ()
         ) | /usr/bin/which --tty-only --read-alias --read-functions --show-tilde --show-dot "$@"
     )
     local ret=$?
-
     batorcat "$out"
-
     return $ret
 }
 
+# get real versions of these executables for use in our aliases and functions
 real_less=$(real less)
 real_tail=$(real tail)
 real_grep=$(real grep)
-real_ls=$(real gls) || real_ls=$(real ls)
+real_ls=$(real gls) || real_ls=$(real ls)  # gls is on MacOS
+real_rm=$(real rm)
 
 #
 # TODO: make an alias for counting extensions in a directory (or list of directories)
@@ -66,8 +67,6 @@ function countext() {
     local dirs="$@"
     find $dirs -type f | sed -re 's/^.*\.(.{1,5})$/\1/p; d' | tr 'A-Z' 'a-z' | sort | uniq -c | sort -n
 }
-
-# functions as aliases
 
 # list all ssh-keys in the ssh-agent
 function agentlist() {
@@ -97,7 +96,7 @@ function rmkernel() {
 function webserver() {
     port=${1:-3333}
     pipe=/tmp/pipe.$port.$RANDOM.$$
-    rm -f $pipe
+    $real_rm -f $pipe
     mkfifo $pipe
     while :; do
         {
@@ -106,7 +105,7 @@ function webserver() {
             echo $(date)
         } | ncat -l $port >$pipe
     done
-    rm -f $pipe
+    $real_rm -f $pipe
 }
 
 # or run a local web server using ruby
@@ -593,7 +592,7 @@ function ycd() {
 	command yazi "$@" --cwd-file="$tmp"
 	IFS= read -r -d '' cwd < "$tmp" || builtin true
 	[ "$cwd" != "$PWD" ] && [ -d "$cwd" ] && builtin cd -- "$cwd" || builtin true
-	command rm -f -- "$tmp"
+	$real_rm -f -- "$tmp"
 }
 
 # midnight commander to yazi [ could also try nnn , ranger , doublecmd alternative file managers ]
