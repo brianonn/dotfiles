@@ -60,6 +60,56 @@ real_tail=$(real tail)
 real_grep=$(real grep)
 real_ls=$(real gls) || real_ls=$(real ls)  # gls is on MacOS
 real_rm=$(real rm)
+real_mv=$(real mv)
+real_trashy=$(real trashy)
+
+trash() {
+    if [ -n "$real_trashy" ]; then
+        $real_trashy "$@"
+    else
+        cmd="$1" ; shift
+        case "$cmd" in
+            "put") $real_rm -i --preserve-root --one-file-system "$@" ;;
+            "list") ;;
+            "restore") ;;
+            "*") echo "Unknown command: $cmd" ;;
+        esac
+    fi
+}
+
+alias tp='trash put'
+alias tl='trash list'
+alias tr='trash restore'
+alias restore='trash restore'
+
+# safe rm(1) will move to xdesktop Trash can
+unalias rm >/dev/null 2>&1
+[ -x $HOME/Source/del.sh ] && alias rm="$HOME/Source/del.sh"
+alias mv='mv -i'
+rm () {
+    files=()
+    end_of_opts=0
+
+    for arg in "$@"; do
+        if [ "$end_of_opts" -eq 1 ]; then
+            files+=("$arg")
+        elif [ "$arg" = "--" ]; then
+            end_of_opts=1
+        elif [ "${arg#-}" != "$arg" ] && [ "$arg" != "-" ]; then
+            # Ignore flags like -r, -f, -rf, -v, --recursive, etc.
+            continue
+        else
+            files+=("$arg")
+        fi
+    done
+
+    if [ ${#files[@]} -eq 0 ]; then
+        echo "rm: missing operand" >&2
+        return 1
+    fi
+
+    trash put "${files[@]}"
+}
 
 #
 # TODO: make an alias for counting extensions in a directory (or list of directories)
@@ -285,11 +335,6 @@ alias fastboot="$HOME/Android/Sdk/platform-tools/fastboot"
 # lattice diamond for ECP3 and MACHXO
 alias diamond='sudo rmmod ftdi_sio usbserial; fakemac 00:1a:4d:92:e6:dc /opt/usr/local/diamond/2.2_x64/bin/lin64/diamond'
 
-# safe mv(1) and rm(1) will move to xdesktop Trash can
-[ -x $HOME/Source/del.sh ] && alias rm="$HOME/Source/del.sh"
-alias mv='mv -i'
-alias del=/bin/rm
-
 alias ppc='cd /cygdrive/d/ppc; Release/ppc.exe ppc.cfg'
 alias matlab='~/Courses/Digital_Signal_Processing/MATLAB/R2013b/bin/matlab'
 
@@ -506,7 +551,6 @@ alias ggt='gogo test $(gh pr view | sed '\''s/^url:.*[/]\([^/]*\)[/]pull[/]\([0-
 alias jqtopkeys="jq -r 'to_entries[] | [.key] | @tsv'"
 
 alias tf=terraform
-alias tp=telepresence
 alias gimme-aws-creds='source $HOME/bin/getaws'
 alias neofetch=fastfetch
 
@@ -582,7 +626,6 @@ alias lastfile="python -c 'import os, glob; newest_file = max(glob.glob(\"./*\")
 
 alias ping='ping -c 5'
 alias mkdir='mkdir -p'
-alias rm='rm -I --preserve-root'
 
 # y is yazi
 # ycd shell wrapper that provides the ability to change the current working directory when exiting Yazi.
